@@ -126,13 +126,15 @@ ${ISSUE_BODY}
 
 ---
 
-Leia o PRD.md e o design/index.html antes de implementar. Ao terminar, feche a issue com \`gh issue close ${NUMBER}\`."
+Leia o PRD.md e o design/index.html antes de implementar. Quando terminar, encerre a sessão — o script fechará a issue automaticamente."
 
   # Inicia sessão Claude Code para esta issue
   claude "$PROMPT"
 
   echo ""
-  echo "  Sessão encerrada para issue #$NUMBER."
+  echo "  Sessão encerrada para issue #$NUMBER. Fechando issue..."
+  gh issue close "$NUMBER" --comment "Implementado via work-on-issue.sh"
+  echo "  Issue #$NUMBER fechada."
 
   # Verifica se ainda há próxima
   if [ "$CURRENT" -lt "$TOTAL" ]; then
