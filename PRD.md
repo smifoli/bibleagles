@@ -1,4 +1,4 @@
-# PRD — BibleAgles (Aplicativo de Leitura Bíblica em Família)
+# PRD — BiblEagles (Aplicativo de Leitura Bíblica em Família)
 
 **Versão:** 1.2  
 **Data:** 2026-06-15  
@@ -8,7 +8,7 @@
 
 ## 1. Visão Geral
 
-BibleAgles é um aplicativo web progressivo (PWA) para leitura bíblica em família. O objetivo é criar um espaço compartilhado onde todos os membros da família leiam a mesma passagem no mesmo dia, possam comentar versículo por versículo, marcar versículos favoritos e acompanhar o progresso uns dos outros — tudo organizado em pacotes de leitura com estatísticas de engajamento.
+BiblEagles é um aplicativo web progressivo (PWA) para leitura bíblica em família. O objetivo é criar um espaço compartilhado onde todos os membros da família leiam a mesma passagem no mesmo dia, possam comentar versículo por versículo, marcar versículos favoritos e acompanhar o progresso uns dos outros — tudo organizado em pacotes de leitura com estatísticas de engajamento.
 
 ---
 
