@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BibleAgles — Design Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a22;
+      --surface2: #22222e;
+      --border: #2e2e3e;
+      --accent: #6c63ff;
+      --accent2: #a78bfa;
+      --gold: #f59e0b;
+      --green: #10b981;
+      --rose: #f43f5e;
+      --blue: #3b82f6;
+      --text: #e8e8f0;
+      --muted: #8888aa;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      gap: 60px;
+    }
+
+    h1 {
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* --- PHONE FRAME --- */
+    .screens {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .screen-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .screen-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .phone {
+      width: 320px;
+      background: var(--surface);
+      border-radius: 36px;
+      border: 2px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .phone-notch {
+      height: 36px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .phone-notch-bar {
+      width: 80px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 10px;
+    }
+
+    .phone-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 620px;
+    }
+
+    .phone-nav {
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0 8px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .nav-item.active { color: var(--accent2); }
+    .nav-icon { font-size: 18px; }
+
+    /* --- TYPOGRAPHY --- */
+    .heading { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .subheading { font-size: 13px; color: var(--muted); }
+    .label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* --- CARD --- */
+    .card {
+      background: var(--surface2);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card-accent {
+      background: linear-gradient(135deg, #1e1b4b 0%, #1a1a22 100%);
+      border-color: #3730a3;
+    }
+
+    /* --- PROGRESS BAR --- */
+    .progress-track {
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 99px;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .progress-pct { color: var(--accent2); font-weight: 600; }
+
+    /* --- AVATARS --- */
+    .avatars { display: flex; gap: 6px; align-items: center; }
+    .avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      border: 2px solid var(--surface2);
+    }
+    .avatar-check {
+      position: relative;
+    }
+    .avatar-check::after {
+      content: '✓';
+      position: absolute;
+      bottom: -2px; right: -2px;
+      width: 12px; height: 12px;
+      background: var(--green);
+      border-radius: 50%;
+      font-size: 7px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--surface2);
+    }
+    .av-l { background: #4f46e5; color: #fff; }
+    .av-a { background: #ec4899; color: #fff; }
+    .av-p { background: #0891b2; color: #fff; }
+    .av-pending { background: var(--border); color: var(--muted); }
+
+    /* --- BUTTON --- */
+    .btn {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      letter-spacing: 0.3px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+    }
+    .btn-ghost {
+      background: var(--border);
+      color: var(--text);
+    }
+    .btn-sm { padding: 8px 14px; font-size: 12px; }
+
+    /* --- ACTIVITY ITEM --- */
+    .activity-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .activity-icon { font-size: 16px; flex-shrink: 0; }
+    .activity-text { font-size: 13px; line-height: 1.4; }
+    .activity-ref { color: var(--accent2); font-size: 12px; }
+    .activity-time { color: var(--muted); font-size: 11px; }
+
+    /* --- STATS ROW --- */
+    .stats-row {
+      display: flex;
+      gap: 8px;
+    }
+    .stat-box {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      text-align: center;
+    }
+    .stat-value { font-size: 20px; font-weight: 700; color: var(--accent2); }
+    .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    /* --- VERSE --- */
+    .verse {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      line-height: 1.7;
+      font-family: 'Georgia', serif;
+      position: relative;
+    }
+    .verse-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      vertical-align: super;
+      margin-right: 4px;
+      font-family: -apple-system, sans-serif;
+    }
+    .verse-highlighted-gold { background: rgba(245,158,11,0.12); border-left: 3px solid var(--gold); }
+    .verse-highlighted-blue { background: rgba(59,130,246,0.10); border-left: 3px solid var(--blue); }
+    .verse-active {
+      background: rgba(108,99,255,0.15);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+    }
+    .verse-badge {
+      position: absolute;
+      right: 10px; top: 50%; transform: translateY(-50%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 10px;
+      padding: 2px 7px;
+      color: var(--muted);
+    }
+
+    /* --- VERSE PANEL --- */
+    .verse-panel {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .color-dots { display: flex; gap: 8px; }
+    .dot {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .dot-gold { background: var(--gold); }
+    .dot-green { background: var(--green); }
+    .dot-rose { background: var(--rose); }
+    .dot-blue { background: var(--blue); }
+
+    /* --- COMMENT --- */
+    .comment {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .comment-header { display: flex; align-items: center; gap: 8px; }
+    .comment-name { font-size: 13px; font-weight: 600; }
+    .comment-time { font-size: 11px; color: var(--muted); margin-left: auto; }
+    .comment-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+    .comment-like { font-size: 12px; color: var(--muted); }
+    .comment-reply {
+      margin-left: 14px;
+      border-left: 2px solid var(--border);
+      padding-left: 10px;
+    }
+
+    /* --- BIBLE NAV --- */
+    .book-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .book-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+    .book-name { font-size: 14px; font-weight: 600; }
+    .book-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .book-activity { font-size: 11px; color: var(--accent2); margin-top: 6px; }
+
+    /* --- CHIP --- */
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+    .chip-active {
+      background: rgba(108,99,255,0.2);
+      border-color: var(--accent);
+      color: var(--accent2);
+    }
+
+    /* --- SECTION HEADER --- */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .see-all { font-size: 12px; color: var(--accent2); }
+
+    /* --- MEMBER ROW --- */
+    .member-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .member-info { flex: 1; }
+    .member-name { font-size: 14px; font-weight: 600; }
+    .member-role { font-size: 11px; color: var(--muted); }
+    .badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 99px;
+      font-weight: 600;
+    }
+    .badge-admin { background: rgba(108,99,255,0.2); color: var(--accent2); }
+    .badge-member { background: var(--border); color: var(--muted); }
+
+    /* divider */
+    .divider { height: 1px; background: var(--border); }
+  </style>
+</head>
+<body>
+
+  <h1>BibleAgles · Design Preview</h1>
+
+  <div class="screens">
+
+    <!-- ═══════════════════ TELA 1: HOME ═══════════════════ -->
+    <div class="screen-wrap">
+      <span class="screen-label">Home</span>
+      <div class="phone">
+        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+        <div class="phone-content">
+
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div class="heading">Bom dia, Lucas 👋</div>
+                <div class="subheading">Segunda, 15 de junho</div>
+              </div>
+              <span style="font-size:22px">🔔</span>
+            </div>
+          </div>
+
+          <div class="label">Pacotes Ativos</div>
+
+          <!-- Pacote 1 -->
+          <div class="card card-accent">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:20px">📖</span>
+              <div>
+                <div style="font-size:15px;font-weight:700">Lendo Mateus</div>
+                <div class="subheading">Dia 12 de 28</div>
+              </div>
+            </div>
+            <div>
+              <div class="progress-label">
+                <span style="font-size:13px;font-weight:600">Mateus 12</span>
+                <span class="progress-pct">43%</span>
+              </div>
+              <div style="height:6px"></div>
+              <div class="progress-track"><div class="progress-fill" style="width:43%"></div></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="avatars">
+                <div class="avatar av-l avatar-check">L</div>
+                <div class="avatar av-a avatar-check">A</div>
+                <div class="avatar av-pending">P</div>
+              </div>
+              <button class="btn btn-primary btn-sm">Ler agora →</button>
+            </div>
+          </div>
+
+          <!-- Pacote 2 -->
+          <div class="card" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.25)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:20px">📜</span>
+              <div>
+                <div style="font-size:15px;font-weight:700">Salmos da Manhã</div>
+                <div class="subheading">Dia 5 de 15</div>
+              </div>
+            </div>
+            <div>
+              <div class="progress-label">
+                <span style="font-size:13px;font-weight:600">Salmos 91</span>
+                <span style="color:var(--green);font-weight:600">33%</span>
+              </div>
+              <div style="height:6px"></div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width:33%;background:linear-gradient(90deg,#059669,#10b981)"></div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="avatars">
+                <div class="avatar av-l avatar-check">L</div>
+                <div class="avatar av-pending">A</div>
+                <div class="avatar av-pending">P</div>
+              </div>
+              <button class="btn btn-sm" style="background:rgba(16,185,129,0.15);color:#10b981;border:none;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:600">Ler agora →</button>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <div class="label">Atividade recente</div>
+            <span class="see-all">Ver tudo</span>
+          </div>
+
+          <div class="activity-item">
+            <span class="activity-icon">🟡</span>
+            <div class="activity-text">
+              <b>Ana</b> destacou um versículo<br>
+              <span class="activity-ref">Mateus 12:28</span>
+              <span class="activity-time"> · há 1h</span>
+            </div>
+          </div>
+          <div class="activity-item">
+            <span class="activity-icon">💬</span>
+            <div class="activity-text">
+              <b>Pedro</b> comentou<br>
+              <span style="color:var(--muted);font-size:12px">"Incrível essa passagem!"</span><br>
+              <span class="activity-ref">Salmos 91:1</span>
+              <span class="activity-time"> · há 3h</span>
+            </div>
+          </div>
+
+        </div>
+        <div class="phone-nav">
+          <div class="nav-item active"><span class="nav-icon">🏠</span>Início</div>
+          <div class="nav-item"><span class="nav-icon">📖</span>Bíblia</div>
+          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
+          <div class="nav-item"><span class="nav-icon">👤</span>Perfil</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ TELA 2: LEITOR ═══════════════════ -->
+    <div class="screen-wrap">
+      <span class="screen-label">Leitor</span>
+      <div class="phone">
+        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+        <div class="phone-content">
+
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:18px">←</span>
+              <div>
+                <div style="font-size:16px;font-weight:700">Mateus 12</div>
+                <div class="subheading">Lendo Mateus · Dia 12</div>
+              </div>
+            </div>
+            <div class="chip chip-active">NVI ▾</div>
+          </div>
+
+          <div style="display:flex;gap:6px">
+            <span style="font-size:11px;font-size:10px;" class="label">Tamanho</span>
+            <span class="chip" style="font-size:10px">A-</span>
+            <span class="chip chip-active" style="font-size:10px">A</span>
+            <span class="chip" style="font-size:10px">A+</span>
+            <span class="chip" style="margin-left:auto;font-size:10px">🌙</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="verse">
+              <span class="verse-num">25</span>
+              Conhecendo os seus pensamentos, disse-lhes: "Todo reino dividido...
+            </div>
+            <div class="verse verse-highlighted-gold" style="position:relative">
+              <span class="verse-num">28</span>
+              Se, porém, eu expulso demônios pelo Espírito de Deus, então o reino de Deus...
+              <span class="verse-badge">💬 3</span>
+            </div>
+            <div class="verse verse-highlighted-blue" style="position:relative">
+              <span class="verse-num">29</span>
+              Ou como pode alguém entrar na casa do homem forte e roubar...
+              <span class="verse-badge">💬 1</span>
+            </div>
+            <div class="verse">
+              <span class="verse-num">30</span>
+              Quem não é por mim é contra mim; e quem não ajunta comigo dispersa.
+            </div>
+          </div>
+
+          <!-- Painel versículo selecionado -->
+          <div class="verse-panel">
+            <div style="font-size:12px;font-weight:700;color:var(--accent2)">Mateus 12:28</div>
+            <div style="display:flex;gap:16px">
+              <div>
+                <div class="label" style="margin-bottom:6px">Destacar</div>
+                <div class="color-dots">
+                  <div class="dot dot-gold"></div>
+                  <div class="dot dot-green"></div>
+                  <div class="dot dot-rose"></div>
+                  <div class="dot dot-blue"></div>
+                </div>
+              </div>
+              <div>
+                <div class="label" style="margin-bottom:6px">Quem marcou</div>
+                <div class="avatars">
+                  <div class="avatar av-a" style="width:22px;height:22px;font-size:9px">A</div>
+                  <div class="avatar av-l" style="width:22px;height:22px;font-size:9px">L</div>
+                </div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="label">Comentários (3)</div>
+            <div class="comment">
+              <div class="comment-header">
+                <div class="avatar av-a" style="width:22px;height:22px;font-size:9px">A</div>
+                <span class="comment-name">Ana</span>
+                <span class="comment-time">1h</span>
+              </div>
+              <div class="comment-text">"Que poder incrível!"</div>
+              <div class="comment-like">❤️ 2</div>
+              <div class="comment-reply">
+                <div style="font-size:12px;color:var(--muted)"><b style="color:var(--text)">Lucas</b> · "Amém!"</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm">+ Comentar</button>
+          </div>
+
+          <button class="btn btn-primary" style="border-radius:var(--radius-sm)">✓ Marcar como lido</button>
+
+        </div>
+        <div class="phone-nav">
+          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
+          <div class="nav-item active"><span class="nav-icon">📖</span>Bíblia</div>
+          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
+          <div class="nav-item"><span class="nav-icon">👤</span>Perfil</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ TELA 3: ESTATÍSTICAS ═══════════════════ -->
+    <div class="screen-wrap">
+      <span class="screen-label">Estatísticas do Pacote</span>
+      <div class="phone">
+        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+        <div class="phone-content">
+
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:18px">←</span>
+            <div>
+              <div style="font-size:16px;font-weight:700">Lendo Mateus</div>
+              <div class="subheading">Ativo · Iniciou 4 jun</div>
+            </div>
+          </div>
+
+          <div class="card card-accent">
+            <div class="progress-label">
+              <span style="font-size:22px;font-weight:800">Dia 12</span>
+              <span class="progress-pct">de 28</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:43%"></div></div>
+            <div class="subheading">~16 dias restantes</div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-box">
+              <div class="stat-value">47</div>
+              <div class="stat-label">comentários</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">23</div>
+              <div class="stat-label">destaques</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">12</div>
+              <div class="stat-label">dias lidos</div>
+            </div>
+          </div>
+
+          <div class="label">Progresso da família</div>
+
+          <div class="card">
+            <!-- Lucas -->
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="avatar av-l">L</div>
+                <span style="font-size:13px;font-weight:600;flex:1">Lucas</span>
+                <span style="font-size:12px;color:var(--green);font-weight:700">12/12 ✓</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+            </div>
+            <div class="divider"></div>
+            <!-- Ana -->
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="avatar av-a">A</div>
+                <span style="font-size:13px;font-weight:600;flex:1">Ana</span>
+                <span style="font-size:12px;color:var(--muted)">11/12</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="width:92%"></div></div>
+            </div>
+            <div class="divider"></div>
+            <!-- Pedro -->
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="avatar av-p">P</div>
+                <span style="font-size:13px;font-weight:600;flex:1">Pedro</span>
+                <span style="font-size:12px;color:var(--muted)">9/12</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="width:75%"></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="font-size:13px">🏆 <b>Mais ativo:</b> Lucas</div>
+            <div style="font-size:13px">🔥 <b>+ comentado:</b> Mateus 5:3 <span style="color:var(--muted)">(8 coments.)</span></div>
+          </div>
+
+        </div>
+        <div class="phone-nav">
+          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
+          <div class="nav-item active"><span class="nav-icon">📖</span>Bíblia</div>
+          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
+          <div class="nav-item"><span class="nav-icon">👤</span>Perfil</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ TELA 4: BÍBLIA ═══════════════════ -->
+    <div class="screen-wrap">
+      <span class="screen-label">Bíblia Completa</span>
+      <div class="phone">
+        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+        <div class="phone-content">
+
+          <div style="font-size:18px;font-weight:700">Bíblia</div>
+
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:10px 14px;font-size:13px;color:var(--muted)">
+            🔍 Buscar referência (ex: João 3:16)
+          </div>
+
+          <div class="chip chip-active" style="width:fit-content">NVI ▾</div>
+
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" style="flex:1">Antigo Testamento</button>
+            <button class="btn btn-primary btn-sm" style="flex:1">Novo Testamento</button>
+          </div>
+
+          <div class="label">Evangelhos</div>
+          <div class="book-grid">
+            <div class="book-card" style="border-color:var(--accent);background:rgba(108,99,255,0.08)">
+              <div class="book-name">Mateus</div>
+              <div class="book-meta">28 capítulos</div>
+              <div class="book-activity">💬 47  🔖 23</div>
+            </div>
+            <div class="book-card">
+              <div class="book-name">Marcos</div>
+              <div class="book-meta">16 capítulos</div>
+              <div class="book-activity">💬 12  🔖 5</div>
+            </div>
+            <div class="book-card">
+              <div class="book-name">Lucas</div>
+              <div class="book-meta">24 capítulos</div>
+              <div class="book-activity">💬 8</div>
+            </div>
+            <div class="book-card">
+              <div class="book-name">João</div>
+              <div class="book-meta">21 capítulos</div>
+              <div class="book-activity">💬 31  🔖 14</div>
+            </div>
+          </div>
+
+          <div class="label">Cartas de Paulo</div>
+          <div class="book-grid">
+            <div class="book-card">
+              <div class="book-name">Romanos</div>
+              <div class="book-meta">16 capítulos</div>
+            </div>
+            <div class="book-card">
+              <div class="book-name">1 Coríntios</div>
+              <div class="book-meta">16 capítulos</div>
+            </div>
+          </div>
+
+        </div>
+        <div class="phone-nav">
+          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
+          <div class="nav-item active"><span class="nav-icon">📖</span>Bíblia</div>
+          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
+          <div class="nav-item"><span class="nav-icon">👤</span>Perfil</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ TELA 5: ADMIN ═══════════════════ -->
+    <div class="screen-wrap">
+      <span class="screen-label">Admin — Pacotes</span>
+      <div class="phone">
+        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+        <div class="phone-content">
+
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:18px;font-weight:700">Admin</div>
+            <button class="btn btn-primary btn-sm">+ Novo pacote</button>
+          </div>
+
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" style="flex:1">Pacotes</button>
+            <button class="btn btn-ghost btn-sm" style="flex:1">Membros</button>
+          </div>
+
+          <div class="label" style="display:flex;align-items:center;gap:6px">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>
+            Ativos
+          </div>
+
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-size:14px;font-weight:700">📖 Lendo Mateus</div>
+                <div class="subheading">Dia 12/28 · 43%</div>
+              </div>
+              <span class="badge badge-admin">ATIVO</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:43%"></div></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" style="flex:1">Editar</button>
+              <button class="btn btn-sm" style="flex:1;background:rgba(244,63,94,0.1);color:var(--rose);border:none;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:600">Arquivar</button>
+            </div>
+          </div>
+
+          <div class="label" style="display:flex;align-items:center;gap:6px">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block"></span>
+            Rascunhos
+          </div>
+
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-size:14px;font-weight:700">✏️ Série de Natal</div>
+                <div class="subheading">12 dias · não iniciado</div>
+              </div>
+              <span class="badge badge-member">RASCUNHO</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" style="flex:1">Editar</button>
+              <button class="btn btn-primary btn-sm" style="flex:1">Ativar</button>
+            </div>
+          </div>
+
+          <div class="label">Membros</div>
+          <div class="card">
+            <div class="member-row">
+              <div class="avatar av-l">L</div>
+              <div class="member-info">
+                <div class="member-name">Lucas Schmidt</div>
+                <div class="member-role">luccas@email.com</div>
+              </div>
+              <span class="badge badge-admin">👑 Admin</span>
+            </div>
+            <div class="member-row">
+              <div class="avatar av-a">A</div>
+              <div class="member-info">
+                <div class="member-name">Ana Schmidt</div>
+              </div>
+              <span class="badge badge-member">Membro ▾</span>
+            </div>
+            <div class="member-row" style="border-bottom:none">
+              <div class="avatar av-p">P</div>
+              <div class="member-info">
+                <div class="member-name">Pedro Schmidt</div>
+              </div>
+              <span class="badge badge-member">Membro ▾</span>
+            </div>
+          </div>
+
+        </div>
+        <div class="phone-nav">
+          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
+          <div class="nav-item"><span class="nav-icon">📖</span>Bíblia</div>
+          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
+          <div class="nav-item active"><span class="nav-icon">👤</span>Perfil</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ TELA 6: PERFIL ═══════════════════ -->
+    <div class="screen-wrap">
+      <span class="screen-label">Perfil</span>
+      <div class="phone">
+        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+        <div class="phone-content">
+
+          <div style="font-size:18px;font-weight:700">Perfil</div>
+
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0">
+            <div class="avatar av-l" style="width:64px;height:64px;font-size:24px;border:3px solid var(--accent)">L</div>
+            <div style="text-align:center">
+              <div style="font-size:18px;font-weight:700">Lucas Schmidt</div>
+              <div class="subheading">luccas@email.com</div>
+            </div>
+            <button class="btn btn-ghost btn-sm">Editar perfil</button>
+          </div>
+
+          <div class="label">Preferências</div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:13px">Versão padrão</span>
+              <div class="chip chip-active">NVI ▾</div>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:13px">Idioma</span>
+              <div class="chip">PT ▾</div>
+            </div>
+          </div>
+
+          <div class="label">Notificações</div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:13px">Lembrete diário</span>
+              <div style="width:40px;height:22px;background:var(--accent);border-radius:99px;position:relative">
+                <div style="position:absolute;right:3px;top:3px;width:16px;height:16px;background:white;border-radius:50%"></div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:13px">Horário</span>
+              <div class="chip chip-active">07:00</div>
+            </div>
+          </div>
+
+          <div class="label">Minha leitura · Junho 2026</div>
+          <div class="card">
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">
+              <span style="font-size:9px;color:var(--muted)">S</span>
+              <span style="font-size:9px;color:var(--muted)">T</span>
+              <span style="font-size:9px;color:var(--muted)">Q</span>
+              <span style="font-size:9px;color:var(--muted)">Q</span>
+              <span style="font-size:9px;color:var(--muted)">S</span>
+              <span style="font-size:9px;color:var(--muted)">S</span>
+              <span style="font-size:9px;color:var(--muted)">D</span>
+              <!-- dias -->
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;color:var(--muted)">7</span>
+              <span style="font-size:11px;color:var(--muted)">8</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
+              <span style="font-size:11px;color:var(--muted)">15</span>
+              <span style="font-size:11px;background:var(--accent);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white;font-weight:700">►</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);text-align:center">12 dias lidos em junho</div>
+          </div>
+
+          <button class="btn btn-ghost btn-sm" style="color:var(--rose)">Sair da conta</button>
+
+        </div>
+        <div class="phone-nav">
+          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
+          <div class="nav-item"><span class="nav-icon">📖</span>Bíblia</div>
+          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
+          <div class="nav-item active"><span class="nav-icon">👤</span>Perfil</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
