@@ -4,940 +4,972 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BiblEagles — Design Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0f0f13;
-      --surface: #1a1a22;
-      --surface2: #22222e;
-      --border: #2e2e3e;
-      --accent: #6c63ff;
-      --accent2: #a78bfa;
-      --gold: #f59e0b;
-      --green: #10b981;
-      --rose: #f43f5e;
-      --blue: #3b82f6;
-      --text: #e8e8f0;
-      --muted: #8888aa;
-      --radius: 16px;
-      --radius-sm: 10px;
-    }
-
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #e8e0d4;
       min-height: 100vh;
+      padding: 56px 40px 96px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
-      gap: 60px;
+      gap: 0;
     }
 
-    h1 {
-      font-size: 13px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    /* --- PHONE FRAME --- */
-    .screens {
-      display: flex;
-      gap: 32px;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: flex-start;
-    }
-
-    .screen-wrap {
+    /* ── HEADER ── */
+    .page-header {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
+      text-align: center;
+      max-width: 660px;
+      margin-bottom: 48px;
     }
-
-    .screen-label {
-      font-size: 11px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .phone {
-      width: 320px;
-      background: var(--surface);
-      border-radius: 36px;
-      border: 2px solid var(--border);
+    .eagle-mark {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      border: 1px solid #cdbfac;
       overflow: hidden;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+      background: #d9cbb5;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .page-eyebrow {
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+      color: #9a8870; font-weight: 600; margin-bottom: 6px;
+    }
+    .page-title {
+      font-size: 36px; font-weight: 600; letter-spacing: -1px;
+      color: #2a221a; line-height: 1.08;
+    }
+    .page-verse {
+      font-family: 'Spectral', serif; font-style: italic;
+      font-size: 15px; color: #7d6c5a; line-height: 1.6;
+    }
+    .page-tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .page-tag {
+      font-size: 11px; letter-spacing: 1px; color: #8a7967;
+      border: 1px solid #cdbfac; border-radius: 99px; padding: 5px 13px;
     }
 
-    .phone-notch {
-      height: 36px;
-      background: var(--bg);
+    /* ── SCREENS ROW ── */
+    .screens {
+      display: flex; gap: 40px; flex-wrap: wrap;
+      justify-content: center; align-items: flex-start;
+    }
+    .screen-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .screen-label {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #9a8870;
+    }
+
+    /* ── PHONE FRAME ── */
+    .phone {
+      width: 312px;
+      border-radius: 42px;
+      padding: 8px;
+      background: #d9cbb5;
+    }
+    .phone-inner {
+      border-radius: 35px;
+      overflow: hidden;
+      background: #f5efe4;
+      min-height: 660px;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+    }
+    .phone-notch {
+      height: 32px; display: flex; align-items: center; justify-content: center;
     }
     .phone-notch-bar {
-      width: 80px;
-      height: 5px;
-      background: var(--border);
-      border-radius: 10px;
+      width: 80px; height: 5px; border-radius: 10px; background: #ddd0bd;
     }
-
-    .phone-content {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      min-height: 620px;
+    .phone-body {
+      padding: 20px 18px;
+      display: flex; flex-direction: column;
+      gap: 20px; flex: 1;
     }
-
     .phone-nav {
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0 8px;
-      border-top: 1px solid var(--border);
-      background: var(--surface);
+      display: flex; justify-content: space-around;
+      padding: 13px 0 15px;
+      border-top: 1px solid #e6dac6;
     }
     .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      font-size: 10px;
-      color: var(--muted);
-      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
     }
-    .nav-item.active { color: var(--accent2); }
-    .nav-icon { font-size: 18px; }
+    .nav-bar { width: 18px; height: 2px; border-radius: 2px; }
+    .nav-bar.active { background: #2c2218; }
+    .nav-bar.inactive { background: transparent; }
+    .nav-label { font-size: 11px; font-weight: 500; }
+    .nav-label.active { color: #2c2218; }
+    .nav-label.inactive { color: #a3927d; }
 
-    /* --- TYPOGRAPHY --- */
-    .heading { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-    .subheading { font-size: 13px; color: var(--muted); }
-    .label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    /* --- CARD --- */
-    .card {
-      background: var(--surface2);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .card-accent {
-      background: linear-gradient(135deg, #1e1b4b 0%, #1a1a22 100%);
-      border-color: #3730a3;
-    }
-
-    /* --- PROGRESS BAR --- */
-    .progress-track {
-      height: 6px;
-      background: var(--border);
-      border-radius: 99px;
+    /* ── EAGLE MARK SMALL (in-screen) ── */
+    .screen-eagle {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid #ddd0bd; background: #ece3d6;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
       overflow: hidden;
     }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 99px;
-    }
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-    }
-    .progress-pct { color: var(--accent2); font-weight: 600; }
 
-    /* --- AVATARS --- */
-    .avatars { display: flex; gap: 6px; align-items: center; }
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: #e6dac6; }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; color: #93826d;
+    }
+
+    /* ── ACTIVE PACKAGE CARD (dark espresso) ── */
+    .card-active {
+      border-radius: 20px; background: #2a2017;
+      padding: 18px; display: flex; flex-direction: column; gap: 16px;
+    }
+    .card-active-eyebrow {
+      font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #a08e78; margin-bottom: 4px;
+    }
+    .card-active-title { font-size: 18px; font-weight: 600; color: #f7f1e6; }
+    .card-active-tag {
+      font-size: 10px; letter-spacing: 1px; color: #cdbb9e;
+      border: 1px solid #4a3d2c; border-radius: 99px;
+      padding: 4px 10px; white-space: nowrap;
+    }
+    .card-active-chapter { font-size: 13px; color: #d8c9b3; }
+    .card-active-pct { font-size: 13px; font-weight: 600; color: #f7f1e6; }
+    .progress-dark { height: 5px; border-radius: 99px; background: #43382a; }
+    .progress-dark-fill { height: 100%; border-radius: 99px; background: #ece0c8; }
+    .btn-active {
+      border: none; cursor: pointer; border-radius: 99px;
+      padding: 10px 18px; font-family: inherit;
+      font-size: 12px; font-weight: 600;
+      color: #2a2017; background: #f3ebdc;
+    }
+
+    /* ── SECONDARY PACKAGE CARD (light) ── */
+    .card-secondary {
+      border-radius: 20px; background: #fbf7ef;
+      border: 1px solid #e6dac6;
+      padding: 18px; display: flex; flex-direction: column; gap: 16px;
+    }
+    .card-secondary-eyebrow {
+      font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #93826d; margin-bottom: 4px;
+    }
+    .card-secondary-title { font-size: 18px; font-weight: 600; color: #2c2218; }
+    .card-secondary-tag {
+      font-size: 10px; letter-spacing: 1px; color: #93826d;
+      border: 1px solid #e0d3bf; border-radius: 99px;
+      padding: 4px 10px; white-space: nowrap;
+    }
+    .card-secondary-chapter { font-size: 13px; color: #7d6c58; }
+    .card-secondary-pct { font-size: 13px; font-weight: 600; color: #52442f; }
+    .progress-light { height: 5px; border-radius: 99px; background: #e8dcc6; }
+    .progress-light-fill { height: 100%; border-radius: 99px; background: #b3a48c; }
+
+    /* ── GENERAL CARD (cream) ── */
+    .card {
+      border-radius: 18px; background: #fbf7ef;
+      border: 1px solid #e6dac6;
+      padding: 16px; display: flex; flex-direction: column; gap: 14px;
+    }
+
+    /* ── AVATARS ── */
+    .avatars { display: flex; }
     .avatar {
-      width: 28px; height: 28px;
-      border-radius: 50%;
+      width: 27px; height: 27px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700;
-      border: 2px solid var(--surface2);
+      font-size: 11px; font-weight: 600; color: #fff;
     }
-    .avatar-check {
-      position: relative;
-    }
-    .avatar-check::after {
-      content: '✓';
-      position: absolute;
-      bottom: -2px; right: -2px;
-      width: 12px; height: 12px;
-      background: var(--green);
-      border-radius: 50%;
-      font-size: 7px;
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid var(--surface2);
-    }
-    .av-l { background: #4f46e5; color: #fff; }
-    .av-a { background: #ec4899; color: #fff; }
-    .av-p { background: #0891b2; color: #fff; }
-    .av-pending { background: var(--border); color: var(--muted); }
+    .avatar + .avatar { margin-left: -7px; }
+    .av-l { background: #b5723e; }
+    .av-a { background: #c98a52; }
+    .av-p { background: #3d3225; color: #a08e78; }
+    .av-pending { background: #e2d8c6; color: #a08e78; }
 
-    /* --- BUTTON --- */
-    .btn {
-      display: flex; align-items: center; justify-content: center;
-      gap: 8px;
-      padding: 12px 20px;
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      letter-spacing: 0.3px;
+    /* ── ACTIVITY FEED ── */
+    .activity-dot {
+      width: 7px; height: 7px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;
     }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
+    .activity-dot.strong { background: #2c2218; }
+    .activity-dot.muted { background: #c0ad94; }
+    .activity-name { color: #1c150e; font-weight: 500; }
+    .activity-ref { color: #7d6c58; }
+    .activity-time { font-size: 11px; color: #a3927d; margin-top: 1px; }
+    .activity-quote {
+      font-family: 'Spectral', serif; font-style: italic;
+      font-size: 13px; color: #93826d; margin-top: 2px;
     }
-    .btn-ghost {
-      background: var(--border);
-      color: var(--text);
-    }
-    .btn-sm { padding: 8px 14px; font-size: 12px; }
 
-    /* --- ACTIVITY ITEM --- */
-    .activity-item {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 10px 12px;
-      background: var(--surface2);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-    }
-    .activity-icon { font-size: 16px; flex-shrink: 0; }
-    .activity-text { font-size: 13px; line-height: 1.4; }
-    .activity-ref { color: var(--accent2); font-size: 12px; }
-    .activity-time { color: var(--muted); font-size: 11px; }
-
-    /* --- STATS ROW --- */
-    .stats-row {
-      display: flex;
-      gap: 8px;
-    }
-    .stat-box {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px;
-      text-align: center;
-    }
-    .stat-value { font-size: 20px; font-weight: 700; color: var(--accent2); }
-    .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
-
-    /* --- VERSE --- */
+    /* ── VERSE READER ── */
     .verse {
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      line-height: 1.7;
-      font-family: 'Georgia', serif;
-      position: relative;
+      font-family: 'Spectral', serif;
+      font-size: 16px; line-height: 1.8;
+      color: #52442f; padding: 7px 2px;
     }
     .verse-num {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--muted);
-      vertical-align: super;
-      margin-right: 4px;
-      font-family: -apple-system, sans-serif;
+      font-size: 10px; font-weight: 600; color: #a3927d;
+      vertical-align: super; margin-right: 5px;
+      font-family: 'Space Grotesk', sans-serif;
     }
-    .verse-highlighted-gold { background: rgba(245,158,11,0.12); border-left: 3px solid var(--gold); }
-    .verse-highlighted-blue { background: rgba(59,130,246,0.10); border-left: 3px solid var(--blue); }
-    .verse-active {
-      background: rgba(108,99,255,0.15);
-      border: 1px solid var(--accent);
-      border-radius: var(--radius-sm);
+    .verse-yellow {
+      background: #f1e6a0; border-radius: 10px;
+      padding: 11px 14px; color: #3a2f17;
     }
-    .verse-badge {
-      position: absolute;
-      right: 10px; top: 50%; transform: translateY(-50%);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 99px;
-      font-size: 10px;
-      padding: 2px 7px;
-      color: var(--muted);
+    .verse-yellow .verse-num { color: #9a883e; }
+    .verse-sand {
+      background: #ece0cf; border-radius: 10px;
+      padding: 11px 14px; color: #4a3f2c;
     }
-
-    /* --- VERSE PANEL --- */
-    .verse-panel {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    .verse-comment-badge {
+      display: inline-block; margin-left: 6px;
+      font-size: 10px; color: #8a7836;
+      font-family: 'Space Grotesk', sans-serif; font-weight: 600;
     }
-    .color-dots { display: flex; gap: 8px; }
-    .dot {
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    .dot-gold { background: var(--gold); }
-    .dot-green { background: var(--green); }
-    .dot-rose { background: var(--rose); }
-    .dot-blue { background: var(--blue); }
-
-    /* --- COMMENT --- */
-    .comment {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .comment-header { display: flex; align-items: center; gap: 8px; }
-    .comment-name { font-size: 13px; font-weight: 600; }
-    .comment-time { font-size: 11px; color: var(--muted); margin-left: auto; }
-    .comment-text { font-size: 13px; color: var(--text); line-height: 1.5; }
-    .comment-like { font-size: 12px; color: var(--muted); }
-    .comment-reply {
-      margin-left: 14px;
-      border-left: 2px solid var(--border);
-      padding-left: 10px;
+    .verse-comment-badge-muted {
+      display: inline-block; margin-left: 6px;
+      font-size: 10px; color: #a3927d;
+      font-family: 'Space Grotesk', sans-serif; font-weight: 600;
     }
 
-    /* --- BIBLE NAV --- */
-    .book-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+    /* ── HIGHLIGHT DOTS ── */
+    .highlight-dots { display: flex; gap: 10px; }
+    .hdot {
+      width: 24px; height: 24px; border-radius: 50%;
     }
-    .book-card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-    }
-    .book-name { font-size: 14px; font-weight: 600; }
-    .book-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .book-activity { font-size: 11px; color: var(--accent2); margin-top: 6px; }
+    .hdot-yellow { background: #f1e6a0; outline: 1.5px solid #2c2218; }
+    .hdot-green  { background: #bcd0b3; }
+    .hdot-rose   { background: #e6b3a6; }
+    .hdot-blue   { background: #b3c4d6; }
 
-    /* --- CHIP --- */
+    /* ── SIZE CONTROLS ── */
+    .size-ctrl {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .size-btn {
+      border-radius: 8px; padding: 4px 9px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600; cursor: pointer;
+    }
+    .size-btn.inactive {
+      font-size: 11px; color: #a3927d;
+      border: 1px solid #ddd0bd; background: transparent;
+    }
+    .size-btn.active {
+      font-size: 13px; color: #f5efe4;
+      background: #2c2218; border: none;
+    }
+    .size-btn.large {
+      font-size: 15px; color: #a3927d;
+      border: 1px solid #ddd0bd; background: transparent;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      border: none; cursor: pointer; border-radius: 13px;
+      padding: 15px; font-family: inherit;
+      font-size: 13px; font-weight: 600;
+      color: #f5efe4; background: #2c2218; width: 100%;
+    }
+    .btn-secondary {
+      border: none; cursor: pointer; border-radius: 99px;
+      padding: 10px; font-family: inherit;
+      font-size: 12px; font-weight: 600;
+      color: #2c2218; background: #efe7d8; width: 100%;
+    }
+    .btn-ghost {
+      border: 1px solid #ddd0bd; cursor: pointer; border-radius: 99px;
+      padding: 9px 16px; font-family: inherit;
+      font-size: 12px; font-weight: 600; color: #52442f;
+      background: transparent;
+    }
+    .btn-danger {
+      border: none; cursor: pointer; border-radius: 99px;
+      padding: 9px 16px; font-family: inherit;
+      font-size: 12px; font-weight: 600;
+      color: #a03a2a; background: rgba(160,58,42,0.08);
+    }
+    .btn-row { display: flex; gap: 8px; }
+    .btn-row > * { flex: 1; }
+
+    /* ── CHIP / TAG ── */
     .chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 99px;
-      padding: 4px 10px;
-      font-size: 12px;
+      display: inline-flex; align-items: center;
+      border-radius: 99px; padding: 6px 12px;
+      font-size: 11px; font-weight: 600;
     }
-    .chip-active {
-      background: rgba(108,99,255,0.2);
-      border-color: var(--accent);
-      color: var(--accent2);
-    }
+    .chip-outline { border: 1px solid #d4c5ac; color: #2c2218; }
+    .chip-dark { background: #2c2218; color: #f5efe4; }
+    .chip-muted { border: 1px solid #e0d3bf; color: #93826d; }
+    .chip-tab-active { background: #2c2218; color: #f5efe4; border-radius: 99px; padding: 8px 20px; font-size: 12px; font-weight: 600; }
+    .chip-tab-inactive { border: 1px solid #e0d3bf; color: #93826d; border-radius: 99px; padding: 8px 20px; font-size: 12px; font-weight: 600; }
 
-    /* --- SECTION HEADER --- */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    /* ── STAT BOX ── */
+    .stat-box {
+      flex: 1; background: #f5efe4;
+      border: 1px solid #e6dac6;
+      border-radius: 14px; padding: 12px 10px; text-align: center;
     }
-    .see-all { font-size: 12px; color: var(--accent2); }
+    .stat-value { font-size: 22px; font-weight: 700; color: #2c2218; }
+    .stat-label { font-size: 10px; color: #93826d; margin-top: 3px; letter-spacing: 0.5px; }
 
-    /* --- MEMBER ROW --- */
+    /* ── BOOK GRID ── */
+    .book-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .book-card {
+      background: #fbf7ef; border: 1px solid #e6dac6;
+      border-radius: 14px; padding: 13px;
+    }
+    .book-card.highlighted { border-color: #b3a48c; background: #f5efe4; }
+    .book-name { font-size: 14px; font-weight: 600; color: #2c2218; }
+    .book-meta { font-size: 11px; color: #93826d; margin-top: 2px; }
+    .book-activity { font-size: 11px; color: #7d6c58; margin-top: 7px; }
+
+    /* ── MEMBER ROW ── */
     .member-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 0;
     }
+    .member-row + .member-row { border-top: 1px solid #e6dac6; }
     .member-info { flex: 1; }
-    .member-name { font-size: 14px; font-weight: 600; }
-    .member-role { font-size: 11px; color: var(--muted); }
-    .badge {
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 99px;
-      font-weight: 600;
+    .member-name { font-size: 14px; font-weight: 600; color: #2c2218; }
+    .member-email { font-size: 11px; color: #93826d; }
+    .role-badge {
+      font-size: 10px; font-weight: 600; padding: 4px 10px;
+      border-radius: 99px; letter-spacing: 0.5px;
     }
-    .badge-admin { background: rgba(108,99,255,0.2); color: var(--accent2); }
-    .badge-member { background: var(--border); color: var(--muted); }
+    .role-admin { background: rgba(44,34,24,0.1); color: #2c2218; }
+    .role-member { background: #ece3d6; color: #93826d; }
 
-    /* divider */
-    .divider { height: 1px; background: var(--border); }
+    /* ── CALENDAR ── */
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 5px; text-align: center;
+    }
+    .cal-day-label { font-size: 10px; color: #a3927d; font-weight: 600; }
+    .cal-day {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; margin: auto;
+    }
+    .cal-day.read { background: #2c2218; color: #f5efe4; font-weight: 600; }
+    .cal-day.today { background: #e6dac6; color: #2c2218; font-weight: 700; border: 1.5px solid #b3a48c; }
+    .cal-day.empty { color: #c0ad94; }
+    .cal-day.missed { color: #c0ad94; }
+
+    /* ── PACKAGE STATUS BADGE ── */
+    .status-active { display: flex; align-items: center; gap: 6px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .status-dot.active { background: #2c2218; }
+    .status-dot.draft { background: #c0ad94; }
+
+    /* ── PROGRESS MEMBER ROW ── */
+    .member-progress { display: flex; flex-direction: column; gap: 5px; }
+    .member-progress-header { display: flex; align-items: center; gap: 8px; }
+    .member-progress-count { font-size: 12px; color: #93826d; margin-left: auto; }
+    .member-progress-count.done { color: #2c2218; font-weight: 600; }
+
+    /* ── TOGGLE SWITCH ── */
+    .toggle {
+      width: 40px; height: 22px; border-radius: 99px;
+      background: #2c2218; position: relative; flex-shrink: 0;
+    }
+    .toggle-knob {
+      position: absolute; right: 3px; top: 3px;
+      width: 16px; height: 16px; border-radius: 50%; background: #f5efe4;
+    }
+    .toggle.off { background: #e6dac6; }
+    .toggle.off .toggle-knob { right: auto; left: 3px; }
+
+    /* ── PROFILE AVATAR LARGE ── */
+    .avatar-lg {
+      width: 68px; height: 68px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 700; color: #f5efe4;
+      background: #b5723e;
+      border: 2px solid #cdbfac;
+    }
+
+    /* ── INPUT ── */
+    .input-row {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .input-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #93826d; }
+    .input-field {
+      background: #f5efe4; border: 1px solid #ddd0bd;
+      border-radius: 10px; padding: 10px 12px;
+      font-family: inherit; font-size: 13px; color: #2c2218;
+    }
+    .select-field {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #fbf7ef; border: 1px solid #e6dac6;
+      border-radius: 10px; padding: 10px 12px;
+      font-size: 13px; color: #2c2218; cursor: pointer;
+    }
+    .select-arrow { color: #93826d; }
+
+    /* ── FOOTNOTE ── */
+    .page-footnote {
+      margin-top: 48px; font-size: 13px; color: #8a7967;
+      text-align: center; max-width: 520px; line-height: 1.6;
+    }
   </style>
 </head>
 <body>
 
-  <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
-    <img src="logo.svg" alt="BiblEagles logo" style="width:80px;height:80px;border-radius:20px;box-shadow:0 8px 32px rgba(108,99,255,0.4)"/>
-    <div style="text-align:center">
-      <h1 style="font-size:28px;font-weight:800;letter-spacing:-1px;color:#e8e8f0">Bibl<span style="color:#a78bfa">Eagles</span></h1>
-      <p style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#8888aa;margin-top:4px">Design Preview</p>
-      <p style="font-size:11px;color:#555570;margin-top:8px;font-style:italic">"Aqueles que esperam no Senhor voarão alto como águias" — Is 40:31</p>
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="eagle-mark">
+      <img src="logo.svg" alt="águia" style="width:100%;height:100%;object-fit:cover" />
+    </div>
+    <div>
+      <div class="page-eyebrow">BiblEagles · Direção Papel</div>
+      <h1 class="page-title">Claro, minimalista,<br/>destaque por contraste</h1>
+    </div>
+    <p class="page-verse">"Aqueles que esperam no Senhor renovam as suas forças,<br/>voam alto como águias." — Isaías 40:31</p>
+    <div class="page-tags">
+      <span class="page-tag">Pacote ativo escuro</span>
+      <span class="page-tag">Sem borda lateral</span>
+      <span class="page-tag">Amarelo só no marcador</span>
+      <span class="page-tag">Flat · sem sombra</span>
     </div>
   </div>
 
   <div class="screens">
 
-    <!-- ═══════════════════ TELA 1: HOME ═══════════════════ -->
+    <!-- ══════════════════════════════════════ HOME ══════════════════════════════════════ -->
     <div class="screen-wrap">
       <span class="screen-label">Home</span>
       <div class="phone">
-        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
-        <div class="phone-content">
+        <div class="phone-inner">
+          <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+          <div class="phone-body">
 
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <!-- Header -->
+            <div style="display:flex;align-items:flex-start;justify-content:space-between">
               <div>
-                <div class="heading">Bom dia, Lucas 👋</div>
-                <div class="subheading">Segunda, 15 de junho</div>
+                <div style="font-size:22px;font-weight:600;color:#1c150e;letter-spacing:-0.5px">Bom dia, Lucas</div>
+                <div style="font-size:12px;color:#93826d;margin-top:2px">Segunda, 15 de junho</div>
               </div>
-              <span style="font-size:22px">🔔</span>
+              <div class="screen-eagle">
+                <img src="logo.svg" alt="" style="width:100%;height:100%;object-fit:cover"/>
+              </div>
             </div>
-          </div>
 
-          <div class="label">Pacotes Ativos</div>
+            <div class="section-label">Pacotes ativos</div>
 
-          <!-- Pacote 1 -->
-          <div class="card card-accent">
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:20px">📖</span>
+            <!-- Active package card (dark) -->
+            <div class="card-active">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between">
+                <div>
+                  <div class="card-active-eyebrow">Leitura em família</div>
+                  <div class="card-active-title">Lendo Mateus</div>
+                </div>
+                <span class="card-active-tag">Dia 12 / 28</span>
+              </div>
               <div>
-                <div style="font-size:15px;font-weight:700">Lendo Mateus</div>
-                <div class="subheading">Dia 12 de 28</div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">
+                  <span class="card-active-chapter">Mateus 12</span>
+                  <span class="card-active-pct">43%</span>
+                </div>
+                <div class="progress-dark"><div class="progress-dark-fill" style="width:43%"></div></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="avatars">
+                  <div class="avatar av-l">L</div>
+                  <div class="avatar av-a">A</div>
+                  <div class="avatar av-p">P</div>
+                </div>
+                <button class="btn-active">Ler agora</button>
               </div>
             </div>
-            <div>
-              <div class="progress-label">
-                <span style="font-size:13px;font-weight:600">Mateus 12</span>
-                <span class="progress-pct">43%</span>
+
+            <!-- Secondary package card (light) -->
+            <div class="card-secondary">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between">
+                <div>
+                  <div class="card-secondary-eyebrow">Devocional</div>
+                  <div class="card-secondary-title">Salmos da Manhã</div>
+                </div>
+                <span class="card-secondary-tag">Dia 5 / 15</span>
               </div>
-              <div style="height:6px"></div>
-              <div class="progress-track"><div class="progress-fill" style="width:43%"></div></div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">
+                  <span class="card-secondary-chapter">Salmos 91</span>
+                  <span class="card-secondary-pct">33%</span>
+                </div>
+                <div class="progress-light"><div class="progress-light-fill" style="width:33%"></div></div>
+              </div>
             </div>
+
+            <!-- Activity feed -->
             <div style="display:flex;justify-content:space-between;align-items:center">
-              <div class="avatars">
-                <div class="avatar av-l avatar-check">L</div>
-                <div class="avatar av-a avatar-check">A</div>
-                <div class="avatar av-pending">P</div>
-              </div>
-              <button class="btn btn-primary btn-sm">Ler agora →</button>
+              <span class="section-label">Atividade recente</span>
+              <span style="font-size:12px;color:#7d6c58">Ver tudo</span>
             </div>
-          </div>
+            <div style="display:flex;flex-direction:column;gap:15px">
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span class="activity-dot strong"></span>
+                <div style="font-size:13px;color:#52442f;line-height:1.5">
+                  <span class="activity-name">Ana</span> destacou <span class="activity-ref">Mateus 12:28</span>
+                  <div class="activity-time">há 1 hora</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span class="activity-dot muted"></span>
+                <div style="font-size:13px;color:#52442f;line-height:1.5">
+                  <span class="activity-name">Pedro</span> comentou em <span class="activity-ref">Salmos 91:1</span>
+                  <div class="activity-quote">"Incrível essa passagem."</div>
+                </div>
+              </div>
+            </div>
 
-          <!-- Pacote 2 -->
-          <div class="card" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.25)">
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:20px">📜</span>
-              <div>
-                <div style="font-size:15px;font-weight:700">Salmos da Manhã</div>
-                <div class="subheading">Dia 5 de 15</div>
-              </div>
-            </div>
-            <div>
-              <div class="progress-label">
-                <span style="font-size:13px;font-weight:600">Salmos 91</span>
-                <span style="color:var(--green);font-weight:600">33%</span>
-              </div>
-              <div style="height:6px"></div>
-              <div class="progress-track">
-                <div class="progress-fill" style="width:33%;background:linear-gradient(90deg,#059669,#10b981)"></div>
-              </div>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div class="avatars">
-                <div class="avatar av-l avatar-check">L</div>
-                <div class="avatar av-pending">A</div>
-                <div class="avatar av-pending">P</div>
-              </div>
-              <button class="btn btn-sm" style="background:rgba(16,185,129,0.15);color:#10b981;border:none;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:600">Ler agora →</button>
-            </div>
           </div>
-
-          <div class="section-header">
-            <div class="label">Atividade recente</div>
-            <span class="see-all">Ver tudo</span>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-bar active"></div><span class="nav-label active">Início</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Bíblia</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Marcas</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Perfil</span></div>
           </div>
-
-          <div class="activity-item">
-            <span class="activity-icon">🟡</span>
-            <div class="activity-text">
-              <b>Ana</b> destacou um versículo<br>
-              <span class="activity-ref">Mateus 12:28</span>
-              <span class="activity-time"> · há 1h</span>
-            </div>
-          </div>
-          <div class="activity-item">
-            <span class="activity-icon">💬</span>
-            <div class="activity-text">
-              <b>Pedro</b> comentou<br>
-              <span style="color:var(--muted);font-size:12px">"Incrível essa passagem!"</span><br>
-              <span class="activity-ref">Salmos 91:1</span>
-              <span class="activity-time"> · há 3h</span>
-            </div>
-          </div>
-
-        </div>
-        <div class="phone-nav">
-          <div class="nav-item active"><span class="nav-icon">🏠</span>Início</div>
-          <div class="nav-item"><span class="nav-icon">📖</span>Bíblia</div>
-          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
-          <div class="nav-item"><span class="nav-icon">👤</span>Perfil</div>
         </div>
       </div>
     </div>
 
-    <!-- ═══════════════════ TELA 2: LEITOR ═══════════════════ -->
+    <!-- ══════════════════════════════════════ LEITOR ══════════════════════════════════════ -->
     <div class="screen-wrap">
       <span class="screen-label">Leitor</span>
       <div class="phone">
-        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
-        <div class="phone-content">
+        <div class="phone-inner">
+          <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+          <div class="phone-body" style="gap:17px">
 
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:18px">←</span>
-              <div>
-                <div style="font-size:16px;font-weight:700">Mateus 12</div>
-                <div class="subheading">Lendo Mateus · Dia 12</div>
-              </div>
-            </div>
-            <div class="chip chip-active">NVI ▾</div>
-          </div>
-
-          <div style="display:flex;gap:6px">
-            <span style="font-size:11px;font-size:10px;" class="label">Tamanho</span>
-            <span class="chip" style="font-size:10px">A-</span>
-            <span class="chip chip-active" style="font-size:10px">A</span>
-            <span class="chip" style="font-size:10px">A+</span>
-            <span class="chip" style="margin-left:auto;font-size:10px">🌙</span>
-          </div>
-
-          <div class="divider"></div>
-
-          <div style="display:flex;flex-direction:column;gap:4px">
-            <div class="verse">
-              <span class="verse-num">25</span>
-              Conhecendo os seus pensamentos, disse-lhes: "Todo reino dividido...
-            </div>
-            <div class="verse verse-highlighted-gold" style="position:relative">
-              <span class="verse-num">28</span>
-              Se, porém, eu expulso demônios pelo Espírito de Deus, então o reino de Deus...
-              <span class="verse-badge">💬 3</span>
-            </div>
-            <div class="verse verse-highlighted-blue" style="position:relative">
-              <span class="verse-num">29</span>
-              Ou como pode alguém entrar na casa do homem forte e roubar...
-              <span class="verse-badge">💬 1</span>
-            </div>
-            <div class="verse">
-              <span class="verse-num">30</span>
-              Quem não é por mim é contra mim; e quem não ajunta comigo dispersa.
-            </div>
-          </div>
-
-          <!-- Painel versículo selecionado -->
-          <div class="verse-panel">
-            <div style="font-size:12px;font-weight:700;color:var(--accent2)">Mateus 12:28</div>
-            <div style="display:flex;gap:16px">
-              <div>
-                <div class="label" style="margin-bottom:6px">Destacar</div>
-                <div class="color-dots">
-                  <div class="dot dot-gold"></div>
-                  <div class="dot dot-green"></div>
-                  <div class="dot dot-rose"></div>
-                  <div class="dot dot-blue"></div>
+            <!-- Header -->
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span style="font-size:18px;color:#93826d">←</span>
+                <div>
+                  <div style="font-size:17px;font-weight:600;color:#1c150e">Mateus 12</div>
+                  <div style="font-size:11px;color:#93826d">Lendo Mateus · Dia 12</div>
                 </div>
               </div>
-              <div>
-                <div class="label" style="margin-bottom:6px">Quem marcou</div>
-                <div class="avatars">
-                  <div class="avatar av-a" style="width:22px;height:22px;font-size:9px">A</div>
-                  <div class="avatar av-l" style="width:22px;height:22px;font-size:9px">L</div>
-                </div>
-              </div>
+              <span class="chip chip-outline">NVI</span>
             </div>
+
+            <!-- Font size controls -->
+            <div class="size-ctrl">
+              <span class="size-btn inactive">A−</span>
+              <span class="size-btn active">A</span>
+              <span class="size-btn large">A+</span>
+            </div>
+
             <div class="divider"></div>
-            <div class="label">Comentários (3)</div>
-            <div class="comment">
-              <div class="comment-header">
-                <div class="avatar av-a" style="width:22px;height:22px;font-size:9px">A</div>
-                <span class="comment-name">Ana</span>
-                <span class="comment-time">1h</span>
-              </div>
-              <div class="comment-text">"Que poder incrível!"</div>
-              <div class="comment-like">❤️ 2</div>
-              <div class="comment-reply">
-                <div style="font-size:12px;color:var(--muted)"><b style="color:var(--text)">Lucas</b> · "Amém!"</div>
-              </div>
+
+            <!-- Verses -->
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div class="verse"><span class="verse-num">25</span>Conhecendo os seus pensamentos, disse-lhes: "Todo reino dividido contra si mesmo será arruinado."</div>
+              <div class="verse verse-yellow"><span class="verse-num">28</span>Se, porém, eu expulso demônios pelo Espírito de Deus, então o reino de Deus chegou a vocês.<span class="verse-comment-badge">· 3 comentários</span></div>
+              <div class="verse verse-sand"><span class="verse-num">29</span>Ou como pode alguém entrar na casa do homem forte e roubar os seus bens...<span class="verse-comment-badge-muted">· 1 comentário</span></div>
+              <div class="verse"><span class="verse-num">30</span>Quem não é por mim é contra mim; e quem não ajunta comigo dispersa.</div>
             </div>
-            <button class="btn btn-ghost btn-sm">+ Comentar</button>
+
+            <!-- Verse action panel -->
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:12px;font-weight:600;color:#2c2218">Mateus 12:28</span>
+                <span style="font-size:11px;color:#a3927d">marcado por Ana, Lucas</span>
+              </div>
+              <div>
+                <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#a3927d;margin-bottom:9px">Cor do destaque</div>
+                <div class="highlight-dots">
+                  <span class="hdot hdot-yellow"></span>
+                  <span class="hdot hdot-green"></span>
+                  <span class="hdot hdot-rose"></span>
+                  <span class="hdot hdot-blue"></span>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div style="display:flex;gap:11px;align-items:flex-start">
+                <div class="avatar av-a" style="width:26px;height:26px;font-size:10px;flex-shrink:0">A</div>
+                <div style="flex:1">
+                  <div style="display:flex;align-items:baseline;gap:7px">
+                    <span style="font-size:12px;font-weight:600;color:#2c2218">Ana</span>
+                    <span style="font-size:10px;color:#a3927d">1h</span>
+                  </div>
+                  <div style="font-family:'Spectral',serif;font-size:14px;color:#52442f;margin-top:2px">"Que poder incrível."</div>
+                </div>
+              </div>
+              <button class="btn-secondary">Comentar</button>
+            </div>
+
+            <button class="btn-primary" style="margin-top:auto">Marcar como lido</button>
+
           </div>
-
-          <button class="btn btn-primary" style="border-radius:var(--radius-sm)">✓ Marcar como lido</button>
-
-        </div>
-        <div class="phone-nav">
-          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
-          <div class="nav-item active"><span class="nav-icon">📖</span>Bíblia</div>
-          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
-          <div class="nav-item"><span class="nav-icon">👤</span>Perfil</div>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Início</span></div>
+            <div class="nav-item"><div class="nav-bar active"></div><span class="nav-label active">Bíblia</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Marcas</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Perfil</span></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ═══════════════════ TELA 3: ESTATÍSTICAS ═══════════════════ -->
+    <!-- ══════════════════════════════════════ BÍBLIA ══════════════════════════════════════ -->
+    <div class="screen-wrap">
+      <span class="screen-label">Bíblia</span>
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+          <div class="phone-body">
+
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:20px;font-weight:600;color:#1c150e">Bíblia</div>
+              <span class="chip chip-outline">NVI</span>
+            </div>
+
+            <!-- Search -->
+            <div style="background:#fbf7ef;border:1px solid #e6dac6;border-radius:10px;padding:10px 13px;font-size:13px;color:#a3927d">
+              Buscar referência — João 3:16
+            </div>
+
+            <!-- Tabs -->
+            <div style="display:flex;gap:8px">
+              <span class="chip-tab-inactive">Antigo</span>
+              <span class="chip-tab-active">Novo Testamento</span>
+            </div>
+
+            <div class="section-label">Evangelhos</div>
+            <div class="book-grid">
+              <div class="book-card highlighted">
+                <div class="book-name">Mateus</div>
+                <div class="book-meta">28 capítulos</div>
+                <div class="book-activity">47 comentários · 23 marks</div>
+              </div>
+              <div class="book-card">
+                <div class="book-name">Marcos</div>
+                <div class="book-meta">16 capítulos</div>
+                <div class="book-activity">12 comentários</div>
+              </div>
+              <div class="book-card">
+                <div class="book-name">Lucas</div>
+                <div class="book-meta">24 capítulos</div>
+                <div class="book-activity">8 comentários</div>
+              </div>
+              <div class="book-card">
+                <div class="book-name">João</div>
+                <div class="book-meta">21 capítulos</div>
+                <div class="book-activity">31 comentários · 14 marks</div>
+              </div>
+            </div>
+
+            <div class="section-label">Cartas de Paulo</div>
+            <div class="book-grid">
+              <div class="book-card">
+                <div class="book-name">Romanos</div>
+                <div class="book-meta">16 capítulos</div>
+              </div>
+              <div class="book-card">
+                <div class="book-name">1 Coríntios</div>
+                <div class="book-meta">16 capítulos</div>
+              </div>
+            </div>
+
+          </div>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Início</span></div>
+            <div class="nav-item"><div class="nav-bar active"></div><span class="nav-label active">Bíblia</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Marcas</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Perfil</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════ ESTATÍSTICAS ══════════════════════════════════════ -->
     <div class="screen-wrap">
       <span class="screen-label">Estatísticas do Pacote</span>
       <div class="phone">
-        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
-        <div class="phone-content">
+        <div class="phone-inner">
+          <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+          <div class="phone-body">
 
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:18px">←</span>
-            <div>
-              <div style="font-size:16px;font-weight:700">Lendo Mateus</div>
-              <div class="subheading">Ativo · Iniciou 4 jun</div>
-            </div>
-          </div>
-
-          <div class="card card-accent">
-            <div class="progress-label">
-              <span style="font-size:22px;font-weight:800">Dia 12</span>
-              <span class="progress-pct">de 28</span>
-            </div>
-            <div class="progress-track"><div class="progress-fill" style="width:43%"></div></div>
-            <div class="subheading">~16 dias restantes</div>
-          </div>
-
-          <div class="stats-row">
-            <div class="stat-box">
-              <div class="stat-value">47</div>
-              <div class="stat-label">comentários</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-value">23</div>
-              <div class="stat-label">destaques</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-value">12</div>
-              <div class="stat-label">dias lidos</div>
-            </div>
-          </div>
-
-          <div class="label">Progresso da família</div>
-
-          <div class="card">
-            <!-- Lucas -->
-            <div style="display:flex;flex-direction:column;gap:5px">
-              <div style="display:flex;align-items:center;gap:8px">
-                <div class="avatar av-l">L</div>
-                <span style="font-size:13px;font-weight:600;flex:1">Lucas</span>
-                <span style="font-size:12px;color:var(--green);font-weight:700">12/12 ✓</span>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:18px;color:#93826d">←</span>
+              <div>
+                <div style="font-size:17px;font-weight:600;color:#1c150e">Lendo Mateus</div>
+                <div style="font-size:11px;color:#93826d">Ativo · iniciou 4 jun</div>
               </div>
-              <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
             </div>
-            <div class="divider"></div>
-            <!-- Ana -->
-            <div style="display:flex;flex-direction:column;gap:5px">
-              <div style="display:flex;align-items:center;gap:8px">
-                <div class="avatar av-a">A</div>
-                <span style="font-size:13px;font-weight:600;flex:1">Ana</span>
-                <span style="font-size:12px;color:var(--muted)">11/12</span>
-              </div>
-              <div class="progress-track"><div class="progress-fill" style="width:92%"></div></div>
-            </div>
-            <div class="divider"></div>
-            <!-- Pedro -->
-            <div style="display:flex;flex-direction:column;gap:5px">
-              <div style="display:flex;align-items:center;gap:8px">
-                <div class="avatar av-p">P</div>
-                <span style="font-size:13px;font-weight:600;flex:1">Pedro</span>
-                <span style="font-size:12px;color:var(--muted)">9/12</span>
-              </div>
-              <div class="progress-track"><div class="progress-fill" style="width:75%"></div></div>
-            </div>
-          </div>
 
-          <div class="card">
-            <div style="font-size:13px">🏆 <b>Mais ativo:</b> Lucas</div>
-            <div style="font-size:13px">🔥 <b>+ comentado:</b> Mateus 5:3 <span style="color:var(--muted)">(8 coments.)</span></div>
-          </div>
+            <!-- Progress summary (dark card) -->
+            <div class="card-active">
+              <div style="display:flex;align-items:baseline;justify-content:space-between">
+                <span style="font-size:26px;font-weight:700;color:#f7f1e6">Dia 12</span>
+                <span style="font-size:13px;color:#d8c9b3">de 28</span>
+              </div>
+              <div class="progress-dark"><div class="progress-dark-fill" style="width:43%"></div></div>
+              <div style="font-size:12px;color:#a08e78">~16 dias restantes</div>
+            </div>
 
-        </div>
-        <div class="phone-nav">
-          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
-          <div class="nav-item active"><span class="nav-icon">📖</span>Bíblia</div>
-          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
-          <div class="nav-item"><span class="nav-icon">👤</span>Perfil</div>
+            <!-- Stats row -->
+            <div style="display:flex;gap:8px">
+              <div class="stat-box">
+                <div class="stat-value">47</div>
+                <div class="stat-label">comentários</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-value">23</div>
+                <div class="stat-label">destaques</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-value">12</div>
+                <div class="stat-label">dias lidos</div>
+              </div>
+            </div>
+
+            <div class="section-label">Progresso da família</div>
+
+            <div class="card">
+              <!-- Lucas -->
+              <div class="member-progress">
+                <div class="member-progress-header">
+                  <div class="avatar av-l" style="width:24px;height:24px;font-size:10px">L</div>
+                  <span style="font-size:13px;font-weight:600;color:#2c2218;flex:1">Lucas</span>
+                  <span class="member-progress-count done">12 / 12</span>
+                </div>
+                <div class="progress-light"><div class="progress-light-fill" style="width:100%;background:#2c2218"></div></div>
+              </div>
+              <div class="divider"></div>
+              <!-- Ana -->
+              <div class="member-progress">
+                <div class="member-progress-header">
+                  <div class="avatar av-a" style="width:24px;height:24px;font-size:10px">A</div>
+                  <span style="font-size:13px;font-weight:600;color:#2c2218;flex:1">Ana</span>
+                  <span class="member-progress-count">11 / 12</span>
+                </div>
+                <div class="progress-light"><div class="progress-light-fill" style="width:92%"></div></div>
+              </div>
+              <div class="divider"></div>
+              <!-- Pedro -->
+              <div class="member-progress">
+                <div class="member-progress-header">
+                  <div class="avatar av-p" style="width:24px;height:24px;font-size:10px">P</div>
+                  <span style="font-size:13px;font-weight:600;color:#2c2218;flex:1">Pedro</span>
+                  <span class="member-progress-count">9 / 12</span>
+                </div>
+                <div class="progress-light"><div class="progress-light-fill" style="width:75%"></div></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="font-size:13px;color:#52442f">Mais ativo: <span style="font-weight:600;color:#2c2218">Lucas</span></div>
+              <div class="divider"></div>
+              <div style="font-size:13px;color:#52442f">Versículo mais comentado: <span style="font-weight:600;color:#2c2218">Mateus 5:3</span> <span style="color:#93826d">(8 coments.)</span></div>
+            </div>
+
+          </div>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Início</span></div>
+            <div class="nav-item"><div class="nav-bar active"></div><span class="nav-label active">Bíblia</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Marcas</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Perfil</span></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ═══════════════════ TELA 4: BÍBLIA ═══════════════════ -->
-    <div class="screen-wrap">
-      <span class="screen-label">Bíblia Completa</span>
-      <div class="phone">
-        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
-        <div class="phone-content">
-
-          <div style="font-size:18px;font-weight:700">Bíblia</div>
-
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:10px 14px;font-size:13px;color:var(--muted)">
-            🔍 Buscar referência (ex: João 3:16)
-          </div>
-
-          <div class="chip chip-active" style="width:fit-content">NVI ▾</div>
-
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-ghost btn-sm" style="flex:1">Antigo Testamento</button>
-            <button class="btn btn-primary btn-sm" style="flex:1">Novo Testamento</button>
-          </div>
-
-          <div class="label">Evangelhos</div>
-          <div class="book-grid">
-            <div class="book-card" style="border-color:var(--accent);background:rgba(108,99,255,0.08)">
-              <div class="book-name">Mateus</div>
-              <div class="book-meta">28 capítulos</div>
-              <div class="book-activity">💬 47  🔖 23</div>
-            </div>
-            <div class="book-card">
-              <div class="book-name">Marcos</div>
-              <div class="book-meta">16 capítulos</div>
-              <div class="book-activity">💬 12  🔖 5</div>
-            </div>
-            <div class="book-card">
-              <div class="book-name">Lucas</div>
-              <div class="book-meta">24 capítulos</div>
-              <div class="book-activity">💬 8</div>
-            </div>
-            <div class="book-card">
-              <div class="book-name">João</div>
-              <div class="book-meta">21 capítulos</div>
-              <div class="book-activity">💬 31  🔖 14</div>
-            </div>
-          </div>
-
-          <div class="label">Cartas de Paulo</div>
-          <div class="book-grid">
-            <div class="book-card">
-              <div class="book-name">Romanos</div>
-              <div class="book-meta">16 capítulos</div>
-            </div>
-            <div class="book-card">
-              <div class="book-name">1 Coríntios</div>
-              <div class="book-meta">16 capítulos</div>
-            </div>
-          </div>
-
-        </div>
-        <div class="phone-nav">
-          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
-          <div class="nav-item active"><span class="nav-icon">📖</span>Bíblia</div>
-          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
-          <div class="nav-item"><span class="nav-icon">👤</span>Perfil</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ TELA 5: ADMIN ═══════════════════ -->
+    <!-- ══════════════════════════════════════ ADMIN ══════════════════════════════════════ -->
     <div class="screen-wrap">
       <span class="screen-label">Admin — Pacotes</span>
       <div class="phone">
-        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
-        <div class="phone-content">
+        <div class="phone-inner">
+          <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+          <div class="phone-body">
 
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-size:18px;font-weight:700">Admin</div>
-            <button class="btn btn-primary btn-sm">+ Novo pacote</button>
-          </div>
-
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-primary btn-sm" style="flex:1">Pacotes</button>
-            <button class="btn btn-ghost btn-sm" style="flex:1">Membros</button>
-          </div>
-
-          <div class="label" style="display:flex;align-items:center;gap:6px">
-            <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>
-            Ativos
-          </div>
-
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start">
-              <div>
-                <div style="font-size:14px;font-weight:700">📖 Lendo Mateus</div>
-                <div class="subheading">Dia 12/28 · 43%</div>
-              </div>
-              <span class="badge badge-admin">ATIVO</span>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:20px;font-weight:600;color:#1c150e">Admin</div>
+              <button class="btn-ghost">+ Novo pacote</button>
             </div>
-            <div class="progress-track"><div class="progress-fill" style="width:43%"></div></div>
+
             <div style="display:flex;gap:8px">
-              <button class="btn btn-ghost btn-sm" style="flex:1">Editar</button>
-              <button class="btn btn-sm" style="flex:1;background:rgba(244,63,94,0.1);color:var(--rose);border:none;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:600">Arquivar</button>
+              <span class="chip-tab-active">Pacotes</span>
+              <span class="chip-tab-inactive">Membros</span>
             </div>
-          </div>
 
-          <div class="label" style="display:flex;align-items:center;gap:6px">
-            <span style="width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block"></span>
-            Rascunhos
-          </div>
+            <!-- Active -->
+            <div class="status-active">
+              <span class="status-dot active"></span>
+              <span class="section-label">Ativos</span>
+            </div>
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:#2c2218">Lendo Mateus</div>
+                  <div style="font-size:11px;color:#93826d;margin-top:2px">Dia 12 / 28 · 43%</div>
+                </div>
+                <span class="role-badge role-admin" style="font-size:9px">ATIVO</span>
+              </div>
+              <div class="progress-light"><div class="progress-light-fill" style="width:43%"></div></div>
+              <div class="btn-row">
+                <button class="btn-ghost" style="font-size:12px;padding:8px 12px">Editar</button>
+                <button class="btn-ghost" style="font-size:12px;padding:8px 12px;color:#a03a2a;border-color:#e6c4be">Arquivar</button>
+              </div>
+            </div>
 
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start">
-              <div>
-                <div style="font-size:14px;font-weight:700">✏️ Série de Natal</div>
-                <div class="subheading">12 dias · não iniciado</div>
+            <!-- Draft -->
+            <div class="status-active">
+              <span class="status-dot draft"></span>
+              <span class="section-label">Rascunho</span>
+            </div>
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div style="font-size:14px;font-weight:600;color:#2c2218">Série de Natal</div>
+                  <div style="font-size:11px;color:#93826d;margin-top:2px">12 dias · não iniciado</div>
+                </div>
+                <span class="role-badge role-member" style="font-size:9px">RASCUNHO</span>
               </div>
-              <span class="badge badge-member">RASCUNHO</span>
+              <div class="btn-row">
+                <button class="btn-ghost" style="font-size:12px;padding:8px 12px">Editar</button>
+                <button class="btn-primary" style="border-radius:99px;padding:8px 12px;font-size:12px;width:auto;flex:1">Ativar</button>
+              </div>
             </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn btn-ghost btn-sm" style="flex:1">Editar</button>
-              <button class="btn btn-primary btn-sm" style="flex:1">Ativar</button>
-            </div>
-          </div>
 
-          <div class="label">Membros</div>
-          <div class="card">
-            <div class="member-row">
-              <div class="avatar av-l">L</div>
-              <div class="member-info">
-                <div class="member-name">Lucas Schmidt</div>
-                <div class="member-role">luccas@email.com</div>
+            <div class="section-label">Membros</div>
+            <div class="card" style="gap:0">
+              <div class="member-row">
+                <div class="avatar av-l">L</div>
+                <div class="member-info">
+                  <div class="member-name">Lucas Schmidt</div>
+                  <div class="member-email">luccas@email.com</div>
+                </div>
+                <span class="role-badge role-admin">Admin</span>
               </div>
-              <span class="badge badge-admin">👑 Admin</span>
-            </div>
-            <div class="member-row">
-              <div class="avatar av-a">A</div>
-              <div class="member-info">
-                <div class="member-name">Ana Schmidt</div>
+              <div class="member-row">
+                <div class="avatar av-a">A</div>
+                <div class="member-info"><div class="member-name">Ana Schmidt</div></div>
+                <span class="role-badge role-member">Membro</span>
               </div>
-              <span class="badge badge-member">Membro ▾</span>
-            </div>
-            <div class="member-row" style="border-bottom:none">
-              <div class="avatar av-p">P</div>
-              <div class="member-info">
-                <div class="member-name">Pedro Schmidt</div>
+              <div class="member-row" style="border-bottom:none">
+                <div class="avatar av-p">P</div>
+                <div class="member-info"><div class="member-name">Pedro Schmidt</div></div>
+                <span class="role-badge role-member">Membro</span>
               </div>
-              <span class="badge badge-member">Membro ▾</span>
             </div>
-          </div>
 
-        </div>
-        <div class="phone-nav">
-          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
-          <div class="nav-item"><span class="nav-icon">📖</span>Bíblia</div>
-          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
-          <div class="nav-item active"><span class="nav-icon">👤</span>Perfil</div>
+          </div>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Início</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Bíblia</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Marcas</span></div>
+            <div class="nav-item"><div class="nav-bar active"></div><span class="nav-label active">Perfil</span></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ═══════════════════ TELA 6: PERFIL ═══════════════════ -->
+    <!-- ══════════════════════════════════════ PERFIL ══════════════════════════════════════ -->
     <div class="screen-wrap">
       <span class="screen-label">Perfil</span>
       <div class="phone">
-        <div class="phone-notch"><div class="phone-notch-bar"></div></div>
-        <div class="phone-content">
+        <div class="phone-inner">
+          <div class="phone-notch"><div class="phone-notch-bar"></div></div>
+          <div class="phone-body">
 
-          <div style="font-size:18px;font-weight:700">Perfil</div>
+            <div style="font-size:20px;font-weight:600;color:#1c150e">Perfil</div>
 
-          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0">
-            <div class="avatar av-l" style="width:64px;height:64px;font-size:24px;border:3px solid var(--accent)">L</div>
-            <div style="text-align:center">
-              <div style="font-size:18px;font-weight:700">Lucas Schmidt</div>
-              <div class="subheading">luccas@email.com</div>
+            <!-- Avatar -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:4px 0 8px">
+              <div class="avatar-lg">L</div>
+              <div style="text-align:center">
+                <div style="font-size:18px;font-weight:600;color:#1c150e">Lucas Schmidt</div>
+                <div style="font-size:12px;color:#93826d;margin-top:2px">luccas@email.com</div>
+              </div>
+              <button class="btn-ghost" style="font-size:12px;padding:8px 18px">Editar perfil</button>
             </div>
-            <button class="btn btn-ghost btn-sm">Editar perfil</button>
-          </div>
 
-          <div class="label">Preferências</div>
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:13px">Versão padrão</span>
-              <div class="chip chip-active">NVI ▾</div>
-            </div>
             <div class="divider"></div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:13px">Idioma</span>
-              <div class="chip">PT ▾</div>
-            </div>
-          </div>
 
-          <div class="label">Notificações</div>
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:13px">Lembrete diário</span>
-              <div style="width:40px;height:22px;background:var(--accent);border-radius:99px;position:relative">
-                <div style="position:absolute;right:3px;top:3px;width:16px;height:16px;background:white;border-radius:50%"></div>
+            <div class="section-label">Preferências</div>
+            <div class="card" style="gap:0">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+                <span style="font-size:13px;color:#2c2218">Versão padrão</span>
+                <div class="select-field" style="padding:6px 12px;border-radius:8px;font-size:12px">NVI <span class="select-arrow">▾</span></div>
+              </div>
+              <div class="divider"></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+                <span style="font-size:13px;color:#2c2218">Idioma</span>
+                <div class="select-field" style="padding:6px 12px;border-radius:8px;font-size:12px">PT <span class="select-arrow">▾</span></div>
               </div>
             </div>
-            <div class="divider"></div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:13px">Horário</span>
-              <div class="chip chip-active">07:00</div>
+
+            <div class="section-label">Notificações</div>
+            <div class="card" style="gap:0">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+                <span style="font-size:13px;color:#2c2218">Lembrete diário</span>
+                <div class="toggle"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="divider"></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+                <span style="font-size:13px;color:#2c2218">Horário</span>
+                <div class="select-field" style="padding:6px 12px;border-radius:8px;font-size:12px">07:00 <span class="select-arrow">▾</span></div>
+              </div>
             </div>
-          </div>
 
-          <div class="label">Minha leitura · Junho 2026</div>
-          <div class="card">
-            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">
-              <span style="font-size:9px;color:var(--muted)">S</span>
-              <span style="font-size:9px;color:var(--muted)">T</span>
-              <span style="font-size:9px;color:var(--muted)">Q</span>
-              <span style="font-size:9px;color:var(--muted)">Q</span>
-              <span style="font-size:9px;color:var(--muted)">S</span>
-              <span style="font-size:9px;color:var(--muted)">S</span>
-              <span style="font-size:9px;color:var(--muted)">D</span>
-              <!-- dias -->
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;color:var(--muted)">7</span>
-              <span style="font-size:11px;color:var(--muted)">8</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white">✓</span>
-              <span style="font-size:11px;color:var(--muted)">15</span>
-              <span style="font-size:11px;background:var(--accent);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:auto;color:white;font-weight:700">►</span>
+            <div class="section-label">Leitura · Junho 2026</div>
+            <div class="card">
+              <div class="cal-grid">
+                <span class="cal-day-label">S</span>
+                <span class="cal-day-label">T</span>
+                <span class="cal-day-label">Q</span>
+                <span class="cal-day-label">Q</span>
+                <span class="cal-day-label">S</span>
+                <span class="cal-day-label">S</span>
+                <span class="cal-day-label">D</span>
+                <span class="cal-day read">1</span>
+                <span class="cal-day read">2</span>
+                <span class="cal-day read">3</span>
+                <span class="cal-day read">4</span>
+                <span class="cal-day read">5</span>
+                <span class="cal-day missed">6</span>
+                <span class="cal-day missed">7</span>
+                <span class="cal-day read">8</span>
+                <span class="cal-day read">9</span>
+                <span class="cal-day read">10</span>
+                <span class="cal-day read">11</span>
+                <span class="cal-day read">12</span>
+                <span class="cal-day read">13</span>
+                <span class="cal-day missed">14</span>
+                <span class="cal-day today">15</span>
+              </div>
+              <div style="font-size:12px;color:#93826d;text-align:center">12 dias lidos em junho</div>
             </div>
-            <div style="font-size:12px;color:var(--muted);text-align:center">12 dias lidos em junho</div>
+
+            <button class="btn-danger" style="align-self:center">Sair da conta</button>
+
           </div>
-
-          <button class="btn btn-ghost btn-sm" style="color:var(--rose)">Sair da conta</button>
-
-        </div>
-        <div class="phone-nav">
-          <div class="nav-item"><span class="nav-icon">🏠</span>Início</div>
-          <div class="nav-item"><span class="nav-icon">📖</span>Bíblia</div>
-          <div class="nav-item"><span class="nav-icon">🔖</span>Marks</div>
-          <div class="nav-item active"><span class="nav-icon">👤</span>Perfil</div>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Início</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Bíblia</span></div>
+            <div class="nav-item"><div class="nav-bar inactive"></div><span class="nav-label inactive">Marcas</span></div>
+            <div class="nav-item"><div class="nav-bar active"></div><span class="nav-label active">Perfil</span></div>
+          </div>
         </div>
       </div>
     </div>
 
   </div>
+
+  <p class="page-footnote">
+    Direção <strong>Papel</strong> — claro, flat, sem sombra. Pacote ativo em card escuro (contraste por preenchimento). Amarelo apenas como marcador de versículo no Leitor. Tipografia Space Grotesk + Spectral.
+  </p>
 
 </body>
 </html>
