@@ -25,11 +25,36 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // O link de recuperação de senha sempre cai na URL base do projeto com ?code=
+  // (a Supabase ignora qualquer path/query customizado em redirect_to nesse
+  // tier) — só um Route Handler ou o middleware pode definir cookies, então a
+  // troca do code por sessão precisa acontecer aqui antes de qualquer outra coisa.
+  const code = request.nextUrl.searchParams.get("code");
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const url = request.nextUrl.clone();
+    url.search = "";
+    if (error) {
+      url.pathname = "/forgot-password";
+      url.searchParams.set("error", "Link inválido ou expirado. Solicite novamente.");
+    } else {
+      url.pathname = "/reset-password";
+    }
+    // exchangeCodeForSession grava os cookies de sessão em supabaseResponse (via
+    // setAll acima) — precisam ser copiados pra resposta de redirect, já que ela
+    // é um objeto novo.
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
 
-  const isAuthRoute = request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/register";
+  const { pathname } = request.nextUrl;
+  const isAuthRoute = pathname === "/login" || pathname === "/register" || pathname === "/forgot-password";
+  const isPublicRoute = isAuthRoute || pathname === "/reset-password";
 
-  if (!user && !isAuthRoute) {
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
