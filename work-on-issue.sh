@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# work-on-issue.sh — Executa todas as issues abertas do BiblEagles, uma por vez,
-# em ordem crescente. Verifica checklist antes e depois de cada sessão.
-# Só fecha a issue quando todos os itens estiverem satisfeitos.
+# work-on-issue.sh — Lista as issues do BiblEagles (abertas e fechadas), pergunta
+# qual executar e roda o Claude Code em modo não-interativo (auto mode), sem
+# precisar de feedback manual, até o checklist da issue estar completo.
 set -euo pipefail
 
 # ── Pré-requisitos ───────────────────────────────────────────────────────────
@@ -73,14 +73,14 @@ CONTEXT
 # Conta itens não-marcados (- [ ]) no corpo da issue
 unchecked_count() {
   local body="$1"
-  echo "$body" | grep -c '^\- \[ \]' || echo "0"
+  echo "$body" | grep -c '^\- \[ \]' || true
 }
 
 # Conta se há qualquer item de checklist (marcado ou não)
 has_checklist() {
   local body="$1"
   local total
-  total=$(echo "$body" | grep -cE '^\- \[(x| )\]' || echo "0")
+  total=$(echo "$body" | grep -cE '^\- \[(x| )\]' || true)
   [ "$total" -gt 0 ]
 }
 
@@ -153,11 +153,11 @@ ${FOCUS}
 Leia o PRD.md e o design/index.html antes de implementar.
 À medida que concluir cada item do checklist, marque-o na issue com:
   gh issue edit ${NUMBER} --body \"\$(gh issue view ${NUMBER} --json body -q '.body' | sed 's/- \[ \] ITEM/- [x] ITEM/')\"
-Quando terminar esta sessão, encerre-a — o script verificará o checklist e fechará a issue se tudo estiver completo."
+Esta sessão roda em modo não-interativo e autônomo — não há ninguém para responder perguntas, então tome as decisões razoáveis você mesmo e siga até o fim."
 
     echo ""
-    echo "  ── Sessão ${ATTEMPT} iniciando para issue #${NUMBER} ──────────────────"
-    claude "$PROMPT"
+    echo "  ── Sessão ${ATTEMPT} iniciando para issue #${NUMBER} (auto mode) ──────"
+    claude -p "$PROMPT" --permission-mode auto
     echo "  ── Sessão ${ATTEMPT} encerrada ────────────────────────────────────────"
     echo ""
 
@@ -181,65 +181,84 @@ Quando terminar esta sessão, encerre-a — o script verificará o checklist e f
     fi
   done
 
-  # ── Fecha a issue ─────────────────────────────────────────────────────────
+  # ── Fecha a issue (se ainda não estiver fechada e sem pendência manual) ─────
+  local CURRENT_STATE CURRENT_LABELS
+  CURRENT_STATE=$(gh issue view "$NUMBER" --json state -q '.state')
+  CURRENT_LABELS=$(gh issue view "$NUMBER" --json labels -q '[.labels[].name] | join(",")')
+
+  if [ "$CURRENT_STATE" != "OPEN" ]; then
+    return
+  fi
+
+  if echo "$CURRENT_LABELS" | grep -q "manual-qa-pending"; then
+    echo "  Issue #${NUMBER} tem item de validação manual pendente (label manual-qa-pending) — não fechando automaticamente."
+    return
+  fi
+
   echo "  Fechando issue #${NUMBER}..."
   gh issue close "$NUMBER" --comment "Implementado em ${ATTEMPT} sessão(ões) via work-on-issue.sh"
   echo "  Issue #${NUMBER} fechada."
 }
 
-# ── Busca issues abertas ordenadas por número ─────────────────────────────────
+# ── Lista issues abertas e fechadas ───────────────────────────────────────────
 echo ""
 echo "  BiblEagles · $REPO"
-echo "  Buscando issues abertas..."
+echo "  ──────────────────────────────────────────────────────────"
 
-ISSUES_JSON=$(gh issue list \
-  --limit 100 \
-  --state open \
-  --json number,title,labels \
-  --jq 'sort_by(.number)')
-
-TOTAL=$(echo "$ISSUES_JSON" | jq 'length')
-
-if [ "$TOTAL" -eq 0 ]; then
-  echo ""
-  echo "  Nenhuma issue aberta. Tudo pronto!"
-  exit 0
+echo ""
+echo "  Abertas:"
+OPEN_LIST=$(gh issue list --limit 100 --state open --json number,title --jq 'sort_by(.number)[] | "  #\(.number)  \(.title)"')
+if [ -n "$OPEN_LIST" ]; then
+  echo "$OPEN_LIST"
+else
+  echo "  (nenhuma)"
 fi
 
 echo ""
-echo "  $TOTAL issues abertas encontradas:"
-echo "  ──────────────────────────────────────────────────────────"
-echo "$ISSUES_JSON" | jq -r '.[] | "  #\(.number)  \(.title)"'
+echo "  Fechadas (últimas 20):"
+CLOSED_LIST=$(gh issue list --limit 20 --state closed --json number,title --jq 'sort_by(.number)[] | "  #\(.number)  \(.title)"')
+if [ -n "$CLOSED_LIST" ]; then
+  echo "$CLOSED_LIST"
+else
+  echo "  (nenhuma)"
+fi
+
 echo "  ──────────────────────────────────────────────────────────"
 echo ""
 
-# ── Itera por cada issue ──────────────────────────────────────────────────────
-CURRENT=0
-echo "$ISSUES_JSON" | jq -c '.[]' | while IFS= read -r issue; do
-  CURRENT=$((CURRENT + 1))
-  NUMBER=$(echo "$issue" | jq -r '.number')
-  TITLE=$(echo "$issue"  | jq -r '.title')
+# ── Seleção da issue ─────────────────────────────────────────────────────────
+if [ -n "${1:-}" ]; then
+  ISSUE_NUMBER="$1"
+  echo "  Issue selecionada via argumento: #$ISSUE_NUMBER"
+else
+  printf "  Qual issue deseja executar? (número): "
+  read -r ISSUE_NUMBER
+fi
 
-  echo ""
-  echo "  ══════════════════════════════════════════════════════════"
-  printf "  Issue %d/%d · #%s\n" "$CURRENT" "$TOTAL" "$NUMBER"
-  echo "  $TITLE"
-  echo "  ══════════════════════════════════════════════════════════"
+if [ -z "$ISSUE_NUMBER" ]; then
+  echo "Nenhum número informado. Saindo." >&2
+  exit 1
+fi
 
-  # Busca detalhes completos
-  ISSUE_JSON=$(gh issue view "$NUMBER" --json number,title,body,labels,url)
-  LABELS=$(echo "$ISSUE_JSON" | jq -r '[.labels[].name] | join(", ")')
-  URL=$(echo "$ISSUE_JSON"    | jq -r '.url')
+# ── Busca detalhes da issue ──────────────────────────────────────────────────
+echo ""
+echo "  Buscando issue #$ISSUE_NUMBER..."
 
-  process_issue "$NUMBER" "$TITLE" "$LABELS" "$URL"
-
-  if [ "$CURRENT" -lt "$TOTAL" ]; then
-    echo "  Iniciando próxima issue em 2s..."
-    sleep 2
-  fi
-done
+ISSUE_JSON=$(gh issue view "$ISSUE_NUMBER" --json number,title,body,labels,url,state)
+TITLE=$(echo "$ISSUE_JSON" | jq -r '.title')
+LABELS=$(echo "$ISSUE_JSON" | jq -r '[.labels[].name] | join(", ")')
+URL=$(echo "$ISSUE_JSON" | jq -r '.url')
+STATE=$(echo "$ISSUE_JSON" | jq -r '.state')
 
 echo ""
 echo "  ══════════════════════════════════════════════════════════"
-echo "  Todas as issues foram processadas e fechadas."
+printf "  Issue #%s · %s\n" "$ISSUE_NUMBER" "$STATE"
+echo "  $TITLE"
+echo "  ══════════════════════════════════════════════════════════"
+
+process_issue "$ISSUE_NUMBER" "$TITLE" "$LABELS" "$URL"
+
+echo ""
+echo "  ══════════════════════════════════════════════════════════"
+echo "  Issue #$ISSUE_NUMBER processada."
 echo "  ══════════════════════════════════════════════════════════"
