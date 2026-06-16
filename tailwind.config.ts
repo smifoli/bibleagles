@@ -18,6 +18,10 @@ const config: Config = {
         "text-secondary": "#52442f",
         "text-muted": "#93826d",
         accent: "#f1e6a0",
+        ink: "#2c2218",
+        "input-border": "#ddd0bd",
+        error: "#a03a2a",
+        link: "#7d6c58",
       },
       fontFamily: {
         sans: ["var(--font-space-grotesk)", "system-ui", "sans-serif"],
