@@ -195,35 +195,37 @@ Visível para todos os membros, na tela do pacote ativo:
 ## 5. Versões da Bíblia
 
 ### Português (padrão do app)
-| Sigla | Nome completo                      |
-|-------|------------------------------------|
-| NVI   | Nova Versão Internacional (padrão) |
-| ARA   | Almeida Revista e Atualizada       |
-| ACF   | Almeida Corrigida Fiel             |
-| NVT   | Nova Versão Transformadora         |
+| Sigla | Nome completo                              |
+|-------|---------------------------------------------|
+| NVT   | Nova Versão Transformadora (padrão)          |
+| BLT   | Bíblia Livre Para Todos                      |
+| TfTP  | Translation for Translators (PT-BR)          |
 
 ### Inglês
-| Sigla | Nome completo             |
-|-------|---------------------------|
-| NIV   | New International Version |
-| KJV   | King James Version        |
-| ESV   | English Standard Version  |
+| Sigla | Nome completo                       |
+|-------|--------------------------------------|
+| NIV   | New International Version (padrão)  |
+| KJV   | King James Version                  |
+| WEB   | World English Bible                 |
 
 ### Espanhol
-| Sigla   | Nome completo               |
-|---------|-----------------------------|
-| RVR1960 | Reina-Valera 1960           |
-| NVI-ES  | Nueva Versión Internacional |
-| DHH     | Dios Habla Hoy              |
+| Sigla | Nome completo                       |
+|-------|--------------------------------------|
+| RVR09 | Reina-Valera 1909 (padrão)           |
+| BES   | La Biblia en Español Sencillo        |
+| VBL   | Versión Biblia Libre                 |
 
 ### Alemão
-| Sigla   | Nome completo      |
-|---------|--------------------|
-| LUT     | Lutherbibel 2017   |
-| SCH2000 | Schlachter 2000    |
-| ELB     | Elberfelder Bibel  |
+| Sigla | Nome completo                          |
+|-------|-----------------------------------------|
+| L1912 | Lutherbibel 1912 (padrão)               |
+| ELO   | Darby Unrevidierte Elberfelder          |
+| TKW   | Textbibel von Kautzsch und Weizsäcker   |
 
-> Fonte: API.Bible (gratuito, 5.000 req/dia). Disponibilidade das versões confirmada no momento do desenvolvimento.
+> Fonte: API.Bible (gratuito, 5.000 req/dia). As versões originalmente planejadas (NVI, ARA, ACF, ESV,
+> RVR1960, NVI-ES, DHH, LUT 2017, SCH2000, ELB) são traduções comerciais que nunca foram licenciadas
+> para o catálogo da API.Bible — confirmado em 2026-06-16 ao listar as ~250 Bíblias disponíveis com
+> uma key real. A tabela acima reflete as versões de fato acessíveis.
 
 ---
 

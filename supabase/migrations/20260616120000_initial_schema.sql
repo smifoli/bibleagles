@@ -13,7 +13,7 @@ create table public.users (
   email text not null unique,
   avatar_url text,
   role text not null default 'member' check (role in ('admin', 'member')),
-  preferred_version text not null default 'NVI',
+  preferred_version text not null default 'NVT',
   preferred_language text not null default 'pt' check (preferred_language in ('pt', 'en', 'es', 'de')),
   notification_enabled boolean not null default false,
   notification_time time not null default '07:00:00',
