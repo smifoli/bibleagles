@@ -1,0 +1,113 @@
+export type UserRole = "admin" | "member";
+export type PackageStatus = "draft" | "active" | "archived";
+export type Language = "pt" | "en" | "es" | "de";
+export type HighlightColor = "yellow" | "green" | "rose" | "blue";
+
+export interface Database {
+  public: {
+    Tables: {
+      users: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          avatar_url: string | null;
+          role: UserRole;
+          preferred_version: string;
+          preferred_language: Language;
+          notification_enabled: boolean;
+          notification_time: string;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["users"]["Row"], "id" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["users"]["Insert"]>;
+      };
+      reading_packages: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          start_date: string;
+          status: PackageStatus;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["reading_packages"]["Row"], "id" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["reading_packages"]["Insert"]>;
+      };
+      reading_plan_days: {
+        Row: {
+          id: string;
+          package_id: string;
+          date: string;
+          title: string;
+          passages: Passage[];
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["reading_plan_days"]["Row"], "id" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["reading_plan_days"]["Insert"]>;
+      };
+      reading_progress: {
+        Row: {
+          id: string;
+          user_id: string;
+          plan_day_id: string;
+          completed_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["reading_progress"]["Row"], "id">;
+        Update: Partial<Database["public"]["Tables"]["reading_progress"]["Insert"]>;
+      };
+      bookmarks: {
+        Row: {
+          id: string;
+          user_id: string;
+          book: string;
+          chapter: number;
+          verse: number;
+          bible_version: string;
+          color: HighlightColor;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["bookmarks"]["Row"], "id" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["bookmarks"]["Insert"]>;
+      };
+      comments: {
+        Row: {
+          id: string;
+          user_id: string;
+          book: string;
+          chapter: number;
+          verse: number;
+          bible_version: string;
+          content: string;
+          parent_id: string | null;
+          updated_at: string;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["comments"]["Row"], "id" | "updated_at" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["comments"]["Insert"]>;
+      };
+      comment_likes: {
+        Row: {
+          id: string;
+          user_id: string;
+          comment_id: string;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["comment_likes"]["Row"], "id" | "created_at">;
+        Update: never;
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+  };
+}
+
+export interface Passage {
+  book: string;
+  chapter_start: number;
+  verse_start: number | null;
+  chapter_end: number | null;
+  verse_end: number | null;
+}
