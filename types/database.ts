@@ -21,6 +21,7 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["users"]["Row"], "id" | "created_at">;
         Update: Partial<Database["public"]["Tables"]["users"]["Insert"]>;
+        Relationships: [];
       };
       reading_packages: {
         Row: {
@@ -34,6 +35,7 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["reading_packages"]["Row"], "id" | "created_at">;
         Update: Partial<Database["public"]["Tables"]["reading_packages"]["Insert"]>;
+        Relationships: [];
       };
       reading_plan_days: {
         Row: {
@@ -46,6 +48,7 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["reading_plan_days"]["Row"], "id" | "created_at">;
         Update: Partial<Database["public"]["Tables"]["reading_plan_days"]["Insert"]>;
+        Relationships: [];
       };
       reading_progress: {
         Row: {
@@ -56,6 +59,7 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["reading_progress"]["Row"], "id">;
         Update: Partial<Database["public"]["Tables"]["reading_progress"]["Insert"]>;
+        Relationships: [];
       };
       bookmarks: {
         Row: {
@@ -70,6 +74,7 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["bookmarks"]["Row"], "id" | "created_at">;
         Update: Partial<Database["public"]["Tables"]["bookmarks"]["Insert"]>;
+        Relationships: [];
       };
       comments: {
         Row: {
@@ -86,6 +91,7 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["comments"]["Row"], "id" | "updated_at" | "created_at">;
         Update: Partial<Database["public"]["Tables"]["comments"]["Insert"]>;
+        Relationships: [];
       };
       comment_likes: {
         Row: {
@@ -96,6 +102,7 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["comment_likes"]["Row"], "id" | "created_at">;
         Update: never;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
