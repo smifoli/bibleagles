@@ -1,0 +1,19 @@
+import type { ButtonHTMLAttributes } from "react";
+
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+
+const VARIANT_CLASSES: Record<ButtonVariant, string> = {
+  primary: "w-full rounded-[13px] bg-ink py-[15px] text-[13px] font-semibold text-background disabled:opacity-60",
+  secondary: "w-full rounded-full bg-[#efe7d8] py-2.5 text-xs font-semibold text-ink disabled:opacity-60",
+  ghost:
+    "rounded-full border border-input-border bg-transparent px-4 py-[9px] text-xs font-semibold text-text-secondary disabled:opacity-60",
+  danger: "rounded-full bg-[#a03a2a]/[0.08] px-4 py-[9px] text-xs font-semibold text-error disabled:opacity-60",
+};
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+}
+
+export function Button({ variant = "primary", className = "", ...props }: ButtonProps) {
+  return <button className={`${VARIANT_CLASSES[variant]} ${className}`} {...props} />;
+}
