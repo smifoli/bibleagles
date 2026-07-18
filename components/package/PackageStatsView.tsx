@@ -30,13 +30,12 @@ export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canE
           </div>
         </div>
         {canEdit ? (
-          <span
-            aria-disabled="true"
-            title="Edição de pacotes ainda não disponível"
-            className="whitespace-nowrap rounded-full border border-input-border px-3 py-2 text-xs font-semibold text-text-secondary opacity-60"
+          <Link
+            href={`/admin/package/${stats.id}/edit`}
+            className="whitespace-nowrap rounded-full border border-input-border px-3 py-2 text-xs font-semibold text-text-secondary"
           >
             Editar
-          </span>
+          </Link>
         ) : null}
       </header>
 
