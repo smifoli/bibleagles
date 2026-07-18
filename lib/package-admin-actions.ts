@@ -112,3 +112,25 @@ export async function updatePackage(packageId: string, input: PackageInput): Pro
   revalidatePath("/admin");
   redirect(`/package/${packageId}`);
 }
+
+async function setPackageStatus(packageId: string, status: "active" | "archived"): Promise<{ error?: string }> {
+  const admin = await requireAdmin();
+  if ("error" in admin && admin.error) return { error: admin.error };
+  const { supabase } = admin as { supabase: Awaited<ReturnType<typeof createClient>>; user: { id: string } };
+
+  const { error } = await supabase.from("reading_packages").update({ status }).eq("id", packageId);
+  if (error) return { error: "Não foi possível atualizar o status do pacote." };
+
+  revalidatePath("/admin");
+  return {};
+}
+
+// Ativação e arquivamento são sempre manuais (issue #15) — sem cron/trigger
+// automático baseado em datas.
+export async function activatePackage(packageId: string): Promise<{ error?: string }> {
+  return setPackageStatus(packageId, "active");
+}
+
+export async function archivePackage(packageId: string): Promise<{ error?: string }> {
+  return setPackageStatus(packageId, "archived");
+}

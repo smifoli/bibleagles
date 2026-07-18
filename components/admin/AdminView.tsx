@@ -3,11 +3,21 @@
 import Link from "next/link";
 import { useState } from "react";
 import { MembersList } from "@/components/admin/MembersList";
+import { PackagesOverview } from "@/components/admin/PackagesOverview";
 import type { AdminMember } from "@/lib/admin-data";
+import type { AdminPackagesOverview } from "@/lib/admin-packages-data";
 
 type Tab = "pacotes" | "membros";
 
-export function AdminView({ members, currentUserId }: { members: AdminMember[]; currentUserId: string }) {
+export function AdminView({
+  members,
+  currentUserId,
+  packages,
+}: {
+  members: AdminMember[];
+  currentUserId: string;
+  packages: AdminPackagesOverview;
+}) {
   const [tab, setTab] = useState<Tab>("pacotes");
 
   return (
@@ -48,12 +58,7 @@ export function AdminView({ members, currentUserId }: { members: AdminMember[]; 
       </div>
 
       {tab === "pacotes" ? (
-        // Issue #15 (listar/arquivar/ativar pacotes existentes) ainda não foi
-        // implementada — criar (#12/#13) já funciona via "+ Novo pacote" acima.
-        <div className="flex flex-col items-center gap-1 rounded-[18px] border border-border bg-surface px-4 py-10 text-center">
-          <p className="text-sm font-semibold text-text-primary">Lista de pacotes em breve</p>
-          <p className="text-xs text-text-muted">Por enquanto, use "+ Novo pacote" pra criar um.</p>
-        </div>
+        <PackagesOverview overview={packages} />
       ) : (
         <MembersList members={members} currentUserId={currentUserId} />
       )}
