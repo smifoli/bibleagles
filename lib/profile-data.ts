@@ -1,7 +1,7 @@
 import type { createClient } from "@/lib/supabase/server";
 import { toDateOnlyString } from "@/lib/format";
 import { getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
-import type { Language } from "@/types/database";
+import type { Language, UserRole } from "@/types/database";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -9,6 +9,7 @@ export interface ProfileUser {
   id: string;
   name: string;
   email: string;
+  role: UserRole;
   preferredVersion: string;
   preferredLanguage: Language;
   notificationEnabled: boolean;
@@ -42,7 +43,7 @@ const AVAILABLE_LANGUAGES: Language[] = ["pt", "en"];
 export async function getProfileData(supabase: SupabaseServerClient, userId: string): Promise<ProfileData> {
   const { data: userRow } = await supabase
     .from("users")
-    .select("id, name, email, preferred_version, preferred_language, notification_enabled, notification_time")
+    .select("id, name, email, role, preferred_version, preferred_language, notification_enabled, notification_time")
     .eq("id", userId)
     .single();
 
@@ -59,6 +60,7 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
     id: userRow?.id ?? userId,
     name: userRow?.name ?? "",
     email: userRow?.email ?? "",
+    role: userRow?.role ?? "member",
     preferredVersion: version.abbreviation,
     preferredLanguage: version.language,
     notificationEnabled: userRow?.notification_enabled ?? false,

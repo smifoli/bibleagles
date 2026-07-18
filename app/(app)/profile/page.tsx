@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NotificationsCard } from "@/components/profile/NotificationsCard";
 import { PreferencesCard } from "@/components/profile/PreferencesCard";
@@ -25,6 +26,15 @@ export default async function ProfilePage() {
       <h1 className="text-[20px] font-semibold text-text-primary">Perfil</h1>
 
       <ProfileHeader name={profile.name} email={profile.email} />
+
+      {profile.role === "admin" ? (
+        <Link
+          href="/admin"
+          className="self-center rounded-full border border-input-border px-4 py-2 text-xs font-semibold text-text-secondary"
+        >
+          Painel admin
+        </Link>
+      ) : null}
 
       <div className="h-px bg-border" />
 
