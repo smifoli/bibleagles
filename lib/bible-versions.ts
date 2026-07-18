@@ -6,30 +6,44 @@ export interface BibleVersion {
   language: Language;
   isDefault?: boolean;
   /**
-   * ID interno da versão na API.Bible (GET /v1/bibles).
-   * Preencher executando `npm run bible:list-versions` após configurar BIBLE_API_KEY.
+   * De onde o texto baixado por `npm run bible:download` para data/bibles/<abbreviation>/
+   * veio. Não é usado em runtime — o app lê o JSON local (lib/bible-data.ts); serve só de
+   * referência para re-baixar ou trocar a fonte.
    */
-  bibleId: string | null;
+  source:
+    | { provider: "api.bible"; bibleId: string }
+    | { provider: "ebible.org"; id: string };
 }
 
 /**
- * NVI, ARA, ACF, ESV, RVR1960, NVI-ES, DHH, LUT (2017) e SCH2000 não existem no catálogo
- * da API.Bible — são traduções comerciais nunca licenciadas para a plataforma. A lista abaixo
- * usa as versões reais disponíveis (confirmado via `npm run bible:list-versions`).
+ * Só versões de domínio público / licença livre entram aqui — são as únicas que podem
+ * ser baixadas uma vez e empacotadas como JSON estático no app (ver lib/bible-data.ts e
+ * scripts/download-bibles.mjs). Traduções comerciais (NVI, ARA, ACF, NVT, NIV, ESV,
+ * RVR1960, LUT 2017, SCH2000 etc.) mesmo quando acessíveis ao vivo via API.Bible, não
+ * podem ser redistribuídas dentro do app sem licenciamento à parte — por isso ficam de fora.
+ *
+ * Duas versões por idioma, exceto italiano: não foi encontrada uma segunda tradução
+ * italiana de licença livre com o cânon completo (só Diodati 1885). Pode ser adicionada
+ * depois se aparecer uma fonte melhor.
+ *
+ * BLT e ONBV vêm de eBible.org, não da API.Bible: o catálogo da API.Bible só tinha o Novo
+ * Testamento do BLT (mirror desatualizado do projeto), enquanto eBible.org tem o cânon
+ * completo das duas.
+ *
+ * Removidas temporariamente (download incompleto):
+ *  - Alemão (L1912, ELO): cortado de propósito por ser lento — ver scripts/download-bibles.mjs.
+ *  - Espanhol (RVR09, VBL) e italiano (DB1885): a chave da API.Bible bateu no limite MENSAL
+ *    (403 "Monthly limit exceeded") no meio do download, então alguns livros/capítulos
+ *    ficaram faltando em data/bibles/. Ficam fora do catálogo pra não expor uma versão com
+ *    buracos no leitor. Terminar o download (`npm run bible:download -- --only=RVR09,VBL,DB1885,L1912,ELO`)
+ *    só é possível depois que a cota da API.Bible resetar (mensal) ou com upgrade de plano —
+ *    depois é só devolver as entradas aqui.
  */
 export const BIBLE_VERSIONS: BibleVersion[] = [
-  { abbreviation: "NVT", name: "Nova Versão Transformadora", language: "pt", isDefault: true, bibleId: "41a6caa722a21d88-01" },
-  { abbreviation: "BLT", name: "Bíblia Livre Para Todos", language: "pt", bibleId: "d63894c8d9a7a503-01" },
-  { abbreviation: "TfTP", name: "Translation for Translators (PT-BR)", language: "pt", bibleId: "90799bb5b996fddc-01" },
-  { abbreviation: "NIV", name: "New International Version", language: "en", isDefault: true, bibleId: "78a9f6124f344018-01" },
-  { abbreviation: "KJV", name: "King James Version", language: "en", bibleId: "de4e12af7f28f599-02" },
-  { abbreviation: "WEB", name: "World English Bible", language: "en", bibleId: "9879dbb7cfe39e4d-04" },
-  { abbreviation: "RVR09", name: "Reina-Valera 1909", language: "es", isDefault: true, bibleId: "592420522e16049f-01" },
-  { abbreviation: "BES", name: "La Biblia en Español Sencillo", language: "es", bibleId: "b32b9d1b64b4ef29-01" },
-  { abbreviation: "VBL", name: "Versión Biblia Libre", language: "es", bibleId: "482ddd53705278cc-02" },
-  { abbreviation: "L1912", name: "Lutherbibel 1912", language: "de", isDefault: true, bibleId: "926aa5efbc5e04e2-01" },
-  { abbreviation: "ELO", name: "Darby Unrevidierte Elberfelder", language: "de", bibleId: "95410db44ef800c1-01" },
-  { abbreviation: "TKW", name: "Textbibel von Kautzsch und Weizsäcker", language: "de", bibleId: "542b32484b6e38c2-01" },
+  { abbreviation: "BLT", name: "Bíblia Livre Para Todos", language: "pt", isDefault: true, source: { provider: "ebible.org", id: "porbr2018" } },
+  { abbreviation: "ONBV", name: "Open Nova Bíblia Viva", language: "pt", source: { provider: "ebible.org", id: "poronbv" } },
+  { abbreviation: "WEB", name: "World English Bible", language: "en", isDefault: true, source: { provider: "api.bible", bibleId: "9879dbb7cfe39e4d-04" } },
+  { abbreviation: "KJV", name: "King James Version", language: "en", source: { provider: "api.bible", bibleId: "de4e12af7f28f599-02" } },
 ];
 
 export function getVersionByAbbreviation(abbreviation: string): BibleVersion | undefined {

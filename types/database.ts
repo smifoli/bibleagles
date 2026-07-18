@@ -1,6 +1,6 @@
 export type UserRole = "admin" | "member";
 export type PackageStatus = "draft" | "active" | "archived";
-export type Language = "pt" | "en" | "es" | "de";
+export type Language = "pt" | "en" | "es" | "de" | "it";
 export type HighlightColor = "yellow" | "green" | "rose" | "blue";
 
 export interface Database {
@@ -57,7 +57,9 @@ export interface Database {
           plan_day_id: string;
           completed_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["reading_progress"]["Row"], "id">;
+        Insert: Omit<Database["public"]["Tables"]["reading_progress"]["Row"], "id" | "completed_at"> & {
+          completed_at?: string;
+        };
         Update: Partial<Database["public"]["Tables"]["reading_progress"]["Insert"]>;
         Relationships: [];
       };
