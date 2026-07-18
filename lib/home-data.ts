@@ -1,5 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
-import { toDateOnlyString } from "@/lib/format";
+import { getActivePackagesWithToday } from "@/lib/reading-plan";
 import type { Passage } from "@/types/database";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -44,50 +44,25 @@ export interface HomeData {
 }
 
 export async function getHomeData(supabase: SupabaseServerClient, userId: string): Promise<HomeData> {
-  const today = toDateOnlyString();
-
-  const [{ data: currentUser }, { data: familyMembers }, { data: packages }] = await Promise.all([
+  const [{ data: currentUser }, { data: familyMembers }, todayPackages] = await Promise.all([
     supabase.from("users").select("name").eq("id", userId).single(),
     supabase.from("users").select("id, name").order("created_at", { ascending: true }),
-    supabase
-      .from("reading_packages")
-      .select("id, title, description")
-      .eq("status", "active")
-      .order("start_date", { ascending: true }),
+    getActivePackagesWithToday(supabase),
   ]);
 
   const memberNames = new Map((familyMembers ?? []).map((member) => [member.id, member.name]));
 
-  const cards: (PackageCardData & { planDayId: string })[] = [];
-
-  for (const pkg of packages ?? []) {
-    const { data: days } = await supabase
-      .from("reading_plan_days")
-      .select("id, date, title, passages")
-      .eq("package_id", pkg.id)
-      .order("date", { ascending: true });
-
-    if (!days || days.length === 0) continue;
-
-    const todayIndex = days.findIndex((day) => day.date === today);
-    if (todayIndex === -1) continue;
-
-    const todayDay = days[todayIndex];
-    const totalDays = days.length;
-    const dayNumber = todayIndex + 1;
-
-    cards.push({
-      packageId: pkg.id,
-      planDayId: todayDay.id,
-      eyebrow: pkg.description ?? "Leitura em família",
-      title: pkg.title,
-      dayNumber,
-      totalDays,
-      chapterTitle: todayDay.title,
-      percent: Math.round((dayNumber / totalDays) * 100),
-      firstPassage: todayDay.passages[0] ?? null,
-    });
-  }
+  const cards: (PackageCardData & { planDayId: string })[] = todayPackages.map((pkg) => ({
+    packageId: pkg.packageId,
+    planDayId: pkg.planDayId,
+    eyebrow: pkg.packageDescription ?? "Leitura em família",
+    title: pkg.packageTitle,
+    dayNumber: pkg.dayNumber,
+    totalDays: pkg.totalDays,
+    chapterTitle: pkg.chapterTitle,
+    percent: Math.round((pkg.dayNumber / pkg.totalDays) * 100),
+    firstPassage: pkg.passages[0] ?? null,
+  }));
 
   const [featuredCard, ...secondary] = cards;
   let featured: FeaturedPackageCardData | null = null;

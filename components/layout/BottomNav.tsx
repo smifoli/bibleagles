@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Início" },
-  { href: "/bible", label: "Bíblia" },
-  { href: "/bookmarks", label: "Marcas" },
-  { href: "/profile", label: "Perfil" },
+  { href: "/", label: "Início", match: (pathname: string) => pathname === "/" },
+  { href: "/bible", label: "Bíblia", match: (pathname: string) => pathname.startsWith("/bible") || pathname.startsWith("/read/") },
+  { href: "/bookmarks", label: "Marcas", match: (pathname: string) => pathname === "/bookmarks" },
+  { href: "/profile", label: "Perfil", match: (pathname: string) => pathname === "/profile" },
 ];
 
 export function BottomNav() {
@@ -16,7 +16,7 @@ export function BottomNav() {
   return (
     <nav className="flex justify-around border-t border-border px-0 py-[13px] pb-[15px]">
       {NAV_ITEMS.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive = item.match(pathname);
         return (
           <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1.5">
             <span className={`h-0.5 w-[18px] rounded-full ${isActive ? "bg-ink" : "bg-transparent"}`} />
