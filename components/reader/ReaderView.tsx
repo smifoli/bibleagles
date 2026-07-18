@@ -6,8 +6,8 @@ import { useEffect, useState, useTransition } from "react";
 import type { BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
-import { addComment, deleteComment, markPlanDayRead, toggleCommentLike, toggleHighlight } from "@/lib/reader-actions";
-import type { ReaderData } from "@/lib/reader-data";
+import { addComment, deleteComment, editComment, markPlanDayRead, toggleCommentLike, toggleHighlight } from "@/lib/reader-actions";
+import type { ReaderComment, ReaderData } from "@/lib/reader-data";
 import type { HighlightColor } from "@/types/database";
 
 const FONT_SIZES = { sm: "14px", md: "16px", lg: "19px" } as const;
@@ -27,6 +27,10 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
   const [fontSize, setFontSize] = useState<FontSize>("md");
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
   const [commentDraft, setCommentDraft] = useState("");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState("");
   const [pending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string>();
 
@@ -70,6 +74,43 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
     });
   }
 
+  function handleToggleReply(commentId: string) {
+    setActionError(undefined);
+    setReplyDraft("");
+    setReplyingTo((current) => (current === commentId ? null : commentId));
+  }
+
+  function handleSubmitReply(verseNumber: number, parentId: string) {
+    setActionError(undefined);
+    startTransition(async () => {
+      const result = await addComment(book, chapter, verseNumber, version, replyDraft, parentId);
+      if (result.error) setActionError(result.error);
+      else {
+        setReplyDraft("");
+        setReplyingTo(null);
+        router.refresh();
+      }
+    });
+  }
+
+  function handleStartEdit(comment: ReaderComment) {
+    setActionError(undefined);
+    setEditDraft(comment.content);
+    setEditingId(comment.id);
+  }
+
+  function handleSaveEdit(commentId: string) {
+    setActionError(undefined);
+    startTransition(async () => {
+      const result = await editComment(book, chapter, commentId, editDraft);
+      if (result.error) setActionError(result.error);
+      else {
+        setEditingId(null);
+        router.refresh();
+      }
+    });
+  }
+
   function handleDeleteComment(commentId: string) {
     setActionError(undefined);
     startTransition(async () => {
@@ -86,6 +127,127 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
       if (result.error) setActionError(result.error);
       else router.refresh();
     });
+  }
+
+  function renderComment(comment: ReaderComment, verseNumber: number, isReply: boolean) {
+    const isEditing = editingId === comment.id;
+
+    return (
+      <div key={comment.id} className={`flex items-start gap-[11px] ${isReply ? "mt-3 pl-[15px]" : ""}`}>
+        <div
+          className={`flex shrink-0 items-center justify-center rounded-full bg-[#c98a52] text-[10px] font-semibold text-white ${
+            isReply ? "h-[22px] w-[22px]" : "h-[26px] w-[26px]"
+          }`}
+        >
+          {comment.userName.charAt(0).toUpperCase()}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-baseline gap-[7px]">
+            <span className="text-xs font-semibold text-ink">{comment.userName}</span>
+            <span className="text-[10px] text-text-muted">{formatRelativeTime(new Date(comment.createdAt))}</span>
+            {comment.isEdited && <span className="text-[10px] text-text-muted">· editado</span>}
+          </div>
+
+          {isEditing ? (
+            <div className="mt-1 flex flex-col gap-1.5">
+              <textarea
+                value={editDraft}
+                onChange={(event) => setEditDraft(event.target.value)}
+                rows={2}
+                className="rounded-[10px] border border-input-border bg-background p-2.5 text-sm text-ink"
+              />
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleSaveEdit(comment.id)}
+                  disabled={pending}
+                  className="text-[11px] font-semibold text-ink"
+                >
+                  Salvar
+                </button>
+                <button
+                  onClick={() => setEditingId(null)}
+                  disabled={pending}
+                  className="text-[11px] font-semibold text-text-muted"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mt-0.5 font-serif text-sm text-text-secondary">{comment.content}</div>
+              <div className="mt-1.5 flex items-center gap-3">
+                <button
+                  onClick={() => handleToggleLike(comment.id, comment.likedByMe)}
+                  disabled={pending}
+                  className={`text-[11px] font-semibold ${comment.likedByMe ? "text-ink" : "text-text-muted"}`}
+                >
+                  {comment.likedByMe ? "♥" : "♡"} {comment.likeCount > 0 ? comment.likeCount : ""}
+                </button>
+                {!isReply && (
+                  <button
+                    onClick={() => handleToggleReply(comment.id)}
+                    disabled={pending}
+                    className="text-[11px] font-semibold text-text-muted"
+                  >
+                    Responder
+                  </button>
+                )}
+                {comment.isOwn && (
+                  <>
+                    <button
+                      onClick={() => handleStartEdit(comment)}
+                      disabled={pending}
+                      className="text-[11px] font-semibold text-text-muted"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDeleteComment(comment.id)}
+                      disabled={pending}
+                      className="text-[11px] font-semibold text-text-muted"
+                    >
+                      Apagar
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+
+          {comment.replies.map((reply) => renderComment(reply, verseNumber, true))}
+
+          {!isReply && replyingTo === comment.id && (
+            <div className="mt-2.5 flex flex-col gap-1.5 pl-[15px]">
+              <textarea
+                value={replyDraft}
+                onChange={(event) => setReplyDraft(event.target.value)}
+                placeholder={`Responder a ${comment.userName}...`}
+                rows={2}
+                autoFocus
+                className="rounded-[10px] border border-input-border bg-background p-2.5 text-sm text-ink"
+              />
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleSubmitReply(verseNumber, comment.id)}
+                  disabled={pending}
+                  className="text-[11px] font-semibold text-ink"
+                >
+                  Responder
+                </button>
+                <button
+                  onClick={() => handleToggleReply(comment.id)}
+                  disabled={pending}
+                  className="text-[11px] font-semibold text-text-muted"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   }
 
   function handleMarkAsRead() {
@@ -155,7 +317,11 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
             <div key={verse.number}>
               <div
                 id={`verse-${verse.number}`}
-                onClick={() => setOpenVerse(isOpen ? null : verse.number)}
+                onClick={() => {
+                  setOpenVerse(isOpen ? null : verse.number);
+                  setReplyingTo(null);
+                  setEditingId(null);
+                }}
                 role="button"
                 tabIndex={0}
                 style={{
@@ -186,38 +352,7 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
 
                   {comments.length > 0 && <div className="h-px bg-border" />}
 
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="flex items-start gap-[11px]">
-                      <div className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-[#c98a52] text-[10px] font-semibold text-white">
-                        {comment.userName.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-baseline gap-[7px]">
-                          <span className="text-xs font-semibold text-ink">{comment.userName}</span>
-                          <span className="text-[10px] text-text-muted">{formatRelativeTime(new Date(comment.createdAt))}</span>
-                        </div>
-                        <div className="mt-0.5 font-serif text-sm text-text-secondary">{comment.content}</div>
-                        <div className="mt-1.5 flex items-center gap-3">
-                          <button
-                            onClick={() => handleToggleLike(comment.id, comment.likedByMe)}
-                            disabled={pending}
-                            className={`text-[11px] font-semibold ${comment.likedByMe ? "text-ink" : "text-text-muted"}`}
-                          >
-                            {comment.likedByMe ? "♥" : "♡"} {comment.likeCount > 0 ? comment.likeCount : ""}
-                          </button>
-                          {comment.isOwn && (
-                            <button
-                              onClick={() => handleDeleteComment(comment.id)}
-                              disabled={pending}
-                              className="text-[11px] font-semibold text-text-muted"
-                            >
-                              Apagar
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  {comments.map((comment) => renderComment(comment, verse.number, false))}
 
                   <textarea
                     value={commentDraft}

@@ -22,9 +22,11 @@ export interface ReaderComment {
   userName: string;
   content: string;
   createdAt: string;
+  isEdited: boolean;
   likeCount: number;
   likedByMe: boolean;
   isOwn: boolean;
+  replies: ReaderComment[];
 }
 
 export interface ReaderVerse {
@@ -61,7 +63,7 @@ export async function getReaderData(
     supabase.from("bookmarks").select("user_id, verse, color").eq("book", bookId).eq("chapter", chapter).eq("bible_version", version),
     supabase
       .from("comments")
-      .select("id, user_id, verse, content, created_at")
+      .select("id, user_id, verse, content, parent_id, created_at, updated_at")
       .eq("book", bookId)
       .eq("chapter", chapter)
       .eq("bible_version", version)
@@ -92,19 +94,36 @@ export async function getReaderData(
     if (row.user_id === userId) likedByMe.add(row.comment_id);
   }
 
-  const commentsByVerse: Record<number, ReaderComment[]> = {};
+  // Threading tem só 1 nível (imposto pelo trigger enforce_comment_depth):
+  // toda comment_rows aqui é raiz (parent_id null) ou resposta direta de uma raiz.
+  const commentById = new Map<string, ReaderComment>();
   for (const row of commentRows ?? []) {
-    const list = commentsByVerse[row.verse] ?? [];
-    list.push({
+    commentById.set(row.id, {
       id: row.id,
       userName: memberNames.get(row.user_id) ?? "Alguém",
       content: row.content,
       createdAt: row.created_at,
+      isEdited: row.updated_at !== row.created_at,
       likeCount: likeCounts.get(row.id) ?? 0,
       likedByMe: likedByMe.has(row.id),
       isOwn: row.user_id === userId,
+      replies: [],
     });
-    commentsByVerse[row.verse] = list;
+  }
+
+  const commentsByVerse: Record<number, ReaderComment[]> = {};
+  const commentCountByVerse = new Map<number, number>();
+  for (const row of commentRows ?? []) {
+    const comment = commentById.get(row.id)!;
+    commentCountByVerse.set(row.verse, (commentCountByVerse.get(row.verse) ?? 0) + 1);
+
+    if (row.parent_id) {
+      commentById.get(row.parent_id)?.replies.push(comment);
+    } else {
+      const list = commentsByVerse[row.verse] ?? [];
+      list.push(comment);
+      commentsByVerse[row.verse] = list;
+    }
   }
 
   const verses: ReaderVerse[] = chapterContent.verses.map((verse) => {
@@ -124,7 +143,7 @@ export async function getReaderData(
       number: verse.number,
       text: verse.text,
       highlight,
-      commentCount: commentsByVerse[verse.number]?.length ?? 0,
+      commentCount: commentCountByVerse.get(verse.number) ?? 0,
     };
   });
 

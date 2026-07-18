@@ -62,19 +62,34 @@ export async function getBibleNavData(supabase: SupabaseServerClient, version: s
   };
 }
 
-/** Capítulos com algum comentário/destaque da família, pra destacar na grade de /bible/[book]. */
-export async function getActiveChaptersForBook(
+export interface ChapterActivity {
+  commentCount: number;
+  highlightCount: number;
+}
+
+/** Contagem de comentários/destaques da família por capítulo, pra grade de /bible/[book]. */
+export async function getChapterActivityForBook(
   supabase: SupabaseServerClient,
   version: string,
   bookId: string
-): Promise<Set<number>> {
+): Promise<Map<number, ChapterActivity>> {
   const [{ data: bookmarkRows }, { data: commentRows }] = await Promise.all([
     supabase.from("bookmarks").select("chapter").eq("bible_version", version).eq("book", bookId),
     supabase.from("comments").select("chapter").eq("bible_version", version).eq("book", bookId),
   ]);
 
-  const chapters = new Set<number>();
-  for (const row of bookmarkRows ?? []) chapters.add(row.chapter);
-  for (const row of commentRows ?? []) chapters.add(row.chapter);
-  return chapters;
+  const activity = new Map<number, ChapterActivity>();
+  const get = (chapter: number) => {
+    let entry = activity.get(chapter);
+    if (!entry) {
+      entry = { commentCount: 0, highlightCount: 0 };
+      activity.set(chapter, entry);
+    }
+    return entry;
+  };
+
+  for (const row of bookmarkRows ?? []) get(row.chapter).highlightCount++;
+  for (const row of commentRows ?? []) get(row.chapter).commentCount++;
+
+  return activity;
 }

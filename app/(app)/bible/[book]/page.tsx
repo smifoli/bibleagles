@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { ChapterGridView } from "@/components/bible-nav/ChapterGridView";
 import { BIBLE_VERSIONS, getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
 import { tryGetBookSummary } from "@/lib/bible-data";
-import { getActiveChaptersForBook } from "@/lib/bible-nav-data";
+import { getChapterActivityForBook } from "@/lib/bible-nav-data";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function BibleBookPage({
@@ -34,7 +34,7 @@ export default async function BibleBookPage({
   const summary = tryGetBookSummary(version.abbreviation, bookId);
   if (!summary) notFound();
 
-  const activeChapters = await getActiveChaptersForBook(supabase, version.abbreviation, bookId);
+  const chapterActivity = await getChapterActivityForBook(supabase, version.abbreviation, bookId);
 
   return (
     <ChapterGridView
@@ -43,7 +43,7 @@ export default async function BibleBookPage({
       chapterCount={summary.chapterCount}
       version={version.abbreviation}
       versions={BIBLE_VERSIONS}
-      activeChapters={Array.from(activeChapters)}
+      chapterActivity={Array.from(chapterActivity.entries())}
     />
   );
 }

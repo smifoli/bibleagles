@@ -49,7 +49,8 @@ export async function addComment(
   chapter: number,
   verse: number,
   version: string,
-  content: string
+  content: string,
+  parentId: string | null = null
 ): Promise<{ error?: string }> {
   const trimmed = content.trim();
   if (!trimmed) return { error: "Escreva algo antes de comentar." };
@@ -60,9 +61,36 @@ export async function addComment(
 
   const { error } = await supabase
     .from("comments")
-    .insert({ user_id: user.id, book, chapter, verse, bible_version: version, content: trimmed, parent_id: null });
+    .insert({ user_id: user.id, book, chapter, verse, bible_version: version, content: trimmed, parent_id: parentId });
 
+  // Réplica a uma resposta (não a uma raiz) é barrada pelo trigger
+  // enforce_comment_depth — repassamos como erro amigável.
   if (error) return { error: "Não foi possível enviar o comentário." };
+
+  revalidatePath(`/read/${book}/${chapter}`);
+  return {};
+}
+
+export async function editComment(
+  book: string,
+  chapter: number,
+  commentId: string,
+  content: string
+): Promise<{ error?: string }> {
+  const trimmed = content.trim();
+  if (!trimmed) return { error: "Escreva algo antes de salvar." };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = await supabase
+    .from("comments")
+    .update({ content: trimmed })
+    .eq("id", commentId)
+    .eq("user_id", user.id);
+
+  if (error) return { error: "Não foi possível salvar a edição." };
 
   revalidatePath(`/read/${book}/${chapter}`);
   return {};
