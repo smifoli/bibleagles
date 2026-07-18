@@ -39,3 +39,14 @@ export function formatRelativeTime(date: Date, now: Date = new Date()): string {
 export function toDateOnlyString(date: Date = new Date()): string {
   return date.toLocaleDateString("en-CA"); // YYYY-MM-DD em horário local, não UTC
 }
+
+/** "YYYY-MM-DD" -> Date à meia-noite local (evita o shift de fuso de `new Date("YYYY-MM-DD")`, que é UTC). */
+export function parseDateOnly(dateOnly: string): Date {
+  return new Date(`${dateOnly}T00:00:00`);
+}
+
+/** Data curta estilo "4 jun" (dia + mês abreviado, sem ano, sem ponto). */
+export function formatShortDate(date: Date): string {
+  const formatted = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short" }).format(date);
+  return formatted.replace(".", "");
+}
