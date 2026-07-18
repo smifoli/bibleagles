@@ -1,0 +1,49 @@
+import { notFound } from "next/navigation";
+import { ChapterGridView } from "@/components/bible-nav/ChapterGridView";
+import { BIBLE_VERSIONS, getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
+import { tryGetBookSummary } from "@/lib/bible-data";
+import { getActiveChaptersForBook } from "@/lib/bible-nav-data";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function BibleBookPage({
+  params,
+  searchParams,
+}: {
+  params: { book: string };
+  searchParams: { version?: string };
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) notFound();
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("preferred_version, preferred_language")
+    .eq("id", user.id)
+    .single();
+
+  const requestedVersion = searchParams.version ? getVersionByAbbreviation(searchParams.version) : undefined;
+  const version =
+    requestedVersion ??
+    (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??
+    getDefaultVersion(profile?.preferred_language ?? "pt");
+
+  const bookId = params.book.toUpperCase();
+  const summary = tryGetBookSummary(version.abbreviation, bookId);
+  if (!summary) notFound();
+
+  const activeChapters = await getActiveChaptersForBook(supabase, version.abbreviation, bookId);
+
+  return (
+    <ChapterGridView
+      bookId={bookId}
+      bookName={summary.name}
+      chapterCount={summary.chapterCount}
+      version={version.abbreviation}
+      versions={BIBLE_VERSIONS}
+      activeChapters={Array.from(activeChapters)}
+    />
+  );
+}
