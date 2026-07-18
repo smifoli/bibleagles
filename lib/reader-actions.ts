@@ -4,23 +4,39 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { HighlightColor } from "@/types/database";
 
+/**
+ * Clicar na cor já selecionada remove o destaque; qualquer outra cor
+ * substitui a atual (upsert). `currentColor` é a cor já marcada pelo próprio
+ * usuário nesse versículo (ou null se não há nenhuma).
+ */
 export async function toggleHighlight(
   book: string,
   chapter: number,
   verse: number,
   version: string,
-  color: HighlightColor
+  color: HighlightColor,
+  currentColor: HighlightColor | null
 ): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Sessão expirada." };
 
-  const { error } = await supabase
-    .from("bookmarks")
-    .upsert(
-      { user_id: user.id, book, chapter, verse, bible_version: version, color },
-      { onConflict: "user_id,book,chapter,verse,bible_version" }
-    );
+  const { error } =
+    color === currentColor
+      ? await supabase
+          .from("bookmarks")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("book", book)
+          .eq("chapter", chapter)
+          .eq("verse", verse)
+          .eq("bible_version", version)
+      : await supabase
+          .from("bookmarks")
+          .upsert(
+            { user_id: user.id, book, chapter, verse, bible_version: version, color },
+            { onConflict: "user_id,book,chapter,verse,bible_version" }
+          );
 
   if (error) return { error: "Não foi possível salvar o destaque." };
 
@@ -47,6 +63,39 @@ export async function addComment(
     .insert({ user_id: user.id, book, chapter, verse, bible_version: version, content: trimmed, parent_id: null });
 
   if (error) return { error: "Não foi possível enviar o comentário." };
+
+  revalidatePath(`/read/${book}/${chapter}`);
+  return {};
+}
+
+export async function deleteComment(book: string, chapter: number, commentId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = await supabase.from("comments").delete().eq("id", commentId).eq("user_id", user.id);
+
+  if (error) return { error: "Não foi possível apagar o comentário." };
+
+  revalidatePath(`/read/${book}/${chapter}`);
+  return {};
+}
+
+export async function toggleCommentLike(
+  book: string,
+  chapter: number,
+  commentId: string,
+  liked: boolean
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = liked
+    ? await supabase.from("comment_likes").delete().eq("comment_id", commentId).eq("user_id", user.id)
+    : await supabase.from("comment_likes").insert({ comment_id: commentId, user_id: user.id });
+
+  if (error) return { error: "Não foi possível curtir o comentário." };
 
   revalidatePath(`/read/${book}/${chapter}`);
   return {};

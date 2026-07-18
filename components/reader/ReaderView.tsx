@@ -6,7 +6,7 @@ import { useEffect, useState, useTransition } from "react";
 import type { BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
-import { addComment, markPlanDayRead, toggleHighlight } from "@/lib/reader-actions";
+import { addComment, deleteComment, markPlanDayRead, toggleCommentLike, toggleHighlight } from "@/lib/reader-actions";
 import type { ReaderData } from "@/lib/reader-data";
 import type { HighlightColor } from "@/types/database";
 
@@ -37,7 +37,6 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const openVerseData = data.verses.find((verse) => verse.number === openVerse) ?? null;
   const bookName = data.reference.split(" ").slice(0, -1).join(" ") || data.reference;
   // O "voltar" aponta pro lugar que faz sentido na hierarquia (pai lógico), não pro
   // histórico do navegador — trocar versão/fonte empilha entradas no histórico, então
@@ -50,26 +49,42 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
     router.push(`${url.pathname}${url.search}`);
   }
 
-  function handleSelectColor(color: HighlightColor) {
-    if (openVerse === null) return;
+  function handleSelectColor(verseNumber: number, color: HighlightColor, currentColor: HighlightColor | null) {
     setActionError(undefined);
     startTransition(async () => {
-      const result = await toggleHighlight(book, chapter, openVerse, version, color);
+      const result = await toggleHighlight(book, chapter, verseNumber, version, color, currentColor);
       if (result.error) setActionError(result.error);
       else router.refresh();
     });
   }
 
-  function handleSubmitComment() {
-    if (openVerse === null) return;
+  function handleSubmitComment(verseNumber: number) {
     setActionError(undefined);
     startTransition(async () => {
-      const result = await addComment(book, chapter, openVerse, version, commentDraft);
+      const result = await addComment(book, chapter, verseNumber, version, commentDraft);
       if (result.error) setActionError(result.error);
       else {
         setCommentDraft("");
         router.refresh();
       }
+    });
+  }
+
+  function handleDeleteComment(commentId: string) {
+    setActionError(undefined);
+    startTransition(async () => {
+      const result = await deleteComment(book, chapter, commentId);
+      if (result.error) setActionError(result.error);
+      else router.refresh();
+    });
+  }
+
+  function handleToggleLike(commentId: string, likedByMe: boolean) {
+    setActionError(undefined);
+    startTransition(async () => {
+      const result = await toggleCommentLike(book, chapter, commentId, likedByMe);
+      if (result.error) setActionError(result.error);
+      else router.refresh();
     });
   }
 
@@ -133,100 +148,135 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
       <div className="flex flex-col gap-1">
         {data.verses.map((verse) => {
           const style = verse.highlight?.style;
+          const isOpen = verse.number === openVerse;
+          const comments = data.commentsByVerse[verse.number] ?? [];
+
           return (
-            <div
-              key={verse.number}
-              id={`verse-${verse.number}`}
-              onClick={() => setOpenVerse(verse.number === openVerse ? null : verse.number)}
-              role="button"
-              tabIndex={0}
-              style={{
-                fontSize: FONT_SIZES[fontSize],
-                backgroundColor: style?.bg,
-                color: style?.text ?? "#52442f",
-                borderRadius: style ? "10px" : undefined,
-                padding: style ? "11px 14px" : "7px 2px",
-              }}
-              className="cursor-pointer font-serif leading-[1.8]"
-            >
-              <sup className="mr-[5px] font-sans text-[10px] font-semibold" style={{ color: style?.verseNum ?? "#a3927d" }}>
-                {verse.number}
-              </sup>
-              {verse.text}
-              {verse.commentCount > 0 && (
-                <span className="ml-1.5 font-sans text-[10px] font-semibold" style={{ color: style ? style.verseNum : "#a3927d" }}>
-                  · {verse.commentCount} {verse.commentCount === 1 ? "comentário" : "comentários"}
-                </span>
+            <div key={verse.number}>
+              <div
+                id={`verse-${verse.number}`}
+                onClick={() => setOpenVerse(isOpen ? null : verse.number)}
+                role="button"
+                tabIndex={0}
+                style={{
+                  fontSize: FONT_SIZES[fontSize],
+                  backgroundColor: style?.bg,
+                  color: style?.text ?? "#52442f",
+                  borderRadius: style ? "10px" : undefined,
+                  padding: style ? "11px 14px" : "7px 2px",
+                }}
+                className="cursor-pointer font-serif leading-[1.8]"
+              >
+                <sup className="mr-[5px] font-sans text-[10px] font-semibold" style={{ color: style?.verseNum ?? "#a3927d" }}>
+                  {verse.number}
+                </sup>
+                {verse.text}
+                {verse.commentCount > 0 && (
+                  <span className="ml-1.5 font-sans text-[10px] font-semibold" style={{ color: style ? style.verseNum : "#a3927d" }}>
+                    · {verse.commentCount} {verse.commentCount === 1 ? "comentário" : "comentários"}
+                  </span>
+                )}
+              </div>
+
+              {isOpen && (
+                <div className="mt-1 flex flex-col gap-3.5 rounded-[18px] border border-border bg-surface p-4">
+                  <span className="text-xs font-semibold text-ink">
+                    {bookName} {chapter}:{verse.number}
+                  </span>
+
+                  {comments.length > 0 && <div className="h-px bg-border" />}
+
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="flex items-start gap-[11px]">
+                      <div className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-[#c98a52] text-[10px] font-semibold text-white">
+                        {comment.userName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-baseline gap-[7px]">
+                          <span className="text-xs font-semibold text-ink">{comment.userName}</span>
+                          <span className="text-[10px] text-text-muted">{formatRelativeTime(new Date(comment.createdAt))}</span>
+                        </div>
+                        <div className="mt-0.5 font-serif text-sm text-text-secondary">{comment.content}</div>
+                        <div className="mt-1.5 flex items-center gap-3">
+                          <button
+                            onClick={() => handleToggleLike(comment.id, comment.likedByMe)}
+                            disabled={pending}
+                            className={`text-[11px] font-semibold ${comment.likedByMe ? "text-ink" : "text-text-muted"}`}
+                          >
+                            {comment.likedByMe ? "♥" : "♡"} {comment.likeCount > 0 ? comment.likeCount : ""}
+                          </button>
+                          {comment.isOwn && (
+                            <button
+                              onClick={() => handleDeleteComment(comment.id)}
+                              disabled={pending}
+                              className="text-[11px] font-semibold text-text-muted"
+                            >
+                              Apagar
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <textarea
+                    value={commentDraft}
+                    onChange={(event) => setCommentDraft(event.target.value)}
+                    placeholder="Escreva um comentário..."
+                    rows={2}
+                    className="rounded-[10px] border border-input-border bg-background p-2.5 text-sm text-ink"
+                  />
+                  {actionError && <p className="text-xs text-error">{actionError}</p>}
+                  <button
+                    onClick={() => handleSubmitComment(verse.number)}
+                    disabled={pending}
+                    className="w-full rounded-full bg-[#efe7d8] py-2.5 text-xs font-semibold text-ink"
+                  >
+                    Comentar
+                  </button>
+
+                  <div className="h-px bg-border" />
+
+                  <div>
+                    <div className="mb-[9px] flex items-baseline justify-between">
+                      <span className="text-[9px] font-semibold uppercase tracking-[1.5px] text-text-muted">Cor do destaque</span>
+                      {verse.highlight?.ownColor && <span className="text-[10px] text-text-muted">toque de novo pra remover</span>}
+                    </div>
+                    <div className="flex gap-2.5">
+                      {HIGHLIGHT_COLOR_ORDER.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => handleSelectColor(verse.number, color, verse.highlight?.ownColor ?? null)}
+                          disabled={pending}
+                          aria-label={color}
+                          className="h-6 w-6 rounded-full"
+                          style={{
+                            backgroundColor: HIGHLIGHT_COLORS[color].bg,
+                            outline: verse.highlight?.ownColor === color ? "1.5px solid #2c2218" : undefined,
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {verse.highlight && verse.highlight.markedBy.length > 0 && (
+                      <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1">
+                        {verse.highlight.markedBy.map((mark, index) => (
+                          <span key={`${mark.name}-${index}`} className="flex items-center gap-1 text-[11px] text-text-muted">
+                            <span
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: HIGHLIGHT_COLORS[mark.color].bg }}
+                            />
+                            {mark.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           );
         })}
       </div>
-
-      {openVerseData && (
-        <div className="flex flex-col gap-3.5 rounded-[18px] border border-border bg-surface p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-ink">
-              {bookName} {chapter}:{openVerseData.number}
-            </span>
-            {openVerseData.highlight && openVerseData.highlight.markedByNames.length > 0 && (
-              <span className="text-[11px] text-text-muted">marcado por {openVerseData.highlight.markedByNames.join(", ")}</span>
-            )}
-          </div>
-
-          <div>
-            <div className="mb-[9px] text-[9px] font-semibold uppercase tracking-[1.5px] text-text-muted">Cor do destaque</div>
-            <div className="flex gap-2.5">
-              {HIGHLIGHT_COLOR_ORDER.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => handleSelectColor(color)}
-                  disabled={pending}
-                  aria-label={color}
-                  className="h-6 w-6 rounded-full"
-                  style={{
-                    backgroundColor: HIGHLIGHT_COLORS[color].bg,
-                    outline: openVerseData.highlight?.ownColor === color ? "1.5px solid #2c2218" : undefined,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {(data.commentsByVerse[openVerseData.number] ?? []).length > 0 && <div className="h-px bg-border" />}
-
-          {(data.commentsByVerse[openVerseData.number] ?? []).map((comment) => (
-            <div key={comment.id} className="flex items-start gap-[11px]">
-              <div className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-[#c98a52] text-[10px] font-semibold text-white">
-                {comment.userName.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-baseline gap-[7px]">
-                  <span className="text-xs font-semibold text-ink">{comment.userName}</span>
-                  <span className="text-[10px] text-text-muted">{formatRelativeTime(new Date(comment.createdAt))}</span>
-                </div>
-                <div className="mt-0.5 font-serif text-sm text-text-secondary">{comment.content}</div>
-              </div>
-            </div>
-          ))}
-
-          <textarea
-            value={commentDraft}
-            onChange={(event) => setCommentDraft(event.target.value)}
-            placeholder="Escreva um comentário..."
-            rows={2}
-            className="rounded-[10px] border border-input-border bg-background p-2.5 text-sm text-ink"
-          />
-          {actionError && <p className="text-xs text-error">{actionError}</p>}
-          <button
-            onClick={handleSubmitComment}
-            disabled={pending}
-            className="w-full rounded-full bg-[#efe7d8] py-2.5 text-xs font-semibold text-ink"
-          >
-            Comentar
-          </button>
-        </div>
-      )}
 
       {data.planContext && (
         <button

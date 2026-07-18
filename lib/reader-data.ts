@@ -6,10 +6,15 @@ import type { HighlightColor } from "@/types/database";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
+export interface VerseHighlightMark {
+  name: string;
+  color: HighlightColor;
+}
+
 export interface VerseHighlight {
   style: HighlightColorStyle;
   ownColor: HighlightColor | null;
-  markedByNames: string[];
+  markedBy: VerseHighlightMark[];
 }
 
 export interface ReaderComment {
@@ -17,6 +22,9 @@ export interface ReaderComment {
   userName: string;
   content: string;
   createdAt: string;
+  likeCount: number;
+  likedByMe: boolean;
+  isOwn: boolean;
 }
 
 export interface ReaderVerse {
@@ -71,6 +79,19 @@ export async function getReaderData(
     highlightsByVerse.set(row.verse, list);
   }
 
+  const commentIds = (commentRows ?? []).map((row) => row.id);
+  const { data: likeRows } =
+    commentIds.length > 0
+      ? await supabase.from("comment_likes").select("comment_id, user_id").in("comment_id", commentIds)
+      : { data: [] as { comment_id: string; user_id: string }[] };
+
+  const likeCounts = new Map<string, number>();
+  const likedByMe = new Set<string>();
+  for (const row of likeRows ?? []) {
+    likeCounts.set(row.comment_id, (likeCounts.get(row.comment_id) ?? 0) + 1);
+    if (row.user_id === userId) likedByMe.add(row.comment_id);
+  }
+
   const commentsByVerse: Record<number, ReaderComment[]> = {};
   for (const row of commentRows ?? []) {
     const list = commentsByVerse[row.verse] ?? [];
@@ -79,6 +100,9 @@ export async function getReaderData(
       userName: memberNames.get(row.user_id) ?? "Alguém",
       content: row.content,
       createdAt: row.created_at,
+      likeCount: likeCounts.get(row.id) ?? 0,
+      likedByMe: likedByMe.has(row.id),
+      isOwn: row.user_id === userId,
     });
     commentsByVerse[row.verse] = list;
   }
@@ -92,7 +116,7 @@ export async function getReaderData(
       highlight = {
         style: own ? HIGHLIGHT_COLORS[own.color] : SAND_HIGHLIGHT,
         ownColor: own?.color ?? null,
-        markedByNames: highlightRows.map((row) => memberNames.get(row.userId) ?? "Alguém"),
+        markedBy: highlightRows.map((row) => ({ name: memberNames.get(row.userId) ?? "Alguém", color: row.color })),
       };
     }
 
