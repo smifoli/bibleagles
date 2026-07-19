@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 import { BookmarksView } from "@/components/bookmarks/BookmarksView";
 import { getBookmarksData } from "@/lib/bookmarks-data";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function BookmarksPage() {
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) notFound();
 
   const data = await getBookmarksData(supabase);

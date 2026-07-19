@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import type { Language } from "@/types/database";
 
 export async function updateProfileName(name: string): Promise<{ error?: string }> {
@@ -12,7 +12,7 @@ export async function updateProfileName(name: string): Promise<{ error?: string 
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   const { error } = await supabase.from("users").update({ name: trimmed }).eq("id", user.id);
@@ -26,7 +26,7 @@ export async function updatePreferences(version: string, language: Language): Pr
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   const { error } = await supabase
@@ -43,7 +43,7 @@ export async function updateNotifications(enabled: boolean, time: string): Promi
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   const { error } = await supabase

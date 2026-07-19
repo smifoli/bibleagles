@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import type { HighlightColor } from "@/types/database";
 
 /**
@@ -18,7 +18,7 @@ export async function toggleHighlight(
   currentColor: HighlightColor | null
 ): Promise<{ error?: string }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   const { error } =
@@ -56,7 +56,7 @@ export async function addComment(
   if (!trimmed) return { error: "Escreva algo antes de comentar." };
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   const { error } = await supabase
@@ -81,7 +81,7 @@ export async function editComment(
   if (!trimmed) return { error: "Escreva algo antes de salvar." };
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   const { error } = await supabase
@@ -98,7 +98,7 @@ export async function editComment(
 
 export async function deleteComment(book: string, chapter: number, commentId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   const { error } = await supabase.from("comments").delete().eq("id", commentId).eq("user_id", user.id);
@@ -116,7 +116,7 @@ export async function toggleCommentLike(
   liked: boolean
 ): Promise<{ error?: string }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   const { error } = liked
@@ -131,7 +131,7 @@ export async function toggleCommentLike(
 
 export async function markPlanDayRead(book: string, chapter: number, planDayId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   // upsert pela unique(user_id, plan_day_id): idempotente caso o botão seja

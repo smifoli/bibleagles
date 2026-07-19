@@ -4,7 +4,7 @@ import { tryGetBookSummary } from "@/lib/bible-data";
 import { BOOK_ORDER } from "@/lib/bible-books";
 import { BIBLE_VERSIONS, getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
 import { getReaderData } from "@/lib/reader-data";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function ReaderPage({
   params,
@@ -17,7 +17,7 @@ export default async function ReaderPage({
   if (!Number.isInteger(chapter) || chapter <= 0) notFound();
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getUser(supabase);
   if (!user) notFound();
 
   const { data: profile } = await supabase

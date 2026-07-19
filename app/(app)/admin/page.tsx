@@ -2,13 +2,13 @@ import { redirect } from "next/navigation";
 import { AdminView } from "@/components/admin/AdminView";
 import { getAdminMembers } from "@/lib/admin-data";
 import { getAdminPackagesOverview } from "@/lib/admin-packages-data";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function AdminPage() {
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) redirect("/");
 
   const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();

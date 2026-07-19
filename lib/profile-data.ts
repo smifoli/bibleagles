@@ -41,11 +41,15 @@ const WEEKDAY_LABELS = ["S", "T", "Q", "Q", "S", "S", "D"]; // Seg..Dom, igual a
 const AVAILABLE_LANGUAGES: Language[] = ["pt", "en"];
 
 export async function getProfileData(supabase: SupabaseServerClient, userId: string): Promise<ProfileData> {
-  const { data: userRow } = await supabase
-    .from("users")
-    .select("id, name, email, role, preferred_version, preferred_language, notification_enabled, notification_time")
-    .eq("id", userId)
-    .single();
+  // getReadingCalendar não depende de userRow (só do userId) — dispara junto.
+  const [{ data: userRow }, calendar] = await Promise.all([
+    supabase
+      .from("users")
+      .select("id, name, email, role, preferred_version, preferred_language, notification_enabled, notification_time")
+      .eq("id", userId)
+      .single(),
+    getReadingCalendar(supabase, userId),
+  ]);
 
   // Mesma lógica de fallback de app/(app)/bible/page.tsx: o valor gravado pode
   // apontar pra uma versão fora do catálogo (ex.: default de banco 'NVT', que é
@@ -66,8 +70,6 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
     notificationEnabled: userRow?.notification_enabled ?? false,
     notificationTime: (userRow?.notification_time ?? "07:00:00").slice(0, 5),
   };
-
-  const calendar = await getReadingCalendar(supabase, userId);
 
   return { user, calendar };
 }

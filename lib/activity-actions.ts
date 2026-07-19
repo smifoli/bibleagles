@@ -1,14 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 /** Apaga um item de atividade (comentário ou destaque) da home/família — só o próprio autor. */
 export async function deleteActivityItem(kind: "comment" | "highlight", id: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
   const table = kind === "comment" ? "comments" : "bookmarks";

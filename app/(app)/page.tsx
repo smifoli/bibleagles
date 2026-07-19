@@ -4,11 +4,11 @@ import { NoReadingToday } from "@/components/home/NoReadingToday";
 import { SecondaryPackageCard } from "@/components/home/SecondaryPackageCard";
 import { formatGreetingDate, getGreeting } from "@/lib/format";
 import { getHomeData } from "@/lib/home-data";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getUser(supabase);
   const { userName, featured, secondary, activity } = await getHomeData(supabase, user!.id);
 
   const now = new Date();

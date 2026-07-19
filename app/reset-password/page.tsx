@@ -3,7 +3,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { FormField } from "@/components/auth/FormField";
 import { SubmitButton } from "@/components/auth/SubmitButton";
 import { FormError } from "@/components/auth/FormError";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { updatePassword } from "./actions";
 
 export default async function ResetPasswordPage({
@@ -12,7 +12,7 @@ export default async function ResetPasswordPage({
   searchParams: { error?: string };
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getUser(supabase);
 
   if (!user) {
     return (

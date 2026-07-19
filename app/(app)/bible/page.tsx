@@ -2,13 +2,13 @@ import { notFound } from "next/navigation";
 import { BibleNavView } from "@/components/bible-nav/BibleNavView";
 import { BIBLE_VERSIONS, getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
 import { getBibleNavData } from "@/lib/bible-nav-data";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function BiblePage({ searchParams }: { searchParams: { version?: string } }) {
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) notFound();
 
   const { data: profile } = await supabase

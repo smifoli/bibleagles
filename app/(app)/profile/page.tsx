@@ -7,7 +7,7 @@ import { ReadingCalendar } from "@/components/profile/ReadingCalendar";
 import { SignOutButton } from "@/components/profile/SignOutButton";
 import { BIBLE_VERSIONS } from "@/lib/bible-versions";
 import { getProfileData } from "@/lib/profile-data";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import type { Language } from "@/types/database";
 
 const LANGUAGES: Language[] = Array.from(new Set(BIBLE_VERSIONS.map((version) => version.language)));
@@ -16,7 +16,7 @@ export default async function ProfilePage() {
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) notFound();
 
   const { user: profile, calendar } = await getProfileData(supabase, user.id);

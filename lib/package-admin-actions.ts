@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import type { Passage, PackageStatus } from "@/types/database";
 
 export interface PackageDayInput {
@@ -22,7 +22,7 @@ async function requireAdmin() {
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) return { supabase, error: "Sessão expirada." } as const;
 
   const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();

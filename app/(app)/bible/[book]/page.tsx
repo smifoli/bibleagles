@@ -3,7 +3,7 @@ import { ChapterGridView } from "@/components/bible-nav/ChapterGridView";
 import { BIBLE_VERSIONS, getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
 import { tryGetBookSummary } from "@/lib/bible-data";
 import { getChapterActivityForBook } from "@/lib/bible-nav-data";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function BibleBookPage({
   params,
@@ -15,7 +15,7 @@ export default async function BibleBookPage({
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await getUser(supabase);
   if (!user) notFound();
 
   const { data: profile } = await supabase
