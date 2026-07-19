@@ -35,7 +35,7 @@ export default async function BibleBookPage({
   const summary = tryGetBookSummary(version.abbreviation, bookId);
   if (!summary) notFound();
 
-  const chapterActivity = await getChapterActivityForBook(supabase, version.abbreviation, bookId);
+  const chapterActivity = await getChapterActivityForBook(supabase, bookId);
 
   return (
     <ChapterGridView

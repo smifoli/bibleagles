@@ -61,14 +61,16 @@ export async function getReaderData(
 ): Promise<ReaderData> {
   const chapterContent = getChapter(version, bookId, chapter);
 
+  // Destaques/comentários não filtram por bible_version: são sobre a
+  // referência (livro/capítulo/versículo), não sobre o texto de uma tradução
+  // específica — precisam aparecer independente de qual versão você está lendo.
   const [{ data: bookmarkRows }, { data: commentRows }, { data: familyMembers }, planContext] = await Promise.all([
-    supabase.from("bookmarks").select("user_id, verse, color").eq("book", bookId).eq("chapter", chapter).eq("bible_version", version),
+    supabase.from("bookmarks").select("user_id, verse, color").eq("book", bookId).eq("chapter", chapter),
     supabase
       .from("comments")
       .select("id, user_id, verse, content, parent_id, created_at, updated_at")
       .eq("book", bookId)
       .eq("chapter", chapter)
-      .eq("bible_version", version)
       .order("created_at", { ascending: true }),
     supabase.from("users").select("id, name"),
     getPlanContext(supabase, userId, bookId, chapter, requestedPlanDayId),

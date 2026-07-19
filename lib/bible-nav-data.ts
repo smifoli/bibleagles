@@ -30,9 +30,10 @@ function countByBook(rows: { book: string }[] | null): Map<string, number> {
 
 /** Dados pra tela /bible: livros agrupados por seção, com contagem de comentários/destaques da família. */
 export async function getBibleNavData(supabase: SupabaseServerClient, version: string): Promise<BibleNavData> {
+  // Sem filtro de bible_version: contagem é por referência, não por tradução.
   const [{ data: bookmarkRows }, { data: commentRows }] = await Promise.all([
-    supabase.from("bookmarks").select("book").eq("bible_version", version),
-    supabase.from("comments").select("book").eq("bible_version", version),
+    supabase.from("bookmarks").select("book"),
+    supabase.from("comments").select("book"),
   ]);
 
   const highlightCounts = countByBook(bookmarkRows);
@@ -70,12 +71,11 @@ export interface ChapterActivity {
 /** Contagem de comentários/destaques da família por capítulo, pra grade de /bible/[book]. */
 export async function getChapterActivityForBook(
   supabase: SupabaseServerClient,
-  version: string,
   bookId: string
 ): Promise<Map<number, ChapterActivity>> {
   const [{ data: bookmarkRows }, { data: commentRows }] = await Promise.all([
-    supabase.from("bookmarks").select("chapter").eq("bible_version", version).eq("book", bookId),
-    supabase.from("comments").select("chapter").eq("bible_version", version).eq("book", bookId),
+    supabase.from("bookmarks").select("chapter").eq("book", bookId),
+    supabase.from("comments").select("chapter").eq("book", bookId),
   ]);
 
   const activity = new Map<number, ChapterActivity>();

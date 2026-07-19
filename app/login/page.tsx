@@ -14,9 +14,14 @@ export default function LoginPage({
     <AuthLayout
       title="Entrar"
       footer={
-        <Link href="/register" className="text-[13px] text-link">
-          Não tenho conta? Criar conta
-        </Link>
+        <div className="flex flex-col items-center gap-2">
+          <Link href="/forgot-password" className="text-[13px] text-link">
+            Esqueci minha senha
+          </Link>
+          <Link href="/register" className="text-[13px] text-link">
+            Não tenho conta? Criar conta
+          </Link>
+        </div>
       }
     >
       <form action={login} className="flex flex-col gap-4">
