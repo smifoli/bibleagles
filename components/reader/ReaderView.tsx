@@ -7,6 +7,7 @@ import type { BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
 import { clampVerseFontSize, VERSE_FONT_MAX, VERSE_FONT_MIN, VERSE_FONT_SIZE_COOKIE, VERSE_FONT_STEP } from "@/lib/font-size";
+import { LAST_READ_COOKIE } from "@/lib/last-read";
 import { updatePreferences } from "@/lib/profile-actions";
 import { addComment, deleteComment, editComment, markPlanDayRead, toggleCommentLike, toggleHighlight } from "@/lib/reader-actions";
 import type { ReaderComment, ReaderData } from "@/lib/reader-data";
@@ -54,6 +55,13 @@ export function ReaderView({
     document.getElementById(`verse-${initialVerse}`)?.scrollIntoView({ block: "center" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Lembra o último capítulo aberto — o BottomNav usa isso pra "Bíblia" voltar
+  // pra cá em vez de reiniciar na lista de livros, se o usuário navegar pra
+  // outra aba e voltar.
+  useEffect(() => {
+    document.cookie = `${LAST_READ_COOKIE}=${encodeURIComponent(`/read/${book}/${chapter}?version=${version}`)}; path=/; max-age=${60 * 60 * 24 * 365}`;
+  }, [book, chapter, version]);
 
   const bookName = data.reference.split(" ").slice(0, -1).join(" ") || data.reference;
   // O "voltar" aponta pro lugar que faz sentido na hierarquia (pai lógico), não pro
