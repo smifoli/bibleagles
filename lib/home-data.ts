@@ -50,22 +50,26 @@ export interface HomeData {
 }
 
 export async function getHomeData(supabase: SupabaseServerClient, userId: string): Promise<HomeData> {
-  const [{ data: currentUser }, { data: familyMembers }, todayPackages] = await Promise.all([
-    supabase.from("users").select("name").eq("id", userId).single(),
-    supabase.from("users").select("id, name").order("created_at", { ascending: true }),
-    getActivePackagesWithToday(supabase),
-  ]);
+  // Tudo que não depende de resultado de outra query dispara junto numa onda só —
+  // cada await sequencial soma uma viagem de rede inteira até o Supabase.
+  const [{ data: currentUser }, { data: familyMembers }, todayPackages, { data: comments }, { data: bookmarks }] =
+    await Promise.all([
+      supabase.from("users").select("name").eq("id", userId).single(),
+      supabase.from("users").select("id, name").order("created_at", { ascending: true }),
+      getActivePackagesWithToday(supabase),
+      supabase
+        .from("comments")
+        .select("id, user_id, book, chapter, verse, bible_version, content, created_at")
+        .order("created_at", { ascending: false })
+        .limit(8),
+      supabase
+        .from("bookmarks")
+        .select("id, user_id, book, chapter, verse, bible_version, created_at")
+        .order("created_at", { ascending: false })
+        .limit(8),
+    ]);
 
   const memberNames = new Map((familyMembers ?? []).map((member) => [member.id, member.name]));
-
-  // Pendências (dias vencidos e não lidos) por pacote, pra badge "em dia" / "N
-  // pendentes" nos cards — mesma noção de "Pendentes" usada em /package/[id].
-  const allDueDayIds = todayPackages.flatMap((pkg) => pkg.dueDayIds);
-  const { data: myProgress } =
-    allDueDayIds.length > 0
-      ? await supabase.from("reading_progress").select("plan_day_id").eq("user_id", userId).in("plan_day_id", allDueDayIds)
-      : { data: [] as { plan_day_id: string }[] };
-  const myCompletedDayIds = new Set((myProgress ?? []).map((row) => row.plan_day_id));
 
   const cards: PackageCardData[] = todayPackages.map((pkg) => ({
     packageId: pkg.packageId,
@@ -76,21 +80,35 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
     totalDays: pkg.totalDays,
     chapterTitle: pkg.chapterTitle,
     dateLabel: formatShortDate(parseDateOnly(pkg.date)),
-    pendingCount: pkg.dueDayIds.filter((id) => !myCompletedDayIds.has(id)).length,
+    pendingCount: 0,
     percent: Math.round((pkg.dayNumber / pkg.totalDays) * 100),
     firstPassage: pkg.passages[0] ?? null,
   }));
 
   const [featuredCard, ...secondary] = cards;
+  const featuredPackage = todayPackages[0];
+
+  // Segunda onda: depende dos pacotes de hoje (dueDayIds / planDayId), mas as
+  // duas queries entre si são independentes — disparam juntas.
+  const allDueDayIds = todayPackages.flatMap((pkg) => pkg.dueDayIds);
+  const [{ data: myProgress }, { data: featuredProgress }] = await Promise.all([
+    allDueDayIds.length > 0
+      ? supabase.from("reading_progress").select("plan_day_id").eq("user_id", userId).in("plan_day_id", allDueDayIds)
+      : Promise.resolve({ data: [] as { plan_day_id: string }[] }),
+    featuredPackage
+      ? supabase.from("reading_progress").select("user_id").eq("plan_day_id", featuredPackage.planDayId)
+      : Promise.resolve({ data: [] as { user_id: string }[] }),
+  ]);
+
+  const myCompletedDayIds = new Set((myProgress ?? []).map((row) => row.plan_day_id));
+  for (const card of cards) {
+    const pkg = todayPackages.find((item) => item.packageId === card.packageId);
+    card.pendingCount = pkg ? pkg.dueDayIds.filter((id) => !myCompletedDayIds.has(id)).length : 0;
+  }
+
   let featured: FeaturedPackageCardData | null = null;
-
   if (featuredCard) {
-    const { data: progress } = await supabase
-      .from("reading_progress")
-      .select("user_id")
-      .eq("plan_day_id", featuredCard.planDayId);
-
-    const completedIds = new Set((progress ?? []).map((row) => row.user_id));
+    const completedIds = new Set((featuredProgress ?? []).map((row) => row.user_id));
     featured = {
       ...featuredCard,
       members: (familyMembers ?? []).map((member) => ({
@@ -100,19 +118,6 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
       })),
     };
   }
-
-  const [{ data: comments }, { data: bookmarks }] = await Promise.all([
-    supabase
-      .from("comments")
-      .select("id, user_id, book, chapter, verse, bible_version, content, created_at")
-      .order("created_at", { ascending: false })
-      .limit(8),
-    supabase
-      .from("bookmarks")
-      .select("id, user_id, book, chapter, verse, bible_version, created_at")
-      .order("created_at", { ascending: false })
-      .limit(8),
-  ]);
 
   const activity: ActivityItem[] = [
     ...(comments ?? []).map((comment) => ({

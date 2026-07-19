@@ -85,22 +85,21 @@ function formatPassageLabel(passage: Passage): string {
 
 /** Busca dados agregados de progresso/engajamento de um pacote pra tela /package/[id]. Retorna null se o pacote não existir. */
 export async function getPackageStats(supabase: SupabaseServerClient, packageId: string, userId: string): Promise<PackageStats | null> {
-  const { data: pkg } = await supabase
-    .from("reading_packages")
-    .select("id, title, status, start_date")
-    .eq("id", packageId)
-    .single();
+  // Nada aqui depende do resultado de outra query — todas disparam juntas.
+  const [{ data: pkg }, { data: days }, { data: familyMembers }, { data: allComments }, { data: allBookmarks }] =
+    await Promise.all([
+      supabase.from("reading_packages").select("id, title, status, start_date").eq("id", packageId).single(),
+      supabase
+        .from("reading_plan_days")
+        .select("id, date, title, passages")
+        .eq("package_id", packageId)
+        .order("date", { ascending: true }),
+      supabase.from("users").select("id, name").order("created_at", { ascending: true }),
+      supabase.from("comments").select("id, user_id, book, chapter, verse, created_at"),
+      supabase.from("bookmarks").select("id, user_id, book, chapter, created_at"),
+    ]);
 
   if (!pkg) return null;
-
-  const [{ data: days }, { data: familyMembers }] = await Promise.all([
-    supabase
-      .from("reading_plan_days")
-      .select("id, date, title, passages")
-      .eq("package_id", packageId)
-      .order("date", { ascending: true }),
-    supabase.from("users").select("id, name").order("created_at", { ascending: true }),
-  ]);
 
   const planDays = days ?? [];
   const members = familyMembers ?? [];
@@ -113,13 +112,10 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
   const daysRemaining = Math.max(totalDays - currentDayNumber, 0);
   const progressPercent = totalDays === 0 ? 0 : Math.round((currentDayNumber / totalDays) * 100);
 
-  const [{ data: progress }, { data: allComments }, { data: allBookmarks }] = await Promise.all([
+  const { data: progress } =
     planDayIds.length > 0
-      ? supabase.from("reading_progress").select("user_id, plan_day_id").in("plan_day_id", planDayIds)
-      : Promise.resolve({ data: [] as { user_id: string; plan_day_id: string }[] }),
-    supabase.from("comments").select("id, user_id, book, chapter, verse, created_at"),
-    supabase.from("bookmarks").select("id, user_id, book, chapter, created_at"),
-  ]);
+      ? await supabase.from("reading_progress").select("user_id, plan_day_id").in("plan_day_id", planDayIds)
+      : { data: [] as { user_id: string; plan_day_id: string }[] };
 
   const progressRows = progress ?? [];
 

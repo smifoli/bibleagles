@@ -14,7 +14,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex justify-around border-t border-border px-0 py-[13px] pb-[15px]">
+    <nav className="flex justify-around border-t border-border px-0 pt-[13px] pb-[max(15px,env(safe-area-inset-bottom))]">
       {NAV_ITEMS.map((item) => {
         const isActive = item.match(pathname);
         return (

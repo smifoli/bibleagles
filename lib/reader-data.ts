@@ -223,22 +223,29 @@ async function getPlanContextForDay(
  * capítulo, prioriza o mais recente com data já vencida (<= hoje); sem nenhum
  * vencido, usa o primeiro futuro.
  */
+interface ActivePackageWithDaysRow {
+  id: string;
+  title: string;
+  reading_plan_days: { id: string; date: string; passages: Passage[] }[];
+}
+
 async function getActivePlanContextForChapter(
   supabase: SupabaseServerClient,
   userId: string,
   bookId: string,
   chapter: number
 ): Promise<ReaderPlanContext | null> {
-  const { data: activePackages } = await supabase.from("reading_packages").select("id, title").eq("status", "active");
-  if (!activePackages || activePackages.length === 0) return null;
+  // Uma query só (dias embutidos) em vez de pacotes ativos + dias em duas viagens
+  // separadas — types/database.ts não modela Relationships, daí o cast manual.
+  const { data } = await supabase.from("reading_packages").select("id, title, reading_plan_days(id, date, passages)").eq("status", "active");
+  const activePackages = (data ?? []) as unknown as ActivePackageWithDaysRow[];
+  if (activePackages.length === 0) return null;
 
-  const { data: allDays } = await supabase
-    .from("reading_plan_days")
-    .select("id, package_id, date, passages")
-    .in("package_id", activePackages.map((pkg) => pkg.id))
-    .order("date", { ascending: true });
+  const allDays = activePackages
+    .flatMap((pkg) => pkg.reading_plan_days.map((day) => ({ ...day, package_id: pkg.id })))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
-  const matches = (allDays ?? []).filter((day) => (day.passages as Passage[]).some((passage) => passageMatches(passage, bookId, chapter)));
+  const matches = allDays.filter((day) => day.passages.some((passage) => passageMatches(passage, bookId, chapter)));
   if (matches.length === 0) return null;
 
   const today = toDateOnlyString();
@@ -246,7 +253,7 @@ async function getActivePlanContextForChapter(
   const chosen = dueMatches.length > 0 ? dueMatches[dueMatches.length - 1] : matches[0];
 
   const pkg = activePackages.find((item) => item.id === chosen.package_id)!;
-  const packageDays = (allDays ?? []).filter((day) => day.package_id === chosen.package_id);
+  const packageDays = allDays.filter((day) => day.package_id === chosen.package_id);
   const dayNumber = packageDays.findIndex((day) => day.id === chosen.id) + 1;
 
   const { data: progress } = await supabase

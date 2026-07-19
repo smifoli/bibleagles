@@ -1,6 +1,6 @@
 export default function OfflinePage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background px-6">
+    <main className="min-h-dvh flex items-center justify-center bg-background px-6">
       <div className="text-center max-w-sm">
         <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
           Você está offline
