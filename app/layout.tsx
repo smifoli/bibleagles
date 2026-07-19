@@ -60,7 +60,13 @@ export default async function RootLayout({
     <html
       lang="pt-BR"
       className={`${spaceGrotesk.variable} ${spectral.variable}`}
-      style={{ fontSize: FONT_SIZE_SCALE[fontSize] }}
+      // A maioria do texto do app usa tamanhos fixos em px (text-[13px] etc,
+      // não rem) — mudar o font-size do <html> só afetaria as poucas classes
+      // relativas (text-sm/text-xs). `zoom` escala tudo dentro do elemento
+      // (texto, ícones, espaçamento) independente da unidade, feito sob medida
+      // pra esse caso — é o mesmo mecanismo do zoom nativo do navegador, só
+      // que aplicado por CSS.
+      style={{ zoom: FONT_SIZE_SCALE[fontSize] }}
     >
       <body>{children}</body>
     </html>
