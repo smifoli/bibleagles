@@ -11,13 +11,15 @@ export default async function BiblePage({ searchParams }: { searchParams: { vers
   } = await getUser(supabase);
   if (!user) notFound();
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("preferred_version, preferred_language")
-    .eq("id", user.id)
-    .single();
-
   const requestedVersion = searchParams.version ? getVersionByAbbreviation(searchParams.version) : undefined;
+
+  // Só busca a preferência salva quando a versão não vier na URL (o seletor
+  // de versão sempre a inclui ao trocar; só a primeira visita via bottom nav
+  // chega sem ela).
+  const { data: profile } = requestedVersion
+    ? { data: null }
+    : await supabase.from("users").select("preferred_version, preferred_language").eq("id", user.id).single();
+
   const version =
     requestedVersion ??
     (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??

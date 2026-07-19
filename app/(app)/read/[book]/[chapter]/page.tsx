@@ -20,13 +20,16 @@ export default async function ReaderPage({
   const { data: { user } } = await getUser(supabase);
   if (!user) notFound();
 
-  const { data: profile } = await supabase
-    .from("users")
-    .select("preferred_version, preferred_language")
-    .eq("id", user.id)
-    .single();
-
   const requestedVersion = searchParams.version ? getVersionByAbbreviation(searchParams.version) : undefined;
+
+  // A maioria das navegações pro leitor (próximo/anterior capítulo, links de
+  // família, destaques, busca) já leva a versão na URL — só busca a
+  // preferência salva quando ela não vier explícita (ex.: card "Leitura de
+  // hoje" da home), evitando uma consulta ao banco à toa.
+  const { data: profile } = requestedVersion
+    ? { data: null }
+    : await supabase.from("users").select("preferred_version, preferred_language").eq("id", user.id).single();
+
   const version =
     requestedVersion ??
     (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??

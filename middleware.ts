@@ -1,6 +1,38 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+interface Jwk {
+  kty: string;
+  key_ops: string[];
+  [key: string]: unknown;
+}
+
+// O projeto usa chaves de assinatura JWT assimétricas (ES256) — cacheamos o
+// JWKS aqui (nível de módulo, sobrevive entre invocações da mesma instância
+// Edge) pra que getClaims() valide o token localmente via WebCrypto, sem
+// round-trip de rede pro servidor de Auth em cada request. TTL de 10min
+// espelha o cache interno do próprio auth-js (JWKS_TTL).
+let jwksCache: { keys: Jwk[]; fetchedAt: number } | null = null;
+const JWKS_TTL_MS = 10 * 60 * 1000;
+
+async function getCachedJwks(supabaseUrl: string): Promise<Jwk[] | null> {
+  const now = Date.now();
+  if (jwksCache && now - jwksCache.fetchedAt < JWKS_TTL_MS) return jwksCache.keys;
+
+  try {
+    const res = await fetch(`${supabaseUrl}/auth/v1/.well-known/jwks.json`);
+    if (!res.ok) return jwksCache?.keys ?? null;
+    const data = (await res.json()) as { keys: Jwk[] };
+    jwksCache = { keys: data.keys, fetchedAt: now };
+    return data.keys;
+  } catch {
+    // Falha na busca do JWKS (rede instável) — usa o cache anterior se
+    // existir; getClaims() cai pra validação via getUser() se não houver
+    // chave nenhuma disponível.
+    return jwksCache?.keys ?? null;
+  }
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -48,7 +80,9 @@ export async function middleware(request: NextRequest) {
     return redirectResponse;
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const jwks = await getCachedJwks(process.env.NEXT_PUBLIC_SUPABASE_URL!);
+  const { data: claimsData } = await supabase.auth.getClaims(undefined, jwks ? { jwks: { keys: jwks } } : undefined);
+  const user = claimsData?.claims ?? null;
 
   const { pathname } = request.nextUrl;
   const isAuthRoute = pathname === "/login" || pathname === "/register" || pathname === "/forgot-password";
