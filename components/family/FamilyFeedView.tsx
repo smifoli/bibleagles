@@ -15,7 +15,15 @@ function describeActivity(item: FamilyActivityItem) {
   );
 }
 
-export function FamilyFeedView({ items, currentUserId }: { items: FamilyActivityItem[]; currentUserId: string }) {
+export function FamilyFeedView({
+  items,
+  currentUserId,
+  isAdmin,
+}: {
+  items: FamilyActivityItem[];
+  currentUserId: string;
+  isAdmin: boolean;
+}) {
   return (
     <div className="flex min-h-full flex-col gap-[17px]">
       <header>
@@ -46,7 +54,7 @@ export function FamilyFeedView({ items, currentUserId }: { items: FamilyActivity
                   )}
                 </div>
               </Link>
-              {item.userId === currentUserId && <ActivityDeleteButton kind={item.kind} id={item.id} />}
+              {(item.userId === currentUserId || isAdmin) && <ActivityDeleteButton kind={item.kind} id={item.id} />}
             </div>
           ))}
         </div>

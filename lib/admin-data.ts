@@ -15,6 +15,7 @@ export async function getAdminMembers(supabase: SupabaseServerClient): Promise<A
   const { data } = await supabase
     .from("users")
     .select("id, name, email, avatar_url, role")
+    .eq("is_deleted", false)
     .order("name", { ascending: true });
 
   return (data ?? []).map((row) => ({

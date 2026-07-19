@@ -1,7 +1,7 @@
 import type { createClient } from "@/lib/supabase/server";
 import { toDateOnlyString } from "@/lib/format";
 import { getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
-import type { Language, UserRole } from "@/types/database";
+import type { FontSizePreference, Language, UserRole } from "@/types/database";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -14,6 +14,7 @@ export interface ProfileUser {
   preferredLanguage: Language;
   notificationEnabled: boolean;
   notificationTime: string; // "HH:MM"
+  fontSize: FontSizePreference;
 }
 
 export type CalendarDayStatus = "read" | "today" | "default";
@@ -45,7 +46,9 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
   const [{ data: userRow }, calendar] = await Promise.all([
     supabase
       .from("users")
-      .select("id, name, email, role, preferred_version, preferred_language, notification_enabled, notification_time")
+      .select(
+        "id, name, email, role, preferred_version, preferred_language, notification_enabled, notification_time, font_size"
+      )
       .eq("id", userId)
       .single(),
     getReadingCalendar(supabase, userId),
@@ -69,6 +72,7 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
     preferredLanguage: version.language,
     notificationEnabled: userRow?.notification_enabled ?? false,
     notificationTime: (userRow?.notification_time ?? "07:00:00").slice(0, 5),
+    fontSize: userRow?.font_size ?? "normal",
   };
 
   return { user, calendar };

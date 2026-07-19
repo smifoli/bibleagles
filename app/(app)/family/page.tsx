@@ -10,7 +10,10 @@ export default async function FamilyPage() {
   } = await getUser(supabase);
   if (!user) notFound();
 
-  const items = await getFamilyFeedData(supabase);
+  const [items, { data: profile }] = await Promise.all([
+    getFamilyFeedData(supabase),
+    supabase.from("users").select("role").eq("id", user.id).single(),
+  ]);
 
-  return <FamilyFeedView items={items} currentUserId={user.id} />;
+  return <FamilyFeedView items={items} currentUserId={user.id} isAdmin={profile?.role === "admin"} />;
 }

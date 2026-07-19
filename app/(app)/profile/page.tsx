@@ -45,6 +45,7 @@ export default async function ProfilePage() {
           language={profile.preferredLanguage}
           versions={BIBLE_VERSIONS}
           languages={LANGUAGES}
+          fontSize={profile.fontSize}
         />
       </div>
 

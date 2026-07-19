@@ -9,7 +9,7 @@ import { createClient, getUser } from "@/lib/supabase/server";
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await getUser(supabase);
-  const { userName, featured, secondary, activity } = await getHomeData(supabase, user!.id);
+  const { userName, isAdmin, featured, secondary, activity } = await getHomeData(supabase, user!.id);
 
   const now = new Date();
 
@@ -43,7 +43,7 @@ export default async function HomePage() {
         )}
       </div>
 
-      <ActivityFeed items={activity} currentUserId={user!.id} />
+      <ActivityFeed items={activity} currentUserId={user!.id} isAdmin={isAdmin} />
     </div>
   );
 }

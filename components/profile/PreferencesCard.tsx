@@ -2,8 +2,9 @@
 
 import { type ReactNode, useState, useTransition } from "react";
 import type { BibleVersion } from "@/lib/bible-versions";
-import { updatePreferences } from "@/lib/profile-actions";
-import type { Language } from "@/types/database";
+import { FONT_SIZE_LABELS, FONT_SIZE_ORDER } from "@/lib/font-size";
+import { updateFontSize, updatePreferences } from "@/lib/profile-actions";
+import type { FontSizePreference, Language } from "@/types/database";
 
 const LANGUAGE_LABELS: Record<Language, string> = {
   pt: "Português",
@@ -18,12 +19,21 @@ interface PreferencesCardProps {
   language: Language;
   versions: BibleVersion[];
   languages: Language[];
+  fontSize: FontSizePreference;
 }
 
-export function PreferencesCard({ version, language, versions, languages }: PreferencesCardProps) {
+export function PreferencesCard({ version, language, versions, languages, fontSize }: PreferencesCardProps) {
   const [currentVersion, setCurrentVersion] = useState(version);
   const [currentLanguage, setCurrentLanguage] = useState(language);
+  const [currentFontSize, setCurrentFontSize] = useState(fontSize);
   const [, startTransition] = useTransition();
+
+  function handleFontSizeChange(next: FontSizePreference) {
+    setCurrentFontSize(next);
+    startTransition(async () => {
+      await updateFontSize(next);
+    });
+  }
 
   const versionsForLanguage = versions.filter((item) => item.language === currentLanguage);
   const safeVersion = versionsForLanguage.some((item) => item.abbreviation === currentVersion)
@@ -77,6 +87,25 @@ export function PreferencesCard({ version, language, versions, languages }: Pref
             </option>
           ))}
         </select>
+      </Row>
+      <div className="h-px bg-border" />
+      <Row label="Tamanho da letra">
+        <div className="flex gap-1.5">
+          {FONT_SIZE_ORDER.map((size) => (
+            <button
+              key={size}
+              type="button"
+              onClick={() => handleFontSizeChange(size)}
+              className={
+                currentFontSize === size
+                  ? "rounded-[10px] bg-ink px-2.5 py-1.5 text-xs font-semibold text-background"
+                  : "rounded-[10px] border border-border bg-surface px-2.5 py-1.5 text-xs text-ink"
+              }
+            >
+              {FONT_SIZE_LABELS[size]}
+            </button>
+          ))}
+        </div>
       </Row>
     </div>
   );

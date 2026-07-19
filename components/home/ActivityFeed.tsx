@@ -14,7 +14,15 @@ function describeActivity(item: ActivityItem) {
   );
 }
 
-export function ActivityFeed({ items, currentUserId }: { items: ActivityItem[]; currentUserId: string }) {
+export function ActivityFeed({
+  items,
+  currentUserId,
+  isAdmin,
+}: {
+  items: ActivityItem[];
+  currentUserId: string;
+  isAdmin: boolean;
+}) {
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex items-center justify-between">
@@ -52,7 +60,7 @@ export function ActivityFeed({ items, currentUserId }: { items: ActivityItem[]; 
                   )}
                 </div>
               </Link>
-              {item.userId === currentUserId && <ActivityDeleteButton kind={item.kind} id={item.id} />}
+              {(item.userId === currentUserId || isAdmin) && <ActivityDeleteButton kind={item.kind} id={item.id} />}
             </div>
           ))}
         </div>

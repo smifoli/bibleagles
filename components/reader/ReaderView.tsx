@@ -230,22 +230,22 @@ export function ReaderView({
                   </button>
                 )}
                 {comment.isOwn && (
-                  <>
-                    <button
-                      onClick={() => handleStartEdit(comment)}
-                      disabled={pending}
-                      className="text-[11px] font-semibold text-text-muted"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDeleteComment(comment.id)}
-                      disabled={pending}
-                      className="text-[11px] font-semibold text-text-muted"
-                    >
-                      Apagar
-                    </button>
-                  </>
+                  <button
+                    onClick={() => handleStartEdit(comment)}
+                    disabled={pending}
+                    className="text-[11px] font-semibold text-text-muted"
+                  >
+                    Editar
+                  </button>
+                )}
+                {(comment.isOwn || data.isAdmin) && (
+                  <button
+                    onClick={() => handleDeleteComment(comment.id)}
+                    disabled={pending}
+                    className="text-[11px] font-semibold text-text-muted"
+                  >
+                    Apagar
+                  </button>
                 )}
               </div>
             </>
@@ -374,7 +374,7 @@ export function ReaderView({
                 </sup>
                 {verse.text}
                 {verse.commentCount > 0 && (
-                  <span className="ml-1.5 font-sans text-[10px] font-semibold" style={{ color: style ? style.verseNum : "#a3927d" }}>
+                  <span className="ml-1.5 font-sans text-sm font-semibold" style={{ color: style ? style.verseNum : "#a3927d" }}>
                     · {verse.commentCount} {verse.commentCount === 1 ? "comentário" : "comentários"}
                   </span>
                 )}
@@ -411,7 +411,7 @@ export function ReaderView({
                   <div>
                     <div className="mb-[9px] flex items-baseline justify-between">
                       <span className="text-[9px] font-semibold uppercase tracking-[1.5px] text-text-muted">Cor do destaque</span>
-                      {verse.highlight?.ownColor && <span className="text-[10px] text-text-muted">toque de novo pra remover</span>}
+                      {verse.highlight?.ownColor && <span className="text-xs text-text-muted">toque de novo pra remover</span>}
                     </div>
                     <div className="flex gap-2.5">
                       {HIGHLIGHT_COLOR_ORDER.map((color) => (
@@ -431,7 +431,7 @@ export function ReaderView({
                     {verse.highlight && verse.highlight.markedBy.length > 0 && (
                       <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1">
                         {verse.highlight.markedBy.map((mark, index) => (
-                          <span key={`${mark.name}-${index}`} className="flex items-center gap-1 text-[11px] text-text-muted">
+                          <span key={`${mark.name}-${index}`} className="flex items-center gap-1 text-sm text-text-muted">
                             <span
                               className="h-2 w-2 rounded-full"
                               style={{ backgroundColor: HIGHLIGHT_COLORS[mark.color].bg }}

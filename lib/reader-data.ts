@@ -49,6 +49,7 @@ export interface ReaderData {
   verses: ReaderVerse[];
   commentsByVerse: Record<number, ReaderComment[]>;
   planContext: ReaderPlanContext | null;
+  isAdmin: boolean;
 }
 
 export async function getReaderData(
@@ -72,11 +73,16 @@ export async function getReaderData(
       .eq("book", bookId)
       .eq("chapter", chapter)
       .order("created_at", { ascending: true }),
-    supabase.from("users").select("id, name"),
+    supabase.from("users").select("id, name, role, is_deleted"),
     getPlanContext(supabase, userId, bookId, chapter, requestedPlanDayId),
   ]);
 
-  const memberNames = new Map((familyMembers ?? []).map((member) => [member.id, member.name]));
+  const isAdmin = (familyMembers ?? []).find((member) => member.id === userId)?.role === "admin";
+  // Membro removido pelo admin, mas com destaques/comentários preservados —
+  // segue aparecendo com o nome original, só marcado, pra não perder o autor.
+  const memberNames = new Map(
+    (familyMembers ?? []).map((member) => [member.id, member.is_deleted ? `${member.name} (deletado)` : member.name])
+  );
 
   const highlightsByVerse = new Map<number, { userId: string; color: HighlightColor }[]>();
   for (const row of bookmarkRows ?? []) {
@@ -156,6 +162,7 @@ export async function getReaderData(
     verses,
     commentsByVerse,
     planContext,
+    isAdmin,
   };
 }
 

@@ -96,12 +96,13 @@ export async function editComment(
   return {};
 }
 
+/** Apaga um comentário — o próprio autor ou um admin (RLS decide de fato). */
 export async function deleteComment(book: string, chapter: number, commentId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await getUser(supabase);
   if (!user) return { error: "Sessão expirada." };
 
-  const { error } = await supabase.from("comments").delete().eq("id", commentId).eq("user_id", user.id);
+  const { error } = await supabase.from("comments").delete().eq("id", commentId);
 
   if (error) return { error: "Não foi possível apagar o comentário." };
 

@@ -70,7 +70,7 @@ function groupKey(book: string, chapter: number, verse: number): string {
  * destacou e quem comentou, ordenadas pela atividade mais recente. */
 export async function getBookmarksData(supabase: SupabaseServerClient): Promise<BookmarksData> {
   const [{ data: familyMembers }, { data: bookmarkRows }, { data: commentRows }] = await Promise.all([
-    supabase.from("users").select("id, name").order("created_at", { ascending: true }),
+    supabase.from("users").select("id, name, is_deleted").order("created_at", { ascending: true }),
     supabase
       .from("bookmarks")
       .select("id, user_id, book, chapter, verse, bible_version, color, created_at")
@@ -82,7 +82,9 @@ export async function getBookmarksData(supabase: SupabaseServerClient): Promise<
   ]);
 
   const memberOrder = new Map((familyMembers ?? []).map((member, index) => [member.id, index]));
-  const memberNames = new Map((familyMembers ?? []).map((member) => [member.id, member.name]));
+  const memberNames = new Map(
+    (familyMembers ?? []).map((member) => [member.id, member.is_deleted ? `${member.name} (deletado)` : member.name])
+  );
   const colorIndexFor = (userId: string) => memberOrder.get(userId) ?? 0;
   const nameFor = (userId: string) => memberNames.get(userId) ?? "Alguém";
 
@@ -159,7 +161,7 @@ export async function getBookmarksData(supabase: SupabaseServerClient): Promise<
 
   const people: FamilyPersonOption[] = (familyMembers ?? []).map((member, index) => ({
     id: member.id,
-    name: member.name,
+    name: nameFor(member.id),
     colorIndex: index,
   }));
 

@@ -2,8 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { createClient, getUser } from "@/lib/supabase/server";
-import type { Language } from "@/types/database";
+import { FONT_SIZE_COOKIE } from "@/lib/font-size";
+import type { FontSizePreference, Language } from "@/types/database";
 
 export async function updateProfileName(name: string): Promise<{ error?: string }> {
   const trimmed = name.trim();
@@ -53,6 +55,26 @@ export async function updateNotifications(enabled: boolean, time: string): Promi
   if (error) return { error: "Não foi possível salvar as notificações." };
 
   revalidatePath("/profile");
+  return {};
+}
+
+export async function updateFontSize(fontSize: FontSizePreference): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await getUser(supabase);
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = await supabase.from("users").update({ font_size: fontSize }).eq("id", user.id);
+  if (error) return { error: "Não foi possível salvar o tamanho da letra." };
+
+  // Grava também num cookie (1 ano) pra o layout aplicar o tamanho sem
+  // precisar consultar o banco em toda navegação — só a troca de preferência
+  // paga essa escrita.
+  const cookieStore = await cookies();
+  cookieStore.set(FONT_SIZE_COOKIE, fontSize, { maxAge: 60 * 60 * 24 * 365, path: "/" });
+
+  revalidatePath("/", "layout");
   return {};
 }
 

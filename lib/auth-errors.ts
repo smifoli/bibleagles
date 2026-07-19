@@ -7,5 +7,9 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export function translateAuthError(message: string): string {
-  return ERROR_MESSAGES[message] ?? message;
+  if (ERROR_MESSAGES[message]) return ERROR_MESSAGES[message];
+  // Mensagem de usuário banido (lib/admin-actions.ts deleteMember) varia
+  // conforme a versão da API ("User is banned", "User banned until ...").
+  if (message.toLowerCase().includes("banned")) return "Essa conta foi removida.";
+  return message;
 }

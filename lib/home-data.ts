@@ -44,6 +44,7 @@ export interface ActivityItem {
 
 export interface HomeData {
   userName: string;
+  isAdmin: boolean;
   featured: FeaturedPackageCardData | null;
   secondary: PackageCardData[];
   activity: ActivityItem[];
@@ -54,8 +55,8 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
   // cada await sequencial soma uma viagem de rede inteira até o Supabase.
   const [{ data: currentUser }, { data: familyMembers }, todayPackages, { data: comments }, { data: bookmarks }] =
     await Promise.all([
-      supabase.from("users").select("name").eq("id", userId).single(),
-      supabase.from("users").select("id, name").order("created_at", { ascending: true }),
+      supabase.from("users").select("name, role").eq("id", userId).single(),
+      supabase.from("users").select("id, name, is_deleted").order("created_at", { ascending: true }),
       getActivePackagesWithToday(supabase),
       supabase
         .from("comments")
@@ -69,7 +70,12 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
         .limit(8),
     ]);
 
-  const memberNames = new Map((familyMembers ?? []).map((member) => [member.id, member.name]));
+  // Membro removido pelo admin, mas com conteúdo preservado, segue aparecendo
+  // como autor (só marcado) — some, porém, do checklist "quem já leu hoje".
+  const memberNames = new Map(
+    (familyMembers ?? []).map((member) => [member.id, member.is_deleted ? `${member.name} (deletado)` : member.name])
+  );
+  const activeFamilyMembers = (familyMembers ?? []).filter((member) => !member.is_deleted);
 
   const cards: PackageCardData[] = todayPackages.map((pkg) => ({
     packageId: pkg.packageId,
@@ -111,7 +117,7 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
     const completedIds = new Set((featuredProgress ?? []).map((row) => row.user_id));
     featured = {
       ...featuredCard,
-      members: (familyMembers ?? []).map((member) => ({
+      members: activeFamilyMembers.map((member) => ({
         id: member.id,
         name: member.name,
         completed: completedIds.has(member.id),
@@ -149,6 +155,7 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
 
   return {
     userName: currentUser?.name ?? "",
+    isAdmin: currentUser?.role === "admin",
     featured,
     secondary,
     activity,

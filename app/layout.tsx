@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Spectral } from "next/font/google";
+import { cookies } from "next/headers";
+import { FONT_SIZE_COOKIE, FONT_SIZE_SCALE, isFontSizePreference } from "@/lib/font-size";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -45,13 +47,21 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const fontSizeCookie = cookieStore.get(FONT_SIZE_COOKIE)?.value;
+  const fontSize = isFontSizePreference(fontSizeCookie) ? fontSizeCookie : "normal";
+
   return (
-    <html lang="pt-BR" className={`${spaceGrotesk.variable} ${spectral.variable}`}>
+    <html
+      lang="pt-BR"
+      className={`${spaceGrotesk.variable} ${spectral.variable}`}
+      style={{ fontSize: FONT_SIZE_SCALE[fontSize] }}
+    >
       <body>{children}</body>
     </html>
   );

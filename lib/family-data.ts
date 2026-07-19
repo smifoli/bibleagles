@@ -25,7 +25,7 @@ const FEED_LIMIT_PER_SOURCE = 60;
  * mais completa (não limitada a 6 itens) do feed que aparece resumido em ActivityFeed na home. */
 export async function getFamilyFeedData(supabase: SupabaseServerClient): Promise<FamilyActivityItem[]> {
   const [{ data: familyMembers }, { data: comments }, { data: bookmarks }] = await Promise.all([
-    supabase.from("users").select("id, name").order("created_at", { ascending: true }),
+    supabase.from("users").select("id, name, is_deleted").order("created_at", { ascending: true }),
     supabase
       .from("comments")
       .select("id, user_id, book, chapter, verse, bible_version, content, created_at")
@@ -38,7 +38,9 @@ export async function getFamilyFeedData(supabase: SupabaseServerClient): Promise
       .limit(FEED_LIMIT_PER_SOURCE),
   ]);
 
-  const memberNames = new Map((familyMembers ?? []).map((member) => [member.id, member.name]));
+  const memberNames = new Map(
+    (familyMembers ?? []).map((member) => [member.id, member.is_deleted ? `${member.name} (deletado)` : member.name])
+  );
 
   const items: FamilyActivityItem[] = [
     ...(comments ?? []).map((comment) => ({

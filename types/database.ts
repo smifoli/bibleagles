@@ -2,6 +2,7 @@ export type UserRole = "admin" | "member";
 export type PackageStatus = "draft" | "active" | "archived";
 export type Language = "pt" | "en" | "es" | "de" | "it";
 export type HighlightColor = "yellow" | "green" | "rose" | "blue";
+export type FontSizePreference = "normal" | "large" | "xlarge";
 
 export interface Database {
   public: {
@@ -17,6 +18,8 @@ export interface Database {
           preferred_language: Language;
           notification_enabled: boolean;
           notification_time: string;
+          font_size: FontSizePreference;
+          is_deleted: boolean;
           created_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["users"]["Row"], "id" | "created_at">;
