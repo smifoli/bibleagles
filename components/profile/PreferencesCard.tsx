@@ -32,6 +32,11 @@ export function PreferencesCard({ version, language, versions, languages, fontSi
     setCurrentFontSize(next);
     startTransition(async () => {
       await updateFontSize(next);
+      // O <html> raiz (zoom aplicado em app/layout.tsx) só é renderizado na
+      // carga inicial do documento — navegação client-side do Next.js nunca
+      // re-executa o layout raiz, só o conteúdo abaixo dele. Sem um reload
+      // completo, o cookie novo fica salvo mas o zoom não muda na tela.
+      window.location.reload();
     });
   }
 
