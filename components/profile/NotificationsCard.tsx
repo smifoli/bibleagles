@@ -34,7 +34,7 @@ export function NotificationsCard({ enabled, time }: NotificationsCardProps) {
   return (
     <div className="flex flex-col rounded-[18px] border border-border bg-surface px-4">
       <div className="flex items-center justify-between py-2.5">
-        <span className="text-[13px] text-[#2c2218]">Lembrete diário</span>
+        <span className="text-[calc(13px*var(--font-scale))] text-[#2c2218]">Lembrete diário</span>
         <button
           type="button"
           role="switch"
@@ -51,13 +51,13 @@ export function NotificationsCard({ enabled, time }: NotificationsCardProps) {
       </div>
       <div className="h-px bg-border" />
       <div className="flex items-center justify-between py-2.5">
-        <span className="text-[13px] text-[#2c2218]">Horário</span>
+        <span className="text-[calc(13px*var(--font-scale))] text-[#2c2218]">Horário</span>
         <input
           type="time"
           value={currentTime}
           onChange={(event) => handleTimeChange(event.target.value)}
           disabled={!isEnabled}
-          className="rounded-[10px] border border-border bg-surface px-3 py-1.5 text-xs text-ink disabled:opacity-50"
+          className="rounded-[10px] border border-border bg-surface px-3 py-1.5 text-[calc(12px*var(--font-scale))] text-ink disabled:opacity-50"
         />
       </div>
     </div>

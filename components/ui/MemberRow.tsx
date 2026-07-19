@@ -27,13 +27,13 @@ export function MemberRow({ name, subtitle, colorIndex, badgeLabel, badgeTone = 
     <div className="flex items-center gap-[11px] py-2.5">
       <Avatar name={name} colorIndex={colorIndex} size="md" />
       <div className="flex-1">
-        <div className="text-sm font-semibold text-ink">{name}</div>
-        {subtitle && <div className="text-[11px] text-text-muted">{subtitle}</div>}
+        <div className="text-[calc(14px*var(--font-scale))] font-semibold text-ink">{name}</div>
+        {subtitle && <div className="text-[calc(11px*var(--font-scale))] text-text-muted">{subtitle}</div>}
       </div>
       {trailing ??
         (badgeLabel ? (
           <span
-            className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.5px] ${BADGE_TONE_CLASSES[badgeTone]}`}
+            className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[calc(10px*var(--font-scale))] font-semibold tracking-[0.5px] ${BADGE_TONE_CLASSES[badgeTone]}`}
           >
             {badgeLabel}
           </span>

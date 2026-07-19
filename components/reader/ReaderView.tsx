@@ -171,7 +171,7 @@ export function ReaderView({
     return (
       <div key={comment.id} className={`flex items-start gap-[11px] ${isReply ? "mt-3 pl-[15px]" : ""}`}>
         <div
-          className={`flex shrink-0 items-center justify-center rounded-full bg-[#c98a52] text-[10px] font-semibold text-white ${
+          className={`flex shrink-0 items-center justify-center rounded-full bg-[#c98a52] text-[calc(10px*var(--font-scale))] font-semibold text-white ${
             isReply ? "h-[22px] w-[22px]" : "h-[26px] w-[26px]"
           }`}
         >
@@ -179,9 +179,9 @@ export function ReaderView({
         </div>
         <div className="flex-1">
           <div className="flex items-baseline gap-[7px]">
-            <span className="text-xs font-semibold text-ink">{comment.userName}</span>
-            <span className="text-[10px] text-text-muted">{formatRelativeTime(new Date(comment.createdAt))}</span>
-            {comment.isEdited && <span className="text-[10px] text-text-muted">· editado</span>}
+            <span className="text-[calc(12px*var(--font-scale))] font-semibold text-ink">{comment.userName}</span>
+            <span className="text-[calc(10px*var(--font-scale))] text-text-muted">{formatRelativeTime(new Date(comment.createdAt))}</span>
+            {comment.isEdited && <span className="text-[calc(10px*var(--font-scale))] text-text-muted">· editado</span>}
           </div>
 
           {isEditing ? (
@@ -190,20 +190,20 @@ export function ReaderView({
                 value={editDraft}
                 onChange={(event) => setEditDraft(event.target.value)}
                 rows={2}
-                className="rounded-[10px] border border-input-border bg-background p-2.5 text-sm text-ink"
+                className="rounded-[10px] border border-input-border bg-background p-2.5 text-[calc(14px*var(--font-scale))] text-ink"
               />
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => handleSaveEdit(comment.id)}
                   disabled={pending}
-                  className="text-[11px] font-semibold text-ink"
+                  className="text-[calc(11px*var(--font-scale))] font-semibold text-ink"
                 >
                   Salvar
                 </button>
                 <button
                   onClick={() => setEditingId(null)}
                   disabled={pending}
-                  className="text-[11px] font-semibold text-text-muted"
+                  className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted"
                 >
                   Cancelar
                 </button>
@@ -211,18 +211,18 @@ export function ReaderView({
             </div>
           ) : (
             <>
-              <div className="mt-0.5 font-serif text-sm text-text-secondary">{comment.content}</div>
+              <div className="mt-0.5 font-serif text-[calc(14px*var(--font-scale))] text-text-secondary">{comment.content}</div>
               <div className="mt-1.5 flex items-center gap-3">
                 <button
                   onClick={() => handleToggleLike(comment.id, comment.likedByMe)}
                   disabled={pending}
                   className="flex items-center gap-1"
                 >
-                  <span className={`text-sm ${comment.likedByMe ? "text-error" : "text-text-muted"}`}>
+                  <span className={`text-[calc(14px*var(--font-scale))] ${comment.likedByMe ? "text-error" : "text-text-muted"}`}>
                     {comment.likedByMe ? "♥" : "♡"}
                   </span>
                   {comment.likeCount > 0 && (
-                    <span className={`text-[11px] font-semibold ${comment.likedByMe ? "text-error" : "text-text-muted"}`}>
+                    <span className={`text-[calc(11px*var(--font-scale))] font-semibold ${comment.likedByMe ? "text-error" : "text-text-muted"}`}>
                       {comment.likeCount}
                     </span>
                   )}
@@ -231,7 +231,7 @@ export function ReaderView({
                   <button
                     onClick={() => handleToggleReply(comment.id)}
                     disabled={pending}
-                    className="text-[11px] font-semibold text-text-muted"
+                    className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted"
                   >
                     Responder
                   </button>
@@ -240,7 +240,7 @@ export function ReaderView({
                   <button
                     onClick={() => handleStartEdit(comment)}
                     disabled={pending}
-                    className="text-[11px] font-semibold text-text-muted"
+                    className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted"
                   >
                     Editar
                   </button>
@@ -249,7 +249,7 @@ export function ReaderView({
                   <button
                     onClick={() => handleDeleteComment(comment.id)}
                     disabled={pending}
-                    className="text-[11px] font-semibold text-text-muted"
+                    className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted"
                   >
                     Apagar
                   </button>
@@ -268,20 +268,20 @@ export function ReaderView({
                 placeholder={`Responder a ${comment.userName}...`}
                 rows={2}
                 autoFocus
-                className="rounded-[10px] border border-input-border bg-background p-2.5 text-sm text-ink"
+                className="rounded-[10px] border border-input-border bg-background p-2.5 text-[calc(14px*var(--font-scale))] text-ink"
               />
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => handleSubmitReply(verseNumber, comment.id)}
                   disabled={pending}
-                  className="text-[11px] font-semibold text-ink"
+                  className="text-[calc(11px*var(--font-scale))] font-semibold text-ink"
                 >
                   Responder
                 </button>
                 <button
                   onClick={() => handleToggleReply(comment.id)}
                   disabled={pending}
-                  className="text-[11px] font-semibold text-text-muted"
+                  className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted"
                 >
                   Cancelar
                 </button>
@@ -307,13 +307,13 @@ export function ReaderView({
     <div className="flex min-h-full flex-col gap-[17px]">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href={parentHref} aria-label="Voltar" className="text-lg text-text-muted">
+          <Link href={parentHref} aria-label="Voltar" className="text-[calc(18px*var(--font-scale))] text-text-muted">
             ←
           </Link>
           <div>
-            <div className="text-[17px] font-semibold text-text-primary">{data.reference}</div>
+            <div className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">{data.reference}</div>
             {data.planContext && (
-              <div className="text-[11px] text-text-muted">
+              <div className="text-[calc(11px*var(--font-scale))] text-text-muted">
                 Lendo {data.planContext.packageTitle} · Dia {data.planContext.dayNumber}
               </div>
             )}
@@ -322,7 +322,7 @@ export function ReaderView({
         <select
           value={version}
           onChange={(event) => handleVersionChange(event.target.value)}
-          className="rounded-full border border-[#d4c5ac] bg-transparent px-3 py-1.5 text-[11px] font-semibold text-ink"
+          className="rounded-full border border-[#d4c5ac] bg-transparent px-3 py-1.5 text-[calc(11px*var(--font-scale))] font-semibold text-ink"
         >
           {versions.map((item) => (
             <option key={item.abbreviation} value={item.abbreviation}>
@@ -339,8 +339,8 @@ export function ReaderView({
             onClick={() => setFontSize(size)}
             className={
               fontSize === size
-                ? "rounded-lg bg-ink px-[9px] py-1 text-[13px] font-semibold text-background"
-                : `rounded-lg border border-input-border px-[9px] py-1 font-semibold text-text-muted ${size === "lg" ? "text-[15px]" : "text-[11px]"}`
+                ? "rounded-lg bg-ink px-[9px] py-1 text-[calc(13px*var(--font-scale))] font-semibold text-background"
+                : `rounded-lg border border-input-border px-[9px] py-1 font-semibold text-text-muted ${size === "lg" ? "text-[calc(15px*var(--font-scale))]" : "text-[calc(11px*var(--font-scale))]"}`
             }
           >
             {size === "sm" ? "A−" : size === "md" ? "A" : "A+"}
@@ -376,12 +376,12 @@ export function ReaderView({
                 }}
                 className="cursor-pointer font-serif leading-[1.8]"
               >
-                <sup className="mr-[5px] font-sans text-[10px] font-semibold" style={{ color: style?.verseNum ?? "#a3927d" }}>
+                <sup className="mr-[5px] font-sans text-[calc(10px*var(--font-scale))] font-semibold" style={{ color: style?.verseNum ?? "#a3927d" }}>
                   {verse.number}
                 </sup>
                 {verse.text}
                 {verse.commentCount > 0 && (
-                  <span className="ml-1.5 font-sans text-sm font-semibold" style={{ color: style ? style.verseNum : "#a3927d" }}>
+                  <span className="ml-1.5 font-sans text-[calc(14px*var(--font-scale))] font-semibold" style={{ color: style ? style.verseNum : "#a3927d" }}>
                     · {verse.commentCount} {verse.commentCount === 1 ? "comentário" : "comentários"}
                   </span>
                 )}
@@ -389,7 +389,7 @@ export function ReaderView({
 
               {isOpen && (
                 <div className="mt-1 flex flex-col gap-3.5 rounded-[18px] border border-border bg-surface p-4">
-                  <span className="text-xs font-semibold text-ink">
+                  <span className="text-[calc(12px*var(--font-scale))] font-semibold text-ink">
                     {bookName} {chapter}:{verse.number}
                   </span>
 
@@ -402,13 +402,13 @@ export function ReaderView({
                     onChange={(event) => setCommentDraft(event.target.value)}
                     placeholder="Escreva um comentário..."
                     rows={2}
-                    className="rounded-[10px] border border-input-border bg-background p-2.5 text-sm text-ink"
+                    className="rounded-[10px] border border-input-border bg-background p-2.5 text-[calc(14px*var(--font-scale))] text-ink"
                   />
-                  {actionError && <p className="text-xs text-error">{actionError}</p>}
+                  {actionError && <p className="text-[calc(12px*var(--font-scale))] text-error">{actionError}</p>}
                   <button
                     onClick={() => handleSubmitComment(verse.number)}
                     disabled={pending}
-                    className="w-full rounded-full bg-[#efe7d8] py-2.5 text-xs font-semibold text-ink"
+                    className="w-full rounded-full bg-[#efe7d8] py-2.5 text-[calc(12px*var(--font-scale))] font-semibold text-ink"
                   >
                     Comentar
                   </button>
@@ -417,8 +417,8 @@ export function ReaderView({
 
                   <div>
                     <div className="mb-[9px] flex items-baseline justify-between">
-                      <span className="text-[9px] font-semibold uppercase tracking-[1.5px] text-text-muted">Cor do destaque</span>
-                      {verse.highlight?.ownColor && <span className="text-xs text-text-muted">toque de novo pra remover</span>}
+                      <span className="text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1.5px] text-text-muted">Cor do destaque</span>
+                      {verse.highlight?.ownColor && <span className="text-[calc(12px*var(--font-scale))] text-text-muted">toque de novo pra remover</span>}
                     </div>
                     <div className="flex gap-2.5">
                       {HIGHLIGHT_COLOR_ORDER.map((color) => (
@@ -438,7 +438,7 @@ export function ReaderView({
                     {verse.highlight && verse.highlight.markedBy.length > 0 && (
                       <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1">
                         {verse.highlight.markedBy.map((mark, index) => (
-                          <span key={`${mark.name}-${index}`} className="flex items-center gap-1 text-sm text-text-muted">
+                          <span key={`${mark.name}-${index}`} className="flex items-center gap-1 text-[calc(14px*var(--font-scale))] text-text-muted">
                             <span
                               className="h-2 w-2 rounded-full"
                               style={{ backgroundColor: HIGHLIGHT_COLORS[mark.color].bg }}
@@ -460,7 +460,7 @@ export function ReaderView({
         <Link
           href={prevHref ?? "#"}
           aria-disabled={!prevHref}
-          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-xs font-semibold ${
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold ${
             prevHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
           }`}
         >
@@ -469,7 +469,7 @@ export function ReaderView({
         <Link
           href={nextHref ?? "#"}
           aria-disabled={!nextHref}
-          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-xs font-semibold ${
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold ${
             nextHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
           }`}
         >
@@ -481,7 +481,7 @@ export function ReaderView({
         <button
           onClick={handleMarkAsRead}
           disabled={pending || data.planContext.alreadyCompleted}
-          className="mt-auto w-full rounded-[13px] bg-ink py-[15px] text-[13px] font-semibold text-background disabled:opacity-60"
+          className="mt-auto w-full rounded-[13px] bg-ink py-[15px] text-[calc(13px*var(--font-scale))] font-semibold text-background disabled:opacity-60"
         >
           {data.planContext.alreadyCompleted ? "Já lido" : "Marcar como lido"}
         </button>

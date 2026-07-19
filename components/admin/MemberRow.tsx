@@ -48,21 +48,21 @@ export function MemberRow({
     <div className={`py-2.5 ${isFirst ? "" : "border-t border-border"}`}>
       <div className="flex items-center gap-[11px]">
         <div
-          className="flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full text-[11px] font-semibold"
+          className="flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full text-[calc(11px*var(--font-scale))] font-semibold"
           style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
         >
           {initial}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-semibold text-ink">{member.name}</div>
-          <div className="truncate text-[11px] text-text-muted">{member.email}</div>
-          {error ? <div className="mt-0.5 text-[11px] text-error">{error}</div> : null}
+          <div className="truncate text-[calc(14px*var(--font-scale))] font-semibold text-ink">{member.name}</div>
+          <div className="truncate text-[calc(11px*var(--font-scale))] text-text-muted">{member.email}</div>
+          {error ? <div className="mt-0.5 text-[calc(11px*var(--font-scale))] text-error">{error}</div> : null}
         </div>
         <span
           className={
             isAdmin
-              ? "shrink-0 whitespace-nowrap rounded-full bg-[rgba(44,34,24,0.1)] px-2.5 py-1 text-[10px] font-semibold text-ink"
-              : "shrink-0 whitespace-nowrap rounded-full bg-[#ece3d6] px-2.5 py-1 text-[10px] font-semibold text-text-muted"
+              ? "shrink-0 whitespace-nowrap rounded-full bg-[rgba(44,34,24,0.1)] px-2.5 py-1 text-[calc(10px*var(--font-scale))] font-semibold text-ink"
+              : "shrink-0 whitespace-nowrap rounded-full bg-[#ece3d6] px-2.5 py-1 text-[calc(10px*var(--font-scale))] font-semibold text-text-muted"
           }
         >
           {isAdmin ? "Admin" : "Membro"}
@@ -74,7 +74,7 @@ export function MemberRow({
                 type="button"
                 onClick={handleToggle}
                 disabled={isPending}
-                className="whitespace-nowrap text-xs text-link disabled:opacity-60"
+                className="whitespace-nowrap text-[calc(12px*var(--font-scale))] text-link disabled:opacity-60"
               >
                 {isAdmin ? "Remover Admin" : "Tornar Admin"} ▾
               </button>
@@ -83,7 +83,7 @@ export function MemberRow({
               type="button"
               onClick={() => setConfirmingRemove(true)}
               disabled={isPending}
-              className="whitespace-nowrap text-xs text-error disabled:opacity-60"
+              className="whitespace-nowrap text-[calc(12px*var(--font-scale))] text-error disabled:opacity-60"
             >
               Remover membro
             </button>
@@ -93,7 +93,7 @@ export function MemberRow({
 
       {confirmingRemove && (
         <div className="mt-2.5 flex flex-col gap-2 rounded-[12px] border border-border bg-background p-3">
-          <p className="text-xs text-text-secondary">
+          <p className="text-[calc(12px*var(--font-scale))] text-text-secondary">
             Apagar os comentários e destaques de <span className="font-semibold">{member.name}</span> também, ou
             manter (aparece como &quot;{member.name} (deletado)&quot;)?
           </p>
@@ -102,7 +102,7 @@ export function MemberRow({
               type="button"
               onClick={() => handleRemove(true)}
               disabled={isPending}
-              className="text-xs font-semibold text-error disabled:opacity-60"
+              className="text-[calc(12px*var(--font-scale))] font-semibold text-error disabled:opacity-60"
             >
               Apagar tudo
             </button>
@@ -110,7 +110,7 @@ export function MemberRow({
               type="button"
               onClick={() => handleRemove(false)}
               disabled={isPending}
-              className="text-xs font-semibold text-ink disabled:opacity-60"
+              className="text-[calc(12px*var(--font-scale))] font-semibold text-ink disabled:opacity-60"
             >
               Manter comentários/destaques
             </button>
@@ -118,7 +118,7 @@ export function MemberRow({
               type="button"
               onClick={() => setConfirmingRemove(false)}
               disabled={isPending}
-              className="text-xs font-semibold text-text-muted disabled:opacity-60"
+              className="text-[calc(12px*var(--font-scale))] font-semibold text-text-muted disabled:opacity-60"
             >
               Cancelar
             </button>

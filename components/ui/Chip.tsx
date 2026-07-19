@@ -15,7 +15,7 @@ export interface ChipProps extends HTMLAttributes<HTMLSpanElement> {
 export function Chip({ variant = "outline", className = "", ...props }: ChipProps) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-semibold ${VARIANT_CLASSES[variant]} ${className}`}
+      className={`inline-flex items-center rounded-full px-3 py-1.5 text-[calc(11px*var(--font-scale))] font-semibold ${VARIANT_CLASSES[variant]} ${className}`}
       {...props}
     />
   );

@@ -34,12 +34,12 @@ export function VerseBlock({ number, text, highlighted, commentCount = 0, fontSi
       style={contentStyle}
       className={`font-serif leading-[1.8] ${onClick ? "cursor-pointer" : ""}`}
     >
-      <sup className="mr-[5px] font-sans text-[10px] font-semibold" style={{ color: style?.verseNum ?? "#a3927d" }}>
+      <sup className="mr-[5px] font-sans text-[calc(10px*var(--font-scale))] font-semibold" style={{ color: style?.verseNum ?? "#a3927d" }}>
         {number}
       </sup>
       {text}
       {commentCount > 0 && (
-        <span className="ml-1.5 font-sans text-[10px] font-semibold" style={{ color: style ? style.verseNum : "#a3927d" }}>
+        <span className="ml-1.5 font-sans text-[calc(10px*var(--font-scale))] font-semibold" style={{ color: style ? style.verseNum : "#a3927d" }}>
           · {commentCount} {commentCount === 1 ? "comentário" : "comentários"}
         </span>
       )}

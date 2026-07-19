@@ -14,7 +14,7 @@ export default function RegisterPage({
     <AuthLayout
       title="Criar conta"
       footer={
-        <Link href="/login" className="text-[13px] text-link">
+        <Link href="/login" className="text-[calc(13px*var(--font-scale))] text-link">
           Já tenho conta? Entrar
         </Link>
       }

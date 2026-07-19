@@ -32,10 +32,10 @@ export function PreferencesCard({ version, language, versions, languages, fontSi
     setCurrentFontSize(next);
     startTransition(async () => {
       await updateFontSize(next);
-      // O <html> raiz (zoom aplicado em app/layout.tsx) só é renderizado na
-      // carga inicial do documento — navegação client-side do Next.js nunca
-      // re-executa o layout raiz, só o conteúdo abaixo dele. Sem um reload
-      // completo, o cookie novo fica salvo mas o zoom não muda na tela.
+      // O <html> raiz (onde --font-scale é definida, em app/layout.tsx) só é
+      // renderizado na carga inicial do documento — navegação client-side do
+      // Next.js nunca re-executa o layout raiz, só o conteúdo abaixo dele.
+      // Sem um reload completo, o cookie novo fica salvo mas a letra não muda.
       window.location.reload();
     });
   }
@@ -70,7 +70,7 @@ export function PreferencesCard({ version, language, versions, languages, fontSi
         <select
           value={safeVersion}
           onChange={(event) => handleVersionChange(event.target.value)}
-          className="rounded-[10px] border border-border bg-surface px-3 py-1.5 text-xs text-ink"
+          className="rounded-[10px] border border-border bg-surface px-3 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
         >
           {versionsForLanguage.map((item) => (
             <option key={item.abbreviation} value={item.abbreviation}>
@@ -84,7 +84,7 @@ export function PreferencesCard({ version, language, versions, languages, fontSi
         <select
           value={currentLanguage}
           onChange={(event) => handleLanguageChange(event.target.value as Language)}
-          className="rounded-[10px] border border-border bg-surface px-3 py-1.5 text-xs text-ink"
+          className="rounded-[10px] border border-border bg-surface px-3 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
         >
           {languages.map((lang) => (
             <option key={lang} value={lang}>
@@ -103,8 +103,8 @@ export function PreferencesCard({ version, language, versions, languages, fontSi
               onClick={() => handleFontSizeChange(size)}
               className={
                 currentFontSize === size
-                  ? "rounded-[10px] bg-ink px-2.5 py-1.5 text-xs font-semibold text-background"
-                  : "rounded-[10px] border border-border bg-surface px-2.5 py-1.5 text-xs text-ink"
+                  ? "rounded-[10px] bg-ink px-2.5 py-1.5 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+                  : "rounded-[10px] border border-border bg-surface px-2.5 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
               }
             >
               {FONT_SIZE_LABELS[size]}
@@ -119,7 +119,7 @@ export function PreferencesCard({ version, language, versions, languages, fontSi
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-center justify-between py-2.5">
-      <span className="text-[13px] text-[#2c2218]">{label}</span>
+      <span className="text-[calc(13px*var(--font-scale))] text-[#2c2218]">{label}</span>
       {children}
     </div>
   );

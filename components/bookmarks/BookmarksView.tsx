@@ -41,8 +41,8 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
   return (
     <div className="flex min-h-full flex-col gap-[17px]">
       <header>
-        <div className="text-[20px] font-semibold text-text-primary">Destaques</div>
-        <p className="mt-0.5 text-xs text-text-muted">
+        <div className="text-[calc(20px*var(--font-scale))] font-semibold text-text-primary">Destaques</div>
+        <p className="mt-0.5 text-[calc(12px*var(--font-scale))] text-text-muted">
           {groups.length} {groups.length === 1 ? "versículo com atividade" : "versículos com atividade"}
         </p>
       </header>
@@ -52,8 +52,8 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
           onClick={() => setPersonFilter("all")}
           className={
             personFilter === "all"
-              ? "rounded-full bg-ink px-4 py-2 text-xs font-semibold text-background"
-              : "rounded-full border border-[#e0d3bf] px-4 py-2 text-xs font-semibold text-text-muted"
+              ? "rounded-full bg-ink px-4 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+              : "rounded-full border border-[#e0d3bf] px-4 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
           }
         >
           Todos
@@ -62,8 +62,8 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
           onClick={() => setPersonFilter(personFilter === currentUserId ? "all" : currentUserId)}
           className={
             personFilter === currentUserId
-              ? "rounded-full bg-ink px-4 py-2 text-xs font-semibold text-background"
-              : "rounded-full border border-[#e0d3bf] px-4 py-2 text-xs font-semibold text-text-muted"
+              ? "rounded-full bg-ink px-4 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+              : "rounded-full border border-[#e0d3bf] px-4 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
           }
         >
           Meus
@@ -74,8 +74,8 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
             onClick={() => setPersonFilter(personFilter === person.id ? "all" : person.id)}
             className={
               personFilter === person.id
-                ? "rounded-full bg-ink px-4 py-2 text-xs font-semibold text-background"
-                : "rounded-full border border-[#e0d3bf] px-4 py-2 text-xs font-semibold text-text-muted"
+                ? "rounded-full bg-ink px-4 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+                : "rounded-full border border-[#e0d3bf] px-4 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
             }
           >
             {person.name}
@@ -88,8 +88,8 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
           onClick={() => setColorFilter("all")}
           className={
             colorFilter === "all"
-              ? "rounded-full bg-ink px-4 py-2 text-xs font-semibold text-background"
-              : "rounded-full border border-[#e0d3bf] px-4 py-2 text-xs font-semibold text-text-muted"
+              ? "rounded-full bg-ink px-4 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+              : "rounded-full border border-[#e0d3bf] px-4 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
           }
         >
           Todas as cores
@@ -114,7 +114,7 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
         <select
           value={bookFilter}
           onChange={(event) => setBookFilter(event.target.value)}
-          className="rounded-[10px] border border-border bg-surface px-[13px] py-2.5 text-[13px] text-ink"
+          className="rounded-[10px] border border-border bg-surface px-[13px] py-2.5 text-[calc(13px*var(--font-scale))] text-ink"
         >
           <option value="all">Todos os livros</option>
           {books.map((book) => (
@@ -126,7 +126,7 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
       )}
 
       {visible.length === 0 ? (
-        <p className="text-sm text-text-muted">
+        <p className="text-[calc(14px*var(--font-scale))] text-text-muted">
           {groups.length === 0 ? "Nenhum destaque ainda." : "Nenhum destaque com esse filtro."}
         </p>
       ) : (
@@ -160,16 +160,16 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-[13px] font-semibold text-text-primary">
+                    <span className="text-[calc(13px*var(--font-scale))] font-semibold text-text-primary">
                       {group.bookName} {group.chapter}:{group.verse}
                     </span>
-                    <span className="shrink-0 text-[10px] text-text-muted">
+                    <span className="shrink-0 text-[calc(10px*var(--font-scale))] text-text-muted">
                       {formatRelativeTime(new Date(group.mostRecentAt))}
                     </span>
                   </div>
 
                   {group.verseText && (
-                    <div className="mt-0.5 truncate font-serif text-[13px] italic text-text-secondary">
+                    <div className="mt-0.5 truncate font-serif text-[calc(13px*var(--font-scale))] italic text-text-secondary">
                       {group.verseText}
                     </div>
                   )}
@@ -188,7 +188,7 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
                   )}
 
                   {latestComment && (
-                    <div className="mt-1.5 text-[12px] text-text-secondary">
+                    <div className="mt-1.5 text-[calc(12px*var(--font-scale))] text-text-secondary">
                       <span className="font-semibold text-text-primary">{latestComment.userName}: </span>
                       <span className="italic">{latestComment.content}</span>
                       {extraComments > 0 && (

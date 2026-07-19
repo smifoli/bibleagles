@@ -19,12 +19,12 @@ export default async function ResetPasswordPage({
       <AuthLayout
         title="Link inválido"
         footer={
-          <Link href="/forgot-password" className="text-[13px] text-link">
+          <Link href="/forgot-password" className="text-[calc(13px*var(--font-scale))] text-link">
             Solicitar novo link
           </Link>
         }
       >
-        <p className="text-sm text-text-secondary text-center">
+        <p className="text-[calc(14px*var(--font-scale))] text-text-secondary text-center">
           Esse link de redefinição de senha é inválido ou já expirou.
         </p>
       </AuthLayout>

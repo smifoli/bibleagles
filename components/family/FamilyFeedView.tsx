@@ -27,12 +27,12 @@ export function FamilyFeedView({
   return (
     <div className="flex min-h-full flex-col gap-[17px]">
       <header>
-        <div className="text-[20px] font-semibold text-text-primary">Família</div>
-        <p className="mt-0.5 text-xs text-text-muted">Atividade de todos os membros, em ordem cronológica</p>
+        <div className="text-[calc(20px*var(--font-scale))] font-semibold text-text-primary">Família</div>
+        <p className="mt-0.5 text-[calc(12px*var(--font-scale))] text-text-muted">Atividade de todos os membros, em ordem cronológica</p>
       </header>
 
       {items.length === 0 ? (
-        <p className="text-sm text-text-muted">Nenhuma atividade da família ainda.</p>
+        <p className="text-[calc(14px*var(--font-scale))] text-text-muted">Nenhuma atividade da família ainda.</p>
       ) : (
         <div className="flex flex-col gap-[15px]">
           {items.map((item) => (
@@ -45,12 +45,12 @@ export function FamilyFeedView({
                   className="mt-1.5 h-[7px] w-[7px] shrink-0 rounded-full"
                   style={{ backgroundColor: item.kind === "highlight" ? HIGHLIGHT_COLORS[item.color!].bg : "#c0ad94" }}
                 />
-                <div className="text-[13px] leading-[1.5] text-text-secondary">
+                <div className="text-[calc(13px*var(--font-scale))] leading-[1.5] text-text-secondary">
                   {describeActivity(item)}
                   {item.kind === "comment" ? (
-                    <div className="mt-0.5 font-serif text-[13px] italic text-text-muted">&quot;{item.quote}&quot;</div>
+                    <div className="mt-0.5 font-serif text-[calc(13px*var(--font-scale))] italic text-text-muted">&quot;{item.quote}&quot;</div>
                   ) : (
-                    <div className="mt-px text-[11px] text-[#a3927d]">{formatRelativeTime(new Date(item.createdAt))}</div>
+                    <div className="mt-px text-[calc(11px*var(--font-scale))] text-[#a3927d]">{formatRelativeTime(new Date(item.createdAt))}</div>
                   )}
                 </div>
               </Link>

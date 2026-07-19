@@ -8,12 +8,6 @@ export const FONT_SIZE_MULTIPLIER: Record<FontSizePreference, number> = {
   xlarge: 1.25,
 };
 
-export const FONT_SIZE_SCALE: Record<FontSizePreference, string> = {
-  normal: "100%",
-  large: "112%",
-  xlarge: "125%",
-};
-
 export const FONT_SIZE_LABELS: Record<FontSizePreference, string> = {
   normal: "Normal",
   large: "Grande",

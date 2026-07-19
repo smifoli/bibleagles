@@ -5,7 +5,7 @@ export function ReadingCalendar({ calendar }: { calendar: ReadingCalendarData })
     <div className="flex flex-col gap-3.5 rounded-[18px] border border-border bg-surface p-4">
       <div className="grid grid-cols-7 gap-[5px]">
         {calendar.weekdayLabels.map((label, index) => (
-          <span key={index} className="text-center text-[10px] font-semibold text-[#a3927d]">
+          <span key={index} className="text-center text-[calc(10px*var(--font-scale))] font-semibold text-[#a3927d]">
             {label}
           </span>
         ))}
@@ -15,7 +15,7 @@ export function ReadingCalendar({ calendar }: { calendar: ReadingCalendarData })
         {calendar.days.map((entry) => (
           <span
             key={entry.day}
-            className={`mx-auto flex h-7 w-7 items-center justify-center rounded-full text-[11px] ${
+            className={`mx-auto flex h-7 w-7 items-center justify-center rounded-full text-[calc(11px*var(--font-scale))] ${
               entry.status === "read"
                 ? "bg-ink font-semibold text-[#f5efe4]"
                 : entry.status === "today"
@@ -27,7 +27,7 @@ export function ReadingCalendar({ calendar }: { calendar: ReadingCalendarData })
           </span>
         ))}
       </div>
-      <p className="text-center text-xs text-text-muted">
+      <p className="text-center text-[calc(12px*var(--font-scale))] text-text-muted">
         {calendar.readCount} {calendar.readCount === 1 ? "dia lido" : "dias lidos"} em {calendar.monthNameLower}
       </p>
     </div>

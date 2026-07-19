@@ -55,9 +55,9 @@ function CommentBody({
       <Avatar name={comment.authorName} colorIndex={comment.authorColorIndex} size={avatarSize} />
       <div className="flex-1">
         <div className="flex items-baseline gap-[7px]">
-          <span className="text-xs font-semibold text-ink">{comment.authorName}</span>
-          <span className="text-[10px] text-text-muted">{formatRelativeTime(comment.createdAt)}</span>
-          {comment.isEdited && <span className="text-[10px] text-text-muted">· editado</span>}
+          <span className="text-[calc(12px*var(--font-scale))] font-semibold text-ink">{comment.authorName}</span>
+          <span className="text-[calc(10px*var(--font-scale))] text-text-muted">{formatRelativeTime(comment.createdAt)}</span>
+          {comment.isEdited && <span className="text-[calc(10px*var(--font-scale))] text-text-muted">· editado</span>}
         </div>
 
         {editing ? (
@@ -66,39 +66,39 @@ function CommentBody({
               value={editValue}
               onChange={(event) => onEditValueChange?.(event.target.value)}
               rows={2}
-              className="rounded-[10px] border border-input-border bg-background p-2.5 text-sm text-ink"
+              className="rounded-[10px] border border-input-border bg-background p-2.5 text-[calc(14px*var(--font-scale))] text-ink"
             />
             <div className="flex items-center gap-3">
-              <button type="button" onClick={onSaveEdit} className="text-[11px] font-semibold text-ink">
+              <button type="button" onClick={onSaveEdit} className="text-[calc(11px*var(--font-scale))] font-semibold text-ink">
                 Salvar
               </button>
-              <button type="button" onClick={onCancelEdit} className="text-[11px] font-semibold text-text-muted">
+              <button type="button" onClick={onCancelEdit} className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted">
                 Cancelar
               </button>
             </div>
           </div>
         ) : (
           <>
-            <div className="mt-0.5 font-serif text-sm text-text-secondary">{comment.content}</div>
+            <div className="mt-0.5 font-serif text-[calc(14px*var(--font-scale))] text-text-secondary">{comment.content}</div>
             <div className="mt-1.5 flex items-center gap-3">
               <button
                 type="button"
                 onClick={onToggleLike}
-                className={`text-[11px] font-semibold ${comment.likedByMe ? "text-ink" : "text-text-muted"}`}
+                className={`text-[calc(11px*var(--font-scale))] font-semibold ${comment.likedByMe ? "text-ink" : "text-text-muted"}`}
               >
                 {comment.likedByMe ? "♥" : "♡"} {comment.likeCount ? comment.likeCount : ""}
               </button>
               {onReply && (
-                <button type="button" onClick={onReply} className="text-[11px] font-semibold text-text-muted">
+                <button type="button" onClick={onReply} className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted">
                   Responder
                 </button>
               )}
               {comment.isOwn && (
                 <>
-                  <button type="button" onClick={onEdit} className="text-[11px] font-semibold text-text-muted">
+                  <button type="button" onClick={onEdit} className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted">
                     Editar
                   </button>
-                  <button type="button" onClick={onDelete} className="text-[11px] font-semibold text-text-muted">
+                  <button type="button" onClick={onDelete} className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted">
                     Apagar
                   </button>
                 </>

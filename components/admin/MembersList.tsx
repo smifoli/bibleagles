@@ -12,10 +12,10 @@ const AVATAR_COLORS: { bg: string; text: string }[] = [
 export function MembersList({ members, currentUserId }: { members: AdminMember[]; currentUserId: string }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">Membros</div>
+      <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Membros</div>
       <div className="flex flex-col rounded-[18px] border border-border bg-surface p-4">
         {members.length === 0 ? (
-          <p className="text-sm text-text-muted">Nenhum membro encontrado.</p>
+          <p className="text-[calc(14px*var(--font-scale))] text-text-muted">Nenhum membro encontrado.</p>
         ) : (
           members.map((member, index) => (
             <MemberRow

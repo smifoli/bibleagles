@@ -23,19 +23,19 @@ export function ActivityDeleteButton({ kind, id }: { kind: "comment" | "highligh
     return (
       <div className="flex shrink-0 flex-col items-end gap-0.5">
         <div className="flex items-center gap-2">
-          <button type="button" onClick={handleDelete} disabled={pending} className="text-[11px] font-semibold text-error">
+          <button type="button" onClick={handleDelete} disabled={pending} className="text-[calc(11px*var(--font-scale))] font-semibold text-error">
             Confirmar
           </button>
           <button
             type="button"
             onClick={() => setConfirming(false)}
             disabled={pending}
-            className="text-[11px] font-semibold text-text-muted"
+            className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted"
           >
             Cancelar
           </button>
         </div>
-        {error && <span className="text-[10px] text-error">{error}</span>}
+        {error && <span className="text-[calc(10px*var(--font-scale))] text-error">{error}</span>}
       </div>
     );
   }
@@ -45,7 +45,7 @@ export function ActivityDeleteButton({ kind, id }: { kind: "comment" | "highligh
       type="button"
       onClick={() => setConfirming(true)}
       aria-label="Apagar"
-      className="shrink-0 px-1 text-sm font-semibold text-text-muted"
+      className="shrink-0 px-1 text-[calc(14px*var(--font-scale))] font-semibold text-text-muted"
     >
       ×
     </button>

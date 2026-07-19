@@ -45,7 +45,7 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
   return (
     <div className="flex min-h-full flex-col gap-[17px]">
       <header className="flex items-center justify-between">
-        <div className="text-[20px] font-semibold text-text-primary">Bíblia</div>
+        <div className="text-[calc(20px*var(--font-scale))] font-semibold text-text-primary">Bíblia</div>
         <VersionSelect version={version} versions={versions} />
       </header>
 
@@ -55,7 +55,7 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={handleSearchKeyDown}
           placeholder="Buscar referência — João 3:16"
-          className="w-full rounded-[10px] border border-border bg-surface px-[13px] py-2.5 text-[13px] text-ink placeholder:text-text-muted"
+          className="w-full rounded-[10px] border border-border bg-surface px-[13px] py-2.5 text-[calc(13px*var(--font-scale))] text-ink placeholder:text-text-muted"
         />
         {suggestions.length > 0 && query && (
           <div className="absolute inset-x-0 top-full z-10 mt-1.5 flex flex-col overflow-hidden rounded-[10px] border border-border bg-surface shadow-sm">
@@ -63,7 +63,7 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
               <button
                 key={suggestion.id}
                 onClick={() => goToBook(suggestion.id)}
-                className="px-[13px] py-2.5 text-left text-[13px] text-ink hover:bg-background"
+                className="px-[13px] py-2.5 text-left text-[calc(13px*var(--font-scale))] text-ink hover:bg-background"
               >
                 {suggestion.name}
               </button>
@@ -77,8 +77,8 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
           onClick={() => setTestament("AT")}
           className={
             testament === "AT"
-              ? "rounded-full bg-ink px-5 py-2 text-xs font-semibold text-background"
-              : "rounded-full border border-[#e0d3bf] px-5 py-2 text-xs font-semibold text-text-muted"
+              ? "rounded-full bg-ink px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+              : "rounded-full border border-[#e0d3bf] px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
           }
         >
           Antigo
@@ -87,8 +87,8 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
           onClick={() => setTestament("NT")}
           className={
             testament === "NT"
-              ? "rounded-full bg-ink px-5 py-2 text-xs font-semibold text-background"
-              : "rounded-full border border-[#e0d3bf] px-5 py-2 text-xs font-semibold text-text-muted"
+              ? "rounded-full bg-ink px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+              : "rounded-full border border-[#e0d3bf] px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
           }
         >
           Novo Testamento
@@ -97,7 +97,7 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
 
       {sections.map((section) => (
         <div key={section.label} className="flex flex-col gap-2">
-          <div className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">{section.label}</div>
+          <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">{section.label}</div>
           <div className="grid grid-cols-2 gap-2">
             {section.books.map((book) => {
               const hasActivity = book.commentCount > 0 || book.highlightCount > 0;
@@ -111,10 +111,10 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
                       : "rounded-[14px] border border-border bg-surface p-[13px] text-left"
                   }
                 >
-                  <div className="text-sm font-semibold text-text-primary">{book.name}</div>
-                  <div className="mt-0.5 text-[11px] text-text-muted">{book.chapterCount} capítulos</div>
+                  <div className="text-[calc(14px*var(--font-scale))] font-semibold text-text-primary">{book.name}</div>
+                  <div className="mt-0.5 text-[calc(11px*var(--font-scale))] text-text-muted">{book.chapterCount} capítulos</div>
                   {hasActivity && (
-                    <div className="mt-[7px] text-[11px] text-[#7d6c58]">
+                    <div className="mt-[7px] text-[calc(11px*var(--font-scale))] text-[#7d6c58]">
                       {[
                         book.commentCount > 0 ? `${book.commentCount} ${book.commentCount === 1 ? "comentário" : "comentários"}` : null,
                         book.highlightCount > 0 ? `${book.highlightCount} ${book.highlightCount === 1 ? "destaque" : "destaques"}` : null,

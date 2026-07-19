@@ -25,7 +25,7 @@ export function CalendarGrid({ weekdayLabels, leadingBlanks, days, onSelectDay }
   return (
     <div className="grid grid-cols-7 gap-[5px]">
       {weekdayLabels.map((label, index) => (
-        <span key={index} className="text-center text-[10px] font-semibold text-[#a3927d]">
+        <span key={index} className="text-center text-[calc(10px*var(--font-scale))] font-semibold text-[#a3927d]">
           {label}
         </span>
       ))}
@@ -33,7 +33,7 @@ export function CalendarGrid({ weekdayLabels, leadingBlanks, days, onSelectDay }
         <span key={`blank-${index}`} />
       ))}
       {days.map((entry) => {
-        const dayClasses = `mx-auto flex h-7 w-7 items-center justify-center rounded-full text-[11px] ${STATUS_CLASSES[entry.status]}`;
+        const dayClasses = `mx-auto flex h-7 w-7 items-center justify-center rounded-full text-[calc(11px*var(--font-scale))] ${STATUS_CLASSES[entry.status]}`;
 
         if (onSelectDay) {
           return (

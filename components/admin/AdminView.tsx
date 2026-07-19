@@ -23,10 +23,10 @@ export function AdminView({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-[20px] font-semibold text-text-primary">Admin</h1>
+        <h1 className="text-[calc(20px*var(--font-scale))] font-semibold text-text-primary">Admin</h1>
         <Link
           href="/admin/package/new"
-          className="rounded-full border border-input-border px-4 py-[9px] text-xs font-semibold text-text-secondary"
+          className="rounded-full border border-input-border px-4 py-[9px] text-[calc(12px*var(--font-scale))] font-semibold text-text-secondary"
         >
           + Novo pacote
         </Link>
@@ -38,8 +38,8 @@ export function AdminView({
           onClick={() => setTab("pacotes")}
           className={
             tab === "pacotes"
-              ? "rounded-full bg-ink px-5 py-2 text-xs font-semibold text-background"
-              : "rounded-full border border-input-border px-5 py-2 text-xs font-semibold text-text-muted"
+              ? "rounded-full bg-ink px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+              : "rounded-full border border-input-border px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
           }
         >
           Pacotes
@@ -49,8 +49,8 @@ export function AdminView({
           onClick={() => setTab("membros")}
           className={
             tab === "membros"
-              ? "rounded-full bg-ink px-5 py-2 text-xs font-semibold text-background"
-              : "rounded-full border border-input-border px-5 py-2 text-xs font-semibold text-text-muted"
+              ? "rounded-full bg-ink px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+              : "rounded-full border border-input-border px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
           }
         >
           Membros

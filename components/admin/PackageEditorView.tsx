@@ -64,30 +64,30 @@ export function PackageEditorView({ mode, packageId, initial, bookChapterCounts 
   return (
     <div className="flex flex-col gap-6">
       <header className="flex items-center gap-3">
-        <Link href="/admin" aria-label="Voltar" className="text-lg text-text-muted">
+        <Link href="/admin" aria-label="Voltar" className="text-[calc(18px*var(--font-scale))] text-text-muted">
           ←
         </Link>
-        <h1 className="text-[17px] font-semibold text-text-primary">
+        <h1 className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">
           {mode === "edit" ? "Editar pacote" : "Novo pacote"}
         </h1>
       </header>
 
       <div className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[1.5px] text-text-muted">Nome</span>
+          <span className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[1.5px] text-text-muted">Nome</span>
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            className="rounded-[10px] border border-input-border bg-surface px-3 py-2.5 text-[13px] text-ink"
+            className="rounded-[10px] border border-input-border bg-surface px-3 py-2.5 text-[calc(13px*var(--font-scale))] text-ink"
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[1.5px] text-text-muted">Descrição</span>
+          <span className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[1.5px] text-text-muted">Descrição</span>
           <textarea
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             rows={2}
-            className="rounded-[10px] border border-input-border bg-surface px-3 py-2.5 text-[13px] text-ink"
+            className="rounded-[10px] border border-input-border bg-surface px-3 py-2.5 text-[calc(13px*var(--font-scale))] text-ink"
           />
         </label>
       </div>
@@ -100,8 +100,8 @@ export function PackageEditorView({ mode, packageId, initial, bookChapterCounts 
               onClick={() => setType("auto")}
               className={
                 type === "auto"
-                  ? "rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-background"
-                  : "rounded-full border border-input-border px-4 py-1.5 text-xs font-semibold text-text-muted"
+                  ? "rounded-full bg-ink px-4 py-1.5 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+                  : "rounded-full border border-input-border px-4 py-1.5 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
               }
             >
               Automático
@@ -111,8 +111,8 @@ export function PackageEditorView({ mode, packageId, initial, bookChapterCounts 
               onClick={() => setType("manual")}
               className={
                 type === "manual"
-                  ? "rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-background"
-                  : "rounded-full border border-input-border px-4 py-1.5 text-xs font-semibold text-text-muted"
+                  ? "rounded-full bg-ink px-4 py-1.5 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+                  : "rounded-full border border-input-border px-4 py-1.5 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
               }
             >
               Manual
@@ -122,7 +122,7 @@ export function PackageEditorView({ mode, packageId, initial, bookChapterCounts 
           {type === "auto" ? (
             <div className="flex flex-col gap-2.5">
               <label className="flex flex-col gap-1">
-                <span className="text-[9px] font-semibold uppercase tracking-[1px] text-text-muted">Livro</span>
+                <span className="text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1px] text-text-muted">Livro</span>
                 <select
                   value={autoBook}
                   onChange={(event) => {
@@ -131,7 +131,7 @@ export function PackageEditorView({ mode, packageId, initial, bookChapterCounts 
                     setAutoChapterStart(1);
                     setAutoChapterEnd(bookChapterCounts[bookId] ?? 1);
                   }}
-                  className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-xs text-ink"
+                  className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
                 >
                   {BOOK_ORDER.map((bookId) => (
                     <option key={bookId} value={bookId}>
@@ -143,46 +143,46 @@ export function PackageEditorView({ mode, packageId, initial, bookChapterCounts 
 
               <div className="grid grid-cols-3 gap-2">
                 <label className="flex flex-col gap-1">
-                  <span className="text-[9px] font-semibold uppercase tracking-[1px] text-text-muted">Cap. início</span>
+                  <span className="text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1px] text-text-muted">Cap. início</span>
                   <input
                     type="number"
                     min={1}
                     max={bookChapterCounts[autoBook] ?? 1}
                     value={autoChapterStart}
                     onChange={(event) => setAutoChapterStart(Number(event.target.value) || 1)}
-                    className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-xs text-ink"
+                    className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
                   />
                 </label>
                 <label className="flex flex-col gap-1">
-                  <span className="text-[9px] font-semibold uppercase tracking-[1px] text-text-muted">Cap. fim</span>
+                  <span className="text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1px] text-text-muted">Cap. fim</span>
                   <input
                     type="number"
                     min={1}
                     max={bookChapterCounts[autoBook] ?? 1}
                     value={autoChapterEnd}
                     onChange={(event) => setAutoChapterEnd(Number(event.target.value) || 1)}
-                    className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-xs text-ink"
+                    className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
                   />
                 </label>
                 <label className="flex flex-col gap-1">
-                  <span className="text-[9px] font-semibold uppercase tracking-[1px] text-text-muted">Cap./dia</span>
+                  <span className="text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1px] text-text-muted">Cap./dia</span>
                   <input
                     type="number"
                     min={1}
                     value={autoPace}
                     onChange={(event) => setAutoPace(Number(event.target.value) || 1)}
-                    className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-xs text-ink"
+                    className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
                   />
                 </label>
               </div>
 
               <label className="flex flex-col gap-1">
-                <span className="text-[9px] font-semibold uppercase tracking-[1px] text-text-muted">Data de início</span>
+                <span className="text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1px] text-text-muted">Data de início</span>
                 <input
                   type="date"
                   value={autoStartDate}
                   onChange={(event) => setAutoStartDate(event.target.value)}
-                  className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-xs text-ink"
+                  className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
                 />
               </label>
 
@@ -191,7 +191,7 @@ export function PackageEditorView({ mode, packageId, initial, bookChapterCounts 
               </Button>
             </div>
           ) : (
-            <p className="text-xs text-text-muted">
+            <p className="text-[calc(12px*var(--font-scale))] text-text-muted">
               Use "+ Adicionar dia" abaixo pra montar o pacote dia a dia.
             </p>
           )}
@@ -200,7 +200,7 @@ export function PackageEditorView({ mode, packageId, initial, bookChapterCounts 
 
       <PackageDayList days={days} onChange={setDays} />
 
-      {error && <p className="text-xs text-error">{error}</p>}
+      {error && <p className="text-[calc(12px*var(--font-scale))] text-error">{error}</p>}
 
       <div className="flex flex-col gap-2.5">
         <Button type="button" variant="primary" disabled={pending} onClick={() => handleSave("active")}>

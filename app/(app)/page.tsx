@@ -17,10 +17,10 @@ export default async function HomePage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-[22px] font-semibold tracking-[-0.5px] text-text-primary">
+          <h1 className="text-[calc(22px*var(--font-scale))] font-semibold tracking-[-0.5px] text-text-primary">
             {getGreeting(now)}, {userName}
           </h1>
-          <p className="mt-0.5 text-xs text-text-muted">{formatGreetingDate(now)}</p>
+          <p className="mt-0.5 text-[calc(12px*var(--font-scale))] text-text-muted">{formatGreetingDate(now)}</p>
         </div>
         <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-input-border bg-[#ece3d6]">
           <img src="/logo.svg" alt="" width={32} height={32} className="h-full w-full object-cover" />
@@ -28,7 +28,7 @@ export default async function HomePage() {
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">
+        <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
           Pacotes ativos
         </div>
         {featured ? (

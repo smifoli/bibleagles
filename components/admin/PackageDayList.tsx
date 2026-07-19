@@ -53,16 +53,16 @@ export function PackageDayList({ days, onChange }: PackageDayListProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">
+        <span className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
           Dias do pacote ({days.length})
         </span>
-        <button type="button" onClick={addDay} className="text-[11px] font-semibold text-ink">
+        <button type="button" onClick={addDay} className="text-[calc(11px*var(--font-scale))] font-semibold text-ink">
           + Adicionar dia
         </button>
       </div>
 
       {days.length === 0 && (
-        <p className="rounded-[14px] border border-border bg-surface px-4 py-6 text-center text-xs text-text-muted">
+        <p className="rounded-[14px] border border-border bg-surface px-4 py-6 text-center text-[calc(12px*var(--font-scale))] text-text-muted">
           Nenhum dia ainda. Gere automaticamente acima ou adicione um dia manual.
         </p>
       )}
@@ -74,13 +74,13 @@ export function PackageDayList({ days, onChange }: PackageDayListProps) {
               type="date"
               value={day.date}
               onChange={(event) => updateDay(index, { date: event.target.value })}
-              className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-xs text-ink"
+              className="rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
             />
             <input
               value={day.title}
               onChange={(event) => updateDay(index, { title: event.target.value })}
               placeholder="Título do dia"
-              className="flex-1 rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-xs text-ink"
+              className="flex-1 rounded-[8px] border border-input-border bg-background px-2 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
             />
           </div>
 
@@ -99,18 +99,18 @@ export function PackageDayList({ days, onChange }: PackageDayListProps) {
             <button
               type="button"
               onClick={() => updateDay(index, { passages: [...day.passages, blankPassage()] })}
-              className="text-[11px] font-semibold text-text-muted"
+              className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted"
             >
               + Adicionar passagem
             </button>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={() => moveDay(index, -1)} disabled={index === 0} className="text-[11px] font-semibold text-text-muted disabled:opacity-30">
+              <button type="button" onClick={() => moveDay(index, -1)} disabled={index === 0} className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted disabled:opacity-30">
                 ↑
               </button>
-              <button type="button" onClick={() => moveDay(index, 1)} disabled={index === days.length - 1} className="text-[11px] font-semibold text-text-muted disabled:opacity-30">
+              <button type="button" onClick={() => moveDay(index, 1)} disabled={index === days.length - 1} className="text-[calc(11px*var(--font-scale))] font-semibold text-text-muted disabled:opacity-30">
                 ↓
               </button>
-              <button type="button" onClick={() => removeDay(index)} className="text-[11px] font-semibold text-error">
+              <button type="button" onClick={() => removeDay(index)} className="text-[calc(11px*var(--font-scale))] font-semibold text-error">
                 Remover dia
               </button>
             </div>

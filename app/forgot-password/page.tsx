@@ -11,7 +11,7 @@ export default function ForgotPasswordPage({
   searchParams: { error?: string; sent?: string };
 }) {
   const backToLogin = (
-    <Link href="/login" className="text-[13px] text-link">
+    <Link href="/login" className="text-[calc(13px*var(--font-scale))] text-link">
       Voltar para Entrar
     </Link>
   );
@@ -19,7 +19,7 @@ export default function ForgotPasswordPage({
   if (searchParams.sent) {
     return (
       <AuthLayout title="Verifique seu e-mail" footer={backToLogin}>
-        <p className="text-sm text-text-secondary text-center">
+        <p className="text-[calc(14px*var(--font-scale))] text-text-secondary text-center">
           Se esse e-mail estiver cadastrado, enviamos um link para redefinir sua senha.
         </p>
       </AuthLayout>

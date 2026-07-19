@@ -20,10 +20,10 @@ export function BookCard({ name, chapterCount, commentCount = 0, highlightCount 
           : "rounded-[14px] border border-border bg-surface p-[13px] text-left"
       }
     >
-      <div className="text-sm font-semibold text-text-primary">{name}</div>
-      <div className="mt-0.5 text-[11px] text-text-muted">{chapterCount} capítulos</div>
+      <div className="text-[calc(14px*var(--font-scale))] font-semibold text-text-primary">{name}</div>
+      <div className="mt-0.5 text-[calc(11px*var(--font-scale))] text-text-muted">{chapterCount} capítulos</div>
       {hasActivity && (
-        <div className="mt-[7px] text-[11px] text-[#7d6c58]">
+        <div className="mt-[7px] text-[calc(11px*var(--font-scale))] text-[#7d6c58]">
           {[
             commentCount > 0 ? `${commentCount} ${commentCount === 1 ? "comentário" : "comentários"}` : null,
             highlightCount > 0 ? `${highlightCount} ${highlightCount === 1 ? "destaque" : "destaques"}` : null,

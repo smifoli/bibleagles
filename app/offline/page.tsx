@@ -5,10 +5,10 @@ export default function OfflinePage() {
         <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
           Você está offline
         </h1>
-        <p className="mt-2 text-sm text-text-secondary">
+        <p className="mt-2 text-[calc(14px*var(--font-scale))] text-text-secondary">
           Não foi possível carregar esta página. Verifique sua conexão e tente novamente.
         </p>
-        <p className="mt-6 text-sm text-text-muted font-serif italic">
+        <p className="mt-6 text-[calc(14px*var(--font-scale))] text-text-muted font-serif italic">
           "Aqueles que esperam no Senhor renovam as suas forças." — Is 40:31
         </p>
       </div>

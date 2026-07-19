@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Spectral } from "next/font/google";
 import { cookies } from "next/headers";
-import { FONT_SIZE_COOKIE, FONT_SIZE_SCALE, isFontSizePreference } from "@/lib/font-size";
+import { FONT_SIZE_COOKIE, FONT_SIZE_MULTIPLIER, isFontSizePreference } from "@/lib/font-size";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -60,13 +60,11 @@ export default async function RootLayout({
     <html
       lang="pt-BR"
       className={`${spaceGrotesk.variable} ${spectral.variable}`}
-      // A maioria do texto do app usa tamanhos fixos em px (text-[13px] etc,
-      // não rem) — mudar o font-size do <html> só afetaria as poucas classes
-      // relativas (text-sm/text-xs). `zoom` escala tudo dentro do elemento
-      // (texto, ícones, espaçamento) independente da unidade, feito sob medida
-      // pra esse caso — é o mesmo mecanismo do zoom nativo do navegador, só
-      // que aplicado por CSS.
-      style={{ zoom: FONT_SIZE_SCALE[fontSize] }}
+      // A maioria do texto do app usa tamanhos fixos em px (text-[calc(13px*var(--font-scale))] etc,
+      // não rem), então cada um desses foi reescrito pra
+      // text-[calc(Npx*var(--font-scale))] — essa variável é o único lugar
+      // que muda com a preferência. Só escala fonte, nada de bordas/ícones.
+      style={{ "--font-scale": FONT_SIZE_MULTIPLIER[fontSize] } as React.CSSProperties}
     >
       <body>{children}</body>
     </html>

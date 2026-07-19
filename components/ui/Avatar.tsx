@@ -15,9 +15,9 @@ export const AVATAR_PALETTE: AvatarColorStyle[] = [
 export const AVATAR_PENDING_STYLE: AvatarColorStyle = { bg: "#e2d8c6", text: "#a08e78" };
 
 const SIZE_CLASSES = {
-  sm: "h-[22px] w-[22px] text-[10px]",
-  md: "h-[27px] w-[27px] text-[11px]",
-  lg: "h-[68px] w-[68px] text-[26px] border-2 border-[#cdbfac]",
+  sm: "h-[22px] w-[22px] text-[calc(10px*var(--font-scale))]",
+  md: "h-[27px] w-[27px] text-[calc(11px*var(--font-scale))]",
+  lg: "h-[68px] w-[68px] text-[calc(26px*var(--font-scale))] border-2 border-[#cdbfac]",
 } as const;
 
 export type AvatarSize = keyof typeof SIZE_CLASSES;

@@ -28,7 +28,7 @@ export function ProfileHeader({ name, email }: { name: string; email: string }) 
 
   return (
     <div className="flex flex-col items-center gap-2.5 py-1 pb-2">
-      <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full border-2 border-[#cdbfac] bg-[#b5723e] text-[26px] font-bold text-[#f5efe4]">
+      <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full border-2 border-[#cdbfac] bg-[#b5723e] text-[calc(26px*var(--font-scale))] font-bold text-[#f5efe4]">
         {initial}
       </div>
 
@@ -38,22 +38,22 @@ export function ProfileHeader({ name, email }: { name: string; email: string }) 
             autoFocus
             value={value}
             onChange={(event) => setValue(event.target.value)}
-            className="w-full rounded-[10px] border border-input-border bg-background px-3 py-2 text-center text-[13px] text-ink focus:border-ink focus:outline-none"
+            className="w-full rounded-[10px] border border-input-border bg-background px-3 py-2 text-center text-[calc(13px*var(--font-scale))] text-ink focus:border-ink focus:outline-none"
           />
-          {error && <p className="text-xs text-error">{error}</p>}
+          {error && <p className="text-[calc(12px*var(--font-scale))] text-error">{error}</p>}
           <div className="flex gap-2">
             <button
               type="button"
               onClick={handleSave}
               disabled={isPending}
-              className="rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-background disabled:opacity-60"
+              className="rounded-full bg-ink px-4 py-1.5 text-[calc(12px*var(--font-scale))] font-semibold text-background disabled:opacity-60"
             >
               Salvar
             </button>
             <button
               type="button"
               onClick={handleCancel}
-              className="rounded-full border border-input-border px-4 py-1.5 text-xs font-semibold text-text-secondary"
+              className="rounded-full border border-input-border px-4 py-1.5 text-[calc(12px*var(--font-scale))] font-semibold text-text-secondary"
             >
               Cancelar
             </button>
@@ -62,13 +62,13 @@ export function ProfileHeader({ name, email }: { name: string; email: string }) 
       ) : (
         <>
           <div className="text-center">
-            <div className="text-lg font-semibold text-text-primary">{name}</div>
-            <div className="mt-0.5 text-xs text-text-muted">{email}</div>
+            <div className="text-[calc(18px*var(--font-scale))] font-semibold text-text-primary">{name}</div>
+            <div className="mt-0.5 text-[calc(12px*var(--font-scale))] text-text-muted">{email}</div>
           </div>
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="rounded-full border border-input-border px-[18px] py-2 text-xs font-semibold text-text-secondary"
+            className="rounded-full border border-input-border px-[18px] py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-secondary"
           >
             Editar perfil
           </button>

@@ -23,14 +23,14 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-[20px] font-semibold text-text-primary">Perfil</h1>
+      <h1 className="text-[calc(20px*var(--font-scale))] font-semibold text-text-primary">Perfil</h1>
 
       <ProfileHeader name={profile.name} email={profile.email} />
 
       {profile.role === "admin" ? (
         <Link
           href="/admin"
-          className="self-center rounded-full border border-input-border px-4 py-2 text-xs font-semibold text-text-secondary"
+          className="self-center rounded-full border border-input-border px-4 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-secondary"
         >
           Painel admin
         </Link>
@@ -39,7 +39,7 @@ export default async function ProfilePage() {
       <div className="h-px bg-border" />
 
       <div className="flex flex-col gap-2">
-        <div className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">Preferências</div>
+        <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Preferências</div>
         <PreferencesCard
           version={profile.preferredVersion}
           language={profile.preferredLanguage}
@@ -50,12 +50,12 @@ export default async function ProfilePage() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">Notificações</div>
+        <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Notificações</div>
         <NotificationsCard enabled={profile.notificationEnabled} time={profile.notificationTime} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">
+        <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
           Leitura · {calendar.monthLabel}
         </div>
         <ReadingCalendar calendar={calendar} />

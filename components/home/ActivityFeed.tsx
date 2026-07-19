@@ -26,16 +26,16 @@ export function ActivityFeed({
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">
+        <span className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
           Atividade recente
         </span>
-        <Link href="/family" className="text-xs text-link">
+        <Link href="/family" className="text-[calc(12px*var(--font-scale))] text-link">
           Ver tudo
         </Link>
       </div>
 
       {items.length === 0 ? (
-        <p className="text-sm text-text-muted">Nenhuma atividade da família ainda.</p>
+        <p className="text-[calc(14px*var(--font-scale))] text-text-muted">Nenhuma atividade da família ainda.</p>
       ) : (
         <div className="flex flex-col gap-[15px]">
           {items.map((item, index) => (
@@ -49,12 +49,12 @@ export function ActivityFeed({
                     index === 0 ? "bg-ink" : "bg-[#c0ad94]"
                   }`}
                 />
-                <div className="text-[13px] leading-[1.5] text-text-secondary">
+                <div className="text-[calc(13px*var(--font-scale))] leading-[1.5] text-text-secondary">
                   {describeActivity(item)}
                   {item.kind === "comment" ? (
-                    <div className="mt-0.5 font-serif text-[13px] italic text-text-muted">"{item.quote}"</div>
+                    <div className="mt-0.5 font-serif text-[calc(13px*var(--font-scale))] italic text-text-muted">"{item.quote}"</div>
                   ) : (
-                    <div className="mt-px text-[11px] text-[#a3927d]">
+                    <div className="mt-px text-[calc(11px*var(--font-scale))] text-[#a3927d]">
                       {formatRelativeTime(new Date(item.createdAt))}
                     </div>
                   )}

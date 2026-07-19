@@ -15,10 +15,10 @@ export default function LoginPage({
       title="Entrar"
       footer={
         <div className="flex flex-col items-center gap-2">
-          <Link href="/forgot-password" className="text-[13px] text-link">
+          <Link href="/forgot-password" className="text-[calc(13px*var(--font-scale))] text-link">
             Esqueci minha senha
           </Link>
-          <Link href="/register" className="text-[13px] text-link">
+          <Link href="/register" className="text-[calc(13px*var(--font-scale))] text-link">
             Não tenho conta? Criar conta
           </Link>
         </div>

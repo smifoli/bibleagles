@@ -20,7 +20,7 @@ export function BottomNav() {
         return (
           <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1.5">
             <span className={`h-0.5 w-[18px] rounded-full ${isActive ? "bg-ink" : "bg-transparent"}`} />
-            <span className={`text-[11px] font-medium ${isActive ? "text-ink" : "text-[#a3927d]"}`}>
+            <span className={`text-[calc(11px*var(--font-scale))] font-medium ${isActive ? "text-ink" : "text-[#a3927d]"}`}>
               {item.label}
             </span>
           </Link>

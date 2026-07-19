@@ -8,7 +8,7 @@ function SectionLabel({ label, dotColor }: { label: string; dotColor?: string })
   return (
     <div className="flex items-center gap-1.5">
       {dotColor && <span className="h-[7px] w-[7px] rounded-full" style={{ backgroundColor: dotColor }} />}
-      <span className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">{label}</span>
+      <span className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">{label}</span>
     </div>
   );
 }
@@ -20,8 +20,8 @@ export function PackagesOverview({ overview }: { overview: AdminPackagesOverview
   if (isEmpty) {
     return (
       <div className="flex flex-col items-center gap-1 rounded-[18px] border border-border bg-surface px-4 py-10 text-center">
-        <p className="text-sm font-semibold text-text-primary">Nenhum pacote ainda</p>
-        <p className="text-xs text-text-muted">Use "+ Novo pacote" acima pra criar o primeiro.</p>
+        <p className="text-[calc(14px*var(--font-scale))] font-semibold text-text-primary">Nenhum pacote ainda</p>
+        <p className="text-[calc(12px*var(--font-scale))] text-text-muted">Use "+ Novo pacote" acima pra criar o primeiro.</p>
       </div>
     );
   }
@@ -50,7 +50,7 @@ export function PackagesOverview({ overview }: { overview: AdminPackagesOverview
         <div className="flex flex-col gap-2.5">
           <button type="button" onClick={() => setArchivedOpen((open) => !open)} className="flex items-center justify-between">
             <SectionLabel label={`Arquivados (${overview.archived.length})`} />
-            <span className="text-xs text-text-muted">{archivedOpen ? "▾" : "▸"}</span>
+            <span className="text-[calc(12px*var(--font-scale))] text-text-muted">{archivedOpen ? "▾" : "▸"}</span>
           </button>
           {archivedOpen && overview.archived.map((summary) => <PackageCard key={summary.id} summary={summary} />)}
         </div>
