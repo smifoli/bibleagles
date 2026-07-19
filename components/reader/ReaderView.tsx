@@ -11,8 +11,10 @@ import { addComment, deleteComment, editComment, markPlanDayRead, toggleCommentL
 import type { ReaderComment, ReaderData } from "@/lib/reader-data";
 import type { HighlightColor } from "@/types/database";
 
-const FONT_SIZES = { sm: "14px", md: "16px", lg: "19px" } as const;
-type FontSize = keyof typeof FONT_SIZES;
+const VERSE_FONT_MIN = 14;
+const VERSE_FONT_MAX = 32;
+const VERSE_FONT_STEP = 2;
+const VERSE_FONT_DEFAULT = 16;
 
 interface ReaderViewProps {
   book: string;
@@ -38,7 +40,7 @@ export function ReaderView({
   nextHref,
 }: ReaderViewProps) {
   const router = useRouter();
-  const [fontSize, setFontSize] = useState<FontSize>("md");
+  const [verseFontSize, setVerseFontSize] = useState(VERSE_FONT_DEFAULT);
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
   const [commentDraft, setCommentDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -87,6 +89,14 @@ export function ReaderView({
       }
       router.push(`${url.pathname}${url.search}`);
     });
+  }
+
+  function handleDecreaseFont() {
+    setVerseFontSize((size) => Math.max(VERSE_FONT_MIN, size - VERSE_FONT_STEP));
+  }
+
+  function handleIncreaseFont() {
+    setVerseFontSize((size) => Math.min(VERSE_FONT_MAX, size + VERSE_FONT_STEP));
   }
 
   function handleSelectColor(verseNumber: number, color: HighlightColor, currentColor: HighlightColor | null) {
@@ -332,20 +342,24 @@ export function ReaderView({
         </select>
       </header>
 
-      <div className="flex items-center gap-2">
-        {(["sm", "md", "lg"] as const).map((size) => (
-          <button
-            key={size}
-            onClick={() => setFontSize(size)}
-            className={
-              fontSize === size
-                ? "rounded-lg bg-ink px-[9px] py-1 text-[calc(13px*var(--font-scale))] font-semibold text-background"
-                : `rounded-lg border border-input-border px-[9px] py-1 font-semibold text-text-muted ${size === "lg" ? "text-[calc(15px*var(--font-scale))]" : "text-[calc(11px*var(--font-scale))]"}`
-            }
-          >
-            {size === "sm" ? "A−" : size === "md" ? "A" : "A+"}
-          </button>
-        ))}
+      <div className="flex items-center gap-2.5">
+        <button
+          onClick={handleDecreaseFont}
+          disabled={verseFontSize <= VERSE_FONT_MIN}
+          aria-label="Diminuir letra"
+          className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(11px*var(--font-scale))] font-semibold text-text-muted disabled:opacity-40"
+        >
+          A−
+        </button>
+        <span className="text-[calc(11px*var(--font-scale))] text-text-muted">{verseFontSize}px</span>
+        <button
+          onClick={handleIncreaseFont}
+          disabled={verseFontSize >= VERSE_FONT_MAX}
+          aria-label="Aumentar letra"
+          className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(15px*var(--font-scale))] font-semibold text-text-muted disabled:opacity-40"
+        >
+          A+
+        </button>
       </div>
 
       <div className="h-px bg-border" />
@@ -368,7 +382,7 @@ export function ReaderView({
                 role="button"
                 tabIndex={0}
                 style={{
-                  fontSize: FONT_SIZES[fontSize],
+                  fontSize: `${verseFontSize}px`,
                   backgroundColor: style?.bg,
                   color: style?.text ?? "#52442f",
                   borderRadius: style ? "10px" : undefined,
