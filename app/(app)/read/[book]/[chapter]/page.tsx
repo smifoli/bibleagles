@@ -9,7 +9,7 @@ export default async function ReaderPage({
   searchParams,
 }: {
   params: { book: string; chapter: string };
-  searchParams: { version?: string; verse?: string };
+  searchParams: { version?: string; verse?: string; planDay?: string };
 }) {
   const chapter = Number(params.chapter);
   if (!Number.isInteger(chapter) || chapter <= 0) notFound();
@@ -32,7 +32,7 @@ export default async function ReaderPage({
 
   let data;
   try {
-    data = await getReaderData(supabase, user.id, params.book.toUpperCase(), chapter, version.abbreviation);
+    data = await getReaderData(supabase, user.id, params.book.toUpperCase(), chapter, version.abbreviation, searchParams.planDay);
   } catch {
     notFound();
   }
