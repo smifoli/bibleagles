@@ -10,7 +10,7 @@ export default async function BookmarksPage() {
   } = await supabase.auth.getUser();
   if (!user) notFound();
 
-  const data = await getBookmarksData(supabase, user.id);
+  const data = await getBookmarksData(supabase);
 
-  return <BookmarksView bookmarks={data.bookmarks} books={data.books} />;
+  return <BookmarksView groups={data.groups} books={data.books} people={data.people} currentUserId={user.id} />;
 }

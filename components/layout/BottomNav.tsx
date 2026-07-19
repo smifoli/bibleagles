@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/", label: "Início", match: (pathname: string) => pathname === "/" },
   { href: "/bible", label: "Bíblia", match: (pathname: string) => pathname.startsWith("/bible") || pathname.startsWith("/read/") },
-  { href: "/bookmarks", label: "Marcas", match: (pathname: string) => pathname === "/bookmarks" },
+  { href: "/bookmarks", label: "Destaques", match: (pathname: string) => pathname === "/bookmarks" },
   { href: "/profile", label: "Perfil", match: (pathname: string) => pathname === "/profile" },
 ];
 
