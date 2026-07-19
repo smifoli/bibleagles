@@ -15,6 +15,8 @@ function progressRemainingLabel(totalDays: number, daysRemaining: number): strin
 }
 
 export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canEdit: boolean }) {
+  const pendingDays = stats.days.filter((day) => !day.isReadByMe && day.readHref);
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex items-center justify-between gap-3">
@@ -55,6 +57,34 @@ export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canE
         <StatBox value={stats.totalHighlights} label="destaques" />
         <StatBox value={stats.totalDaysRead} label="dias lidos" />
       </div>
+
+      {pendingDays.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <div className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">
+            Pendentes ({pendingDays.length})
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {pendingDays.map((day) => (
+              <Link
+                key={day.id}
+                href={day.readHref!}
+                className="flex items-center justify-between gap-3 rounded-[14px] border border-border bg-surface p-3.5"
+              >
+                <div className="min-w-0">
+                  <div className="truncate text-[13px] font-semibold text-ink">{day.title}</div>
+                  <div className="mt-0.5 text-[11px] text-text-muted">
+                    {day.dateLabel}
+                    {day.passageLabel ? ` · ${day.passageLabel}` : ""}
+                  </div>
+                </div>
+                <span className="shrink-0 whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-[11px] font-semibold text-background">
+                  Ler →
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3">
         <div className="text-[10px] font-semibold uppercase tracking-[2px] text-text-muted">Progresso da família</div>
@@ -128,25 +158,40 @@ export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canE
           {stats.days.length === 0 ? (
             <p className="text-sm text-text-muted">Nenhum dia configurado neste pacote.</p>
           ) : (
-            stats.days.map((day, index) => (
-              <div key={day.id}>
-                {index > 0 ? <div className="mb-3.5 h-px bg-border" /> : null}
+            stats.days.map((day, index) => {
+              const content = (
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-[13px] font-semibold text-ink">{day.title}</div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      {day.isReadByMe && <span className="text-[11px] text-ink">✓</span>}
+                      <span className="truncate text-[13px] font-semibold text-ink">{day.title}</span>
+                    </div>
                     <div className="mt-0.5 text-[11px] text-text-muted">
                       {day.dateLabel}
                       {day.passageLabel ? ` · ${day.passageLabel}` : ""}
                     </div>
                   </div>
                   {stats.members.length > 0 ? (
-                    <span className="whitespace-nowrap text-[11px] text-text-muted">
+                    <span className="shrink-0 whitespace-nowrap text-[11px] text-text-muted">
                       {day.readCount} / {stats.members.length} leram
                     </span>
                   ) : null}
                 </div>
-              </div>
-            ))
+              );
+
+              return (
+                <div key={day.id}>
+                  {index > 0 ? <div className="mb-3.5 h-px bg-border" /> : null}
+                  {day.readHref ? (
+                    <Link href={day.readHref} className="block">
+                      {content}
+                    </Link>
+                  ) : (
+                    content
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
       </div>

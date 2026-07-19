@@ -8,7 +8,7 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
 
   return (
     <div className="flex flex-col gap-4 rounded-[20px] bg-card-dark p-[18px]">
-      <div className="flex items-start justify-between">
+      <Link href={`/package/${card.packageId}`} className="flex items-start justify-between">
         <div>
           <div className="mb-1 text-[9px] font-semibold uppercase tracking-[1.5px] text-[#a08e78]">
             {card.eyebrow}
@@ -18,9 +18,9 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
         <span className="whitespace-nowrap rounded-full border border-[#4a3d2c] px-2.5 py-1 text-[10px] tracking-wide text-[#cdbb9e]">
           Dia {card.dayNumber} / {card.totalDays}
         </span>
-      </div>
+      </Link>
 
-      <div>
+      <Link href={`/package/${card.packageId}`}>
         <div className="mb-[9px] flex items-baseline justify-between">
           <span className="text-[13px] text-[#d8c9b3]">{card.chapterTitle}</span>
           <span className="text-[13px] font-semibold text-[#f7f1e6]">{card.percent}%</span>
@@ -28,7 +28,7 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
         <div className="h-[5px] rounded-full bg-[#43382a]">
           <div className="h-full rounded-full bg-[#ece0c8]" style={{ width: `${card.percent}%` }} />
         </div>
-      </div>
+      </Link>
 
       <div className="flex items-center justify-between">
         <div className="flex">

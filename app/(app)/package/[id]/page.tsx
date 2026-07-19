@@ -12,7 +12,7 @@ export default async function PackageStatsPage({ params }: { params: { id: strin
 
   const [{ data: profile }, stats] = await Promise.all([
     supabase.from("users").select("role").eq("id", user.id).single(),
-    getPackageStats(supabase, params.id),
+    getPackageStats(supabase, params.id, user.id),
   ]);
 
   if (!stats) notFound();

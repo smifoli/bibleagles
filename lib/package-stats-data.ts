@@ -14,6 +14,8 @@ export interface PackageDayItem {
   title: string;
   passageLabel: string | null;
   readCount: number;
+  isReadByMe: boolean;
+  readHref: string | null;
 }
 
 export interface PackageMemberStat {
@@ -82,7 +84,7 @@ function formatPassageLabel(passage: Passage): string {
 }
 
 /** Busca dados agregados de progresso/engajamento de um pacote pra tela /package/[id]. Retorna null se o pacote não existir. */
-export async function getPackageStats(supabase: SupabaseServerClient, packageId: string): Promise<PackageStats | null> {
+export async function getPackageStats(supabase: SupabaseServerClient, packageId: string, userId: string): Promise<PackageStats | null> {
   const { data: pkg } = await supabase
     .from("reading_packages")
     .select("id, title, status, start_date")
@@ -165,14 +167,17 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
   }
 
   const dayItems: PackageDayItem[] = planDays.map((day) => {
-    const readCount = progressRows.filter((row) => row.plan_day_id === day.id).length;
+    const dayProgress = progressRows.filter((row) => row.plan_day_id === day.id);
+    const firstPassage = day.passages[0] as Passage | undefined;
     return {
       id: day.id,
       date: day.date,
       dateLabel: formatShortDateLabel(day.date),
       title: day.title,
-      passageLabel: day.passages[0] ? formatPassageLabel(day.passages[0]) : null,
-      readCount,
+      passageLabel: firstPassage ? formatPassageLabel(firstPassage) : null,
+      readCount: dayProgress.length,
+      isReadByMe: dayProgress.some((row) => row.user_id === userId),
+      readHref: firstPassage ? `/read/${firstPassage.book}/${firstPassage.chapter_start}` : null,
     };
   });
 
