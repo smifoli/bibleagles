@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { ReaderView } from "@/components/reader/ReaderView";
 import { tryGetBookSummary } from "@/lib/bible-data";
 import { BOOK_ORDER } from "@/lib/bible-books";
 import { BIBLE_VERSIONS, getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
+import { parseVerseFontSize, VERSE_FONT_SIZE_COOKIE } from "@/lib/font-size";
 import { getReaderData } from "@/lib/reader-data";
 import { createClient, getUser } from "@/lib/supabase/server";
 
@@ -45,6 +47,8 @@ export default async function ReaderPage({
   }
 
   const initialVerse = searchParams.verse ? Number(searchParams.verse) : undefined;
+  const cookieStore = await cookies();
+  const initialVerseFontSize = parseVerseFontSize(cookieStore.get(VERSE_FONT_SIZE_COOKIE)?.value);
 
   // Navegação anterior/próximo capítulo, cruzando limite de livro via BOOK_ORDER.
   // Carrega version + from adiante (não planDay — o dia do plano é específico
@@ -84,6 +88,7 @@ export default async function ReaderPage({
       versions={BIBLE_VERSIONS}
       data={data}
       initialVerse={Number.isInteger(initialVerse) ? initialVerse : undefined}
+      initialVerseFontSize={initialVerseFontSize}
       backPath={searchParams.from}
       prevHref={prevHref}
       nextHref={nextHref}

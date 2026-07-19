@@ -6,15 +6,11 @@ import { useEffect, useState, useTransition } from "react";
 import type { BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
+import { clampVerseFontSize, VERSE_FONT_MAX, VERSE_FONT_MIN, VERSE_FONT_SIZE_COOKIE, VERSE_FONT_STEP } from "@/lib/font-size";
 import { updatePreferences } from "@/lib/profile-actions";
 import { addComment, deleteComment, editComment, markPlanDayRead, toggleCommentLike, toggleHighlight } from "@/lib/reader-actions";
 import type { ReaderComment, ReaderData } from "@/lib/reader-data";
 import type { HighlightColor } from "@/types/database";
-
-const VERSE_FONT_MIN = 14;
-const VERSE_FONT_MAX = 32;
-const VERSE_FONT_STEP = 2;
-const VERSE_FONT_DEFAULT = 16;
 
 interface ReaderViewProps {
   book: string;
@@ -23,6 +19,7 @@ interface ReaderViewProps {
   versions: BibleVersion[];
   data: ReaderData;
   initialVerse?: number;
+  initialVerseFontSize: number;
   backPath?: string;
   prevHref: string | null;
   nextHref: string | null;
@@ -35,12 +32,13 @@ export function ReaderView({
   versions,
   data,
   initialVerse,
+  initialVerseFontSize,
   backPath,
   prevHref,
   nextHref,
 }: ReaderViewProps) {
   const router = useRouter();
-  const [verseFontSize, setVerseFontSize] = useState(VERSE_FONT_DEFAULT);
+  const [verseFontSize, setVerseFontSize] = useState(initialVerseFontSize);
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
   const [commentDraft, setCommentDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -91,12 +89,20 @@ export function ReaderView({
     });
   }
 
+  // Preferência de dispositivo — grava direto num cookie (sem ida ao
+  // servidor) pra não pesar cada clique, e persiste entre capítulos/sessões.
+  function applyVerseFontSize(next: number) {
+    const clamped = clampVerseFontSize(next);
+    setVerseFontSize(clamped);
+    document.cookie = `${VERSE_FONT_SIZE_COOKIE}=${clamped}; path=/; max-age=${60 * 60 * 24 * 365}`;
+  }
+
   function handleDecreaseFont() {
-    setVerseFontSize((size) => Math.max(VERSE_FONT_MIN, size - VERSE_FONT_STEP));
+    applyVerseFontSize(verseFontSize - VERSE_FONT_STEP);
   }
 
   function handleIncreaseFont() {
-    setVerseFontSize((size) => Math.min(VERSE_FONT_MAX, size + VERSE_FONT_STEP));
+    applyVerseFontSize(verseFontSize + VERSE_FONT_STEP);
   }
 
   function handleSelectColor(verseNumber: number, color: HighlightColor, currentColor: HighlightColor | null) {
