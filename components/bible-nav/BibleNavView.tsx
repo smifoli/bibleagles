@@ -32,7 +32,7 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
 
     const parsed = parseReference(query);
     if (parsed) {
-      const params = new URLSearchParams({ version });
+      const params = new URLSearchParams({ version, from: "/bible" });
       if (parsed.verseStart) params.set("verse", String(parsed.verseStart));
       router.push(`/read/${parsed.book}/${parsed.chapter}?${params.toString()}`);
       return;

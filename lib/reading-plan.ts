@@ -9,10 +9,13 @@ export interface TodayPlanDay {
   packageTitle: string;
   packageDescription: string | null;
   planDayId: string;
+  date: string;
   dayNumber: number;
   totalDays: number;
   chapterTitle: string;
   passages: Passage[];
+  /** IDs de todos os dias do pacote com data <= hoje — pra calcular pendências por usuário. */
+  dueDayIds: string[];
 }
 
 /** Pacotes ativos que têm um dia configurado para hoje, na ordem de start_date. */
@@ -45,10 +48,12 @@ export async function getActivePackagesWithToday(supabase: SupabaseServerClient)
       packageTitle: pkg.title,
       packageDescription: pkg.description,
       planDayId: todayDay.id,
+      date: todayDay.date,
       dayNumber: todayIndex + 1,
       totalDays: days.length,
       chapterTitle: todayDay.title,
       passages: todayDay.passages,
+      dueDayIds: days.filter((day) => day.date <= today).map((day) => day.id),
     });
   }
 

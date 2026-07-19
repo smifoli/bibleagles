@@ -3,7 +3,7 @@ import type { FeaturedPackageCardData } from "@/lib/home-data";
 
 export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
   const readHref = card.firstPassage
-    ? `/read/${card.firstPassage.book}/${card.firstPassage.chapter_start}`
+    ? `/read/${card.firstPassage.book}/${card.firstPassage.chapter_start}?planDay=${card.planDayId}&from=${encodeURIComponent("/")}`
     : "/bible";
 
   return (
@@ -27,6 +27,16 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
         </div>
         <div className="h-[5px] rounded-full bg-[#43382a]">
           <div className="h-full rounded-full bg-[#ece0c8]" style={{ width: `${card.percent}%` }} />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-[11px]">
+          <span className="text-[#a08e78]">{card.dateLabel}</span>
+          {card.pendingCount === 0 ? (
+            <span className="font-semibold text-[#9fb389]">Você está em dia</span>
+          ) : (
+            <span className="font-semibold text-[#e2a08c]">
+              {card.pendingCount} {card.pendingCount === 1 ? "capítulo pendente" : "capítulos pendentes"}
+            </span>
+          )}
         </div>
       </Link>
 

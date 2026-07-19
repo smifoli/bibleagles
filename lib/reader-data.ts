@@ -1,6 +1,7 @@
 import { getChapter } from "@/lib/bible-data";
+import { toDateOnlyString } from "@/lib/format";
 import { HIGHLIGHT_COLORS, SAND_HIGHLIGHT, type HighlightColorStyle } from "@/lib/highlight-colors";
-import { getActivePackagesWithToday, passageMatches } from "@/lib/reading-plan";
+import { passageMatches } from "@/lib/reading-plan";
 import type { createClient } from "@/lib/supabase/server";
 import type { HighlightColor, Passage } from "@/types/database";
 
@@ -158,10 +159,10 @@ export async function getReaderData(
 
 /**
  * Contexto de "marcar como lido" pra esse capítulo. Se `requestedPlanDayId` vier
- * (link "Ler" a partir de /package/[id]), usa exatamente esse dia — permite marcar
- * dias pendentes atrasados como lidos, não só o de hoje. Sem isso, cai no
- * comportamento original: só mostra o botão se o capítulo bater com o dia de hoje
- * de algum pacote ativo (navegação orgânica pela Bíblia).
+ * (link "Ler" a partir de /package/[id]), usa exatamente esse dia. Sem isso, cai
+ * na navegação orgânica pela Bíblia: qualquer capítulo que bata com algum dia de
+ * um pacote ATIVO pode ser marcado como lido, passado, hoje ou futuro — só a lista
+ * "Pendentes" de /package/[id] restringe a dias já vencidos (ver getPackageStats).
  */
 async function getPlanContext(
   supabase: SupabaseServerClient,
@@ -174,7 +175,7 @@ async function getPlanContext(
     const specific = await getPlanContextForDay(supabase, userId, bookId, chapter, requestedPlanDayId);
     if (specific) return specific;
   }
-  return getTodaysPlanContext(supabase, userId, bookId, chapter);
+  return getActivePlanContextForChapter(supabase, userId, bookId, chapter);
 }
 
 async function getPlanContextForDay(
@@ -197,11 +198,12 @@ async function getPlanContextForDay(
   if (!passages.some((passage) => passageMatches(passage, bookId, chapter))) return null;
 
   const [{ data: pkg }, { data: packageDays }, { data: progress }] = await Promise.all([
-    supabase.from("reading_packages").select("title").eq("id", day.package_id).single(),
+    supabase.from("reading_packages").select("title, status").eq("id", day.package_id).single(),
     supabase.from("reading_plan_days").select("id, date").eq("package_id", day.package_id).order("date", { ascending: true }),
     supabase.from("reading_progress").select("id").eq("plan_day_id", day.id).eq("user_id", userId).maybeSingle(),
   ]);
-  if (!pkg) return null;
+  // Só pacotes ativos podem ser marcados como lidos.
+  if (!pkg || pkg.status !== "active") return null;
 
   const dayNumber = (packageDays ?? []).findIndex((row) => row.id === day.id) + 1;
 
@@ -213,28 +215,51 @@ async function getPlanContextForDay(
   };
 }
 
-async function getTodaysPlanContext(
+/**
+ * Navegação orgânica (sem planDay explícito): procura, entre todos os dias de
+ * pacotes ativos, algum cujas passagens cubram esse capítulo — sem restrição de
+ * data (um capítulo futuro do plano também pode ser marcado como lido se alguém
+ * chegar nele direto pela Bíblia). Em caso de mais de um dia bater com o mesmo
+ * capítulo, prioriza o mais recente com data já vencida (<= hoje); sem nenhum
+ * vencido, usa o primeiro futuro.
+ */
+async function getActivePlanContextForChapter(
   supabase: SupabaseServerClient,
   userId: string,
   bookId: string,
   chapter: number
 ): Promise<ReaderPlanContext | null> {
-  const todayPackages = await getActivePackagesWithToday(supabase);
+  const { data: activePackages } = await supabase.from("reading_packages").select("id, title").eq("status", "active");
+  if (!activePackages || activePackages.length === 0) return null;
 
-  const match = todayPackages.find((pkg) => pkg.passages.some((passage) => passageMatches(passage, bookId, chapter)));
-  if (!match) return null;
+  const { data: allDays } = await supabase
+    .from("reading_plan_days")
+    .select("id, package_id, date, passages")
+    .in("package_id", activePackages.map((pkg) => pkg.id))
+    .order("date", { ascending: true });
+
+  const matches = (allDays ?? []).filter((day) => (day.passages as Passage[]).some((passage) => passageMatches(passage, bookId, chapter)));
+  if (matches.length === 0) return null;
+
+  const today = toDateOnlyString();
+  const dueMatches = matches.filter((day) => day.date <= today);
+  const chosen = dueMatches.length > 0 ? dueMatches[dueMatches.length - 1] : matches[0];
+
+  const pkg = activePackages.find((item) => item.id === chosen.package_id)!;
+  const packageDays = (allDays ?? []).filter((day) => day.package_id === chosen.package_id);
+  const dayNumber = packageDays.findIndex((day) => day.id === chosen.id) + 1;
 
   const { data: progress } = await supabase
     .from("reading_progress")
     .select("id")
-    .eq("plan_day_id", match.planDayId)
+    .eq("plan_day_id", chosen.id)
     .eq("user_id", userId)
     .maybeSingle();
 
   return {
-    planDayId: match.planDayId,
-    packageTitle: match.packageTitle,
-    dayNumber: match.dayNumber,
+    planDayId: chosen.id,
+    packageTitle: pkg.title,
+    dayNumber: dayNumber > 0 ? dayNumber : 1,
     alreadyCompleted: Boolean(progress),
   };
 }

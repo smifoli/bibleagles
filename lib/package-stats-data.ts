@@ -177,7 +177,9 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
       passageLabel: firstPassage ? formatPassageLabel(firstPassage) : null,
       readCount: dayProgress.length,
       isReadByMe: dayProgress.some((row) => row.user_id === userId),
-      readHref: firstPassage ? `/read/${firstPassage.book}/${firstPassage.chapter_start}?planDay=${day.id}` : null,
+      readHref: firstPassage
+        ? `/read/${firstPassage.book}/${firstPassage.chapter_start}?planDay=${day.id}&from=${encodeURIComponent(`/package/${packageId}`)}`
+        : null,
     };
   });
 

@@ -6,6 +6,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export interface FamilyActivityItem {
   id: string;
+  userId: string;
   userName: string;
   kind: "highlight" | "comment";
   book: string;
@@ -42,6 +43,7 @@ export async function getFamilyFeedData(supabase: SupabaseServerClient): Promise
   const items: FamilyActivityItem[] = [
     ...(comments ?? []).map((comment) => ({
       id: comment.id,
+      userId: comment.user_id,
       userName: memberNames.get(comment.user_id) ?? "Alguém",
       kind: "comment" as const,
       book: comment.book,
@@ -54,6 +56,7 @@ export async function getFamilyFeedData(supabase: SupabaseServerClient): Promise
     })),
     ...(bookmarks ?? []).map((bookmark) => ({
       id: bookmark.id,
+      userId: bookmark.user_id,
       userName: memberNames.get(bookmark.user_id) ?? "Alguém",
       kind: "highlight" as const,
       book: bookmark.book,

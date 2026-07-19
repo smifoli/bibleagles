@@ -6,6 +6,7 @@ import { useEffect, useState, useTransition } from "react";
 import type { BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
+import { updatePreferences } from "@/lib/profile-actions";
 import { addComment, deleteComment, editComment, markPlanDayRead, toggleCommentLike, toggleHighlight } from "@/lib/reader-actions";
 import type { ReaderComment, ReaderData } from "@/lib/reader-data";
 import type { HighlightColor } from "@/types/database";
@@ -20,9 +21,22 @@ interface ReaderViewProps {
   versions: BibleVersion[];
   data: ReaderData;
   initialVerse?: number;
+  backPath?: string;
+  prevHref: string | null;
+  nextHref: string | null;
 }
 
-export function ReaderView({ book, chapter, version, versions, data, initialVerse }: ReaderViewProps) {
+export function ReaderView({
+  book,
+  chapter,
+  version,
+  versions,
+  data,
+  initialVerse,
+  backPath,
+  prevHref,
+  nextHref,
+}: ReaderViewProps) {
   const router = useRouter();
   const [fontSize, setFontSize] = useState<FontSize>("md");
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
@@ -45,12 +59,34 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
   // O "voltar" aponta pro lugar que faz sentido na hierarquia (pai lógico), não pro
   // histórico do navegador — trocar versão/fonte empilha entradas no histórico, então
   // router.back() levaria pro estado anterior desta mesma tela, não pra tela anterior.
-  const parentHref = data.planContext ? "/" : `/bible/${book}?version=${version}`;
+  // `backPath` (query "from") vem de onde o usuário realmente entrou no leitor — home,
+  // grade de capítulos, pacote, marcas, família — e usa sempre a versão ATUAL (não a de
+  // quando entrou), pra trocar de versão no leitor não "voltar" pra uma versão antiga.
+  const parentHref = backPath
+    ? backPath.startsWith("/bible")
+      ? `${backPath}?version=${version}`
+      : backPath
+    : data.planContext
+      ? "/"
+      : `/bible/${book}?version=${version}`;
 
   function handleVersionChange(next: string) {
     const url = new URL(window.location.href);
     url.searchParams.set("version", next);
-    router.push(`${url.pathname}${url.search}`);
+
+    // Trocar a versão no leitor vira o novo padrão do usuário até ele trocar de
+    // novo (mesma ação que o seletor de versão em /profile já persiste). A
+    // server action precisa terminar (e seu refresh automático da rota atual
+    // resolver) ANTES do router.push — se disparados juntos, o refresh da
+    // action pode vencer a corrida e sobrescrever a navegação com a versão
+    // antiga (URL muda mas conteúdo/seletor ficam presos na versão anterior).
+    const nextVersion = versions.find((item) => item.abbreviation === next);
+    startTransition(async () => {
+      if (nextVersion) {
+        await updatePreferences(next, nextVersion.language);
+      }
+      router.push(`${url.pathname}${url.search}`);
+    });
   }
 
   function handleSelectColor(verseNumber: number, color: HighlightColor, currentColor: HighlightColor | null) {
@@ -413,13 +449,34 @@ export function ReaderView({ book, chapter, version, versions, data, initialVers
         })}
       </div>
 
+      <div className="flex items-center gap-2.5">
+        <Link
+          href={prevHref ?? "#"}
+          aria-disabled={!prevHref}
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-xs font-semibold ${
+            prevHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
+          }`}
+        >
+          ← Anterior
+        </Link>
+        <Link
+          href={nextHref ?? "#"}
+          aria-disabled={!nextHref}
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-xs font-semibold ${
+            nextHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
+          }`}
+        >
+          Próximo →
+        </Link>
+      </div>
+
       {data.planContext && (
         <button
           onClick={handleMarkAsRead}
           disabled={pending || data.planContext.alreadyCompleted}
           className="mt-auto w-full rounded-[13px] bg-ink py-[15px] text-[13px] font-semibold text-background disabled:opacity-60"
         >
-          {data.planContext.alreadyCompleted ? "Lido hoje" : "Marcar como lido"}
+          {data.planContext.alreadyCompleted ? "Já lido" : "Marcar como lido"}
         </button>
       )}
     </div>

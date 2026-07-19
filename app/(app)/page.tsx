@@ -43,7 +43,7 @@ export default async function HomePage() {
         )}
       </div>
 
-      <ActivityFeed items={activity} />
+      <ActivityFeed items={activity} currentUserId={user!.id} />
     </div>
   );
 }

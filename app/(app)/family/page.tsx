@@ -12,5 +12,5 @@ export default async function FamilyPage() {
 
   const items = await getFamilyFeedData(supabase);
 
-  return <FamilyFeedView items={items} />;
+  return <FamilyFeedView items={items} currentUserId={user.id} />;
 }

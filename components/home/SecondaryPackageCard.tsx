@@ -24,6 +24,16 @@ export function SecondaryPackageCard({ card }: { card: PackageCardData }) {
         <div className="h-[5px] rounded-full bg-[#e8dcc6]">
           <div className="h-full rounded-full bg-[#b3a48c]" style={{ width: `${card.percent}%` }} />
         </div>
+        <div className="mt-2 flex items-center justify-between text-[11px]">
+          <span className="text-text-muted">{card.dateLabel}</span>
+          {card.pendingCount === 0 ? (
+            <span className="font-semibold text-[#5e7350]">Você está em dia</span>
+          ) : (
+            <span className="font-semibold text-error">
+              {card.pendingCount} {card.pendingCount === 1 ? "capítulo pendente" : "capítulos pendentes"}
+            </span>
+          )}
+        </div>
       </div>
     </Link>
   );

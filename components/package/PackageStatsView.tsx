@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { toDateOnlyString } from "@/lib/format";
 import type { PackageStats } from "@/lib/package-stats-data";
 
 const AVATAR_COLORS: { bg: string; text: string }[] = [
@@ -15,7 +16,10 @@ function progressRemainingLabel(totalDays: number, daysRemaining: number): strin
 }
 
 export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canEdit: boolean }) {
-  const pendingDays = stats.days.filter((day) => !day.isReadByMe && day.readHref);
+  const today = toDateOnlyString();
+  // Só dias já vencidos (passado ou hoje) e não lidos contam como pendentes —
+  // dias futuros do plano não entram na lista, mesmo sem leitura ainda.
+  const pendingDays = stats.days.filter((day) => !day.isReadByMe && day.readHref && day.date <= today);
 
   return (
     <div className="flex flex-col gap-6">
@@ -64,24 +68,36 @@ export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canE
             Pendentes ({pendingDays.length})
           </div>
           <div className="flex flex-col gap-2.5">
-            {pendingDays.map((day) => (
-              <Link
-                key={day.id}
-                href={day.readHref!}
-                className="flex items-center justify-between gap-3 rounded-[14px] border border-border bg-surface p-3.5"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-[13px] font-semibold text-ink">{day.title}</div>
-                  <div className="mt-0.5 text-[11px] text-text-muted">
-                    {day.dateLabel}
-                    {day.passageLabel ? ` · ${day.passageLabel}` : ""}
+            {pendingDays.map((day) => {
+              const isOverdue = day.date < today;
+              return (
+                <Link
+                  key={day.id}
+                  href={day.readHref!}
+                  className={`flex items-center justify-between gap-3 rounded-[14px] border p-3.5 ${
+                    isOverdue ? "border-[#e6c4be] bg-[rgba(160,58,42,0.05)]" : "border-border bg-surface"
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <div className={`truncate text-[13px] font-semibold ${isOverdue ? "text-error" : "text-ink"}`}>
+                      {day.title}
+                    </div>
+                    <div className={`mt-0.5 text-[11px] ${isOverdue ? "text-error/80" : "text-text-muted"}`}>
+                      {day.dateLabel}
+                      {day.passageLabel ? ` · ${day.passageLabel}` : ""}
+                      {isOverdue ? " · atrasado" : ""}
+                    </div>
                   </div>
-                </div>
-                <span className="shrink-0 whitespace-nowrap rounded-full bg-ink px-3 py-1.5 text-[11px] font-semibold text-background">
-                  Ler →
-                </span>
-              </Link>
-            ))}
+                  <span
+                    className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] font-semibold ${
+                      isOverdue ? "bg-error text-background" : "bg-ink text-background"
+                    }`}
+                  >
+                    Ler →
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

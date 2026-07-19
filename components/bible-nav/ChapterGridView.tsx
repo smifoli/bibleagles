@@ -38,7 +38,7 @@ export function ChapterGridView({ bookId, bookName, chapterCount, version, versi
           return (
             <Link
               key={chapter}
-              href={`/read/${bookId}/${chapter}?version=${version}`}
+              href={`/read/${bookId}/${chapter}?version=${version}&from=${encodeURIComponent(`/bible/${bookId}`)}`}
               className={
                 hasActivity
                   ? "flex flex-col items-center justify-center gap-0.5 rounded-[14px] border border-[#b3a48c] bg-background py-3 text-sm font-semibold text-text-primary"
