@@ -216,9 +216,12 @@ export function ReaderView({
                 <button
                   onClick={() => handleToggleLike(comment.id, comment.likedByMe)}
                   disabled={pending}
-                  className={`text-[11px] font-semibold ${comment.likedByMe ? "text-ink" : "text-text-muted"}`}
+                  className="flex items-center gap-1 font-semibold"
                 >
-                  {comment.likedByMe ? "♥" : "♡"} {comment.likeCount > 0 ? comment.likeCount : ""}
+                  <span className={`text-lg leading-none ${comment.likedByMe ? "text-error" : "text-text-muted"}`}>
+                    {comment.likedByMe ? "♥" : "♡"}
+                  </span>
+                  {comment.likeCount > 0 && <span className="text-[11px] text-text-muted">{comment.likeCount}</span>}
                 </button>
                 {!isReply && (
                   <button
