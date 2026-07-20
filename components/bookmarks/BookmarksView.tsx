@@ -152,6 +152,7 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
                       <Avatar
                         key={participant.userId}
                         name={participant.userName}
+                        avatarUrl={participant.avatarUrl}
                         colorIndex={participant.colorIndex}
                         size="sm"
                         className="border border-surface"

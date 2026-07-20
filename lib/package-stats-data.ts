@@ -21,6 +21,7 @@ export interface PackageDayItem {
 export interface PackageMemberStat {
   id: string;
   name: string;
+  avatarUrl: string | null;
   completedDays: number;
   isFullyCompleted: boolean;
   percent: number;
@@ -94,7 +95,7 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
         .select("id, date, title, passages")
         .eq("package_id", packageId)
         .order("date", { ascending: true }),
-      supabase.from("users").select("id, name").order("created_at", { ascending: true }),
+      supabase.from("users").select("id, name, avatar_url").order("created_at", { ascending: true }),
       supabase.from("comments").select("id, user_id, book, chapter, verse, created_at"),
       supabase.from("bookmarks").select("id, user_id, book, chapter, created_at"),
     ]);
@@ -132,6 +133,7 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
     return {
       id: member.id,
       name: member.name,
+      avatarUrl: member.avatar_url,
       completedDays,
       isFullyCompleted: totalDays > 0 && completedDays === totalDays,
       percent: totalDays === 0 ? 0 : Math.round((completedDays / totalDays) * 100),

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import type { FeaturedPackageCardData } from "@/lib/home-data";
 
 export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
@@ -43,15 +44,13 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
       <div className="flex items-center justify-between">
         <div className="flex">
           {card.members.map((member) => (
-            <div
+            <Avatar
               key={member.id}
-              title={member.name}
-              className={`-ml-[7px] flex h-[27px] w-[27px] items-center justify-center rounded-full text-[calc(11px*var(--font-scale))] font-semibold first:ml-0 ${
-                member.completed ? "bg-ink text-background" : "bg-[#e2d8c6] text-[#a08e78]"
-              }`}
-            >
-              {member.name.charAt(0).toUpperCase()}
-            </div>
+              name={member.name}
+              avatarUrl={member.avatarUrl}
+              fallbackColor={member.completed ? { bg: "#2c2218", text: "#f5efe4" } : { bg: "#e2d8c6", text: "#a08e78" }}
+              className="-ml-[7px] border-2 border-card-dark first:ml-0"
+            />
           ))}
         </div>
         <Link

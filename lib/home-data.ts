@@ -8,6 +8,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 export interface FamilyMemberStatus {
   id: string;
   name: string;
+  avatarUrl: string | null;
   completed: boolean;
 }
 
@@ -56,7 +57,7 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
   const [{ data: currentUser }, { data: familyMembers }, todayPackages, { data: comments }, { data: bookmarks }] =
     await Promise.all([
       supabase.from("users").select("name, role").eq("id", userId).single(),
-      supabase.from("users").select("id, name, is_deleted").order("created_at", { ascending: true }),
+      supabase.from("users").select("id, name, is_deleted, avatar_url").order("created_at", { ascending: true }),
       getActivePackagesWithToday(supabase),
       supabase
         .from("comments")
@@ -120,6 +121,7 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
       members: activeFamilyMembers.map((member) => ({
         id: member.id,
         name: member.name,
+        avatarUrl: member.avatar_url,
         completed: completedIds.has(member.id),
       })),
     };

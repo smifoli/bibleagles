@@ -1,13 +1,7 @@
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import { toDateOnlyString } from "@/lib/format";
 import type { PackageStats } from "@/lib/package-stats-data";
-
-const AVATAR_COLORS: { bg: string; text: string }[] = [
-  { bg: "#b5723e", text: "#ffffff" },
-  { bg: "#c98a52", text: "#ffffff" },
-  { bg: "#3d3225", text: "#a08e78" },
-  { bg: "#7d6c58", text: "#ffffff" },
-];
 
 function progressRemainingLabel(totalDays: number, daysRemaining: number): string {
   if (totalDays === 0) return "Nenhum dia configurado";
@@ -113,15 +107,7 @@ export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canE
                 {index > 0 ? <div className="mb-3.5 h-px bg-border" /> : null}
                 <div className="flex flex-col gap-[5px]">
                   <div className="flex items-center gap-2">
-                    <div
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[calc(10px*var(--font-scale))] font-semibold"
-                      style={{
-                        backgroundColor: AVATAR_COLORS[index % AVATAR_COLORS.length].bg,
-                        color: AVATAR_COLORS[index % AVATAR_COLORS.length].text,
-                      }}
-                    >
-                      {member.name.charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar name={member.name} avatarUrl={member.avatarUrl} colorIndex={index} size="sm" />
                     <span className="flex-1 text-[calc(13px*var(--font-scale))] font-semibold text-ink">{member.name}</span>
                     <span className={`text-[calc(12px*var(--font-scale))] ${member.isFullyCompleted ? "font-semibold text-ink" : "text-text-muted"}`}>
                       {member.completedDays} / {stats.totalDays}

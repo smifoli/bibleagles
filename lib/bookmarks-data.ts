@@ -8,6 +8,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 export interface HighlightMark {
   userId: string;
   userName: string;
+  avatarUrl: string | null;
   colorIndex: number;
   color: HighlightColor;
   createdAt: string;
@@ -17,6 +18,7 @@ export interface HighlightComment {
   id: string;
   userId: string;
   userName: string;
+  avatarUrl: string | null;
   colorIndex: number;
   content: string;
   createdAt: string;
@@ -70,7 +72,7 @@ function groupKey(book: string, chapter: number, verse: number): string {
  * destacou e quem comentou, ordenadas pela atividade mais recente. */
 export async function getBookmarksData(supabase: SupabaseServerClient): Promise<BookmarksData> {
   const [{ data: familyMembers }, { data: bookmarkRows }, { data: commentRows }] = await Promise.all([
-    supabase.from("users").select("id, name, is_deleted").order("created_at", { ascending: true }),
+    supabase.from("users").select("id, name, is_deleted, avatar_url").order("created_at", { ascending: true }),
     supabase
       .from("bookmarks")
       .select("id, user_id, book, chapter, verse, bible_version, color, created_at")
@@ -85,8 +87,10 @@ export async function getBookmarksData(supabase: SupabaseServerClient): Promise<
   const memberNames = new Map(
     (familyMembers ?? []).map((member) => [member.id, member.is_deleted ? `${member.name} (deletado)` : member.name])
   );
+  const memberAvatars = new Map((familyMembers ?? []).map((member) => [member.id, member.avatar_url]));
   const colorIndexFor = (userId: string) => memberOrder.get(userId) ?? 0;
   const nameFor = (userId: string) => memberNames.get(userId) ?? "Alguém";
+  const avatarFor = (userId: string) => memberAvatars.get(userId) ?? null;
 
   const groups = new Map<string, HighlightGroupEntry>();
   // Versão do item mais recente de cada grupo — decide qual versão usar pro link/texto
@@ -124,6 +128,7 @@ export async function getBookmarksData(supabase: SupabaseServerClient): Promise<
     group.highlights.push({
       userId: row.user_id,
       userName: nameFor(row.user_id),
+      avatarUrl: avatarFor(row.user_id),
       colorIndex: colorIndexFor(row.user_id),
       color: row.color,
       createdAt: row.created_at,
@@ -137,6 +142,7 @@ export async function getBookmarksData(supabase: SupabaseServerClient): Promise<
       id: row.id,
       userId: row.user_id,
       userName: nameFor(row.user_id),
+      avatarUrl: avatarFor(row.user_id),
       colorIndex: colorIndexFor(row.user_id),
       content: row.content,
       createdAt: row.created_at,
