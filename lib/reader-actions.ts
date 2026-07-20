@@ -147,3 +147,22 @@ export async function markPlanDayRead(book: string, chapter: number, planDayId: 
   revalidatePath("/");
   return {};
 }
+
+/** Desfaz o "marcar como lido" — permite corrigir um toque por engano. */
+export async function unmarkPlanDayRead(book: string, chapter: number, planDayId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await getUser(supabase);
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = await supabase
+    .from("reading_progress")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("plan_day_id", planDayId);
+
+  if (error) return { error: "Não foi possível desmarcar." };
+
+  revalidatePath(`/read/${book}/${chapter}`);
+  revalidatePath("/");
+  return {};
+}

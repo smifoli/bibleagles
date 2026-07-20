@@ -2,14 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import type { BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
 import { clampVerseFontSize, VERSE_FONT_MAX, VERSE_FONT_MIN, VERSE_FONT_SIZE_COOKIE, VERSE_FONT_STEP } from "@/lib/font-size";
 import { LAST_READ_COOKIE } from "@/lib/last-read";
 import { updatePreferences } from "@/lib/profile-actions";
-import { addComment, deleteComment, editComment, markPlanDayRead, toggleCommentLike, toggleHighlight } from "@/lib/reader-actions";
+import {
+  addComment,
+  deleteComment,
+  editComment,
+  markPlanDayRead,
+  toggleCommentLike,
+  toggleHighlight,
+  unmarkPlanDayRead,
+} from "@/lib/reader-actions";
 import type { ReaderComment, ReaderData } from "@/lib/reader-data";
 import type { HighlightColor } from "@/types/database";
 
@@ -39,6 +47,7 @@ export function ReaderView({
   nextHref,
 }: ReaderViewProps) {
   const router = useRouter();
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const [verseFontSize, setVerseFontSize] = useState(initialVerseFontSize);
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
   const [commentDraft, setCommentDraft] = useState("");
@@ -111,6 +120,30 @@ export function ReaderView({
 
   function handleIncreaseFont() {
     applyVerseFontSize(verseFontSize + VERSE_FONT_STEP);
+  }
+
+  // Navegação por gesto: arrasta pra direita volta um capítulo, pra
+  // esquerda avança — só dispara se o gesto for majoritariamente horizontal,
+  // pra não brigar com o scroll vertical da página.
+  const SWIPE_THRESHOLD_PX = 60;
+
+  function handleTouchStart(event: React.TouchEvent) {
+    const touch = event.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  }
+
+  function handleTouchEnd(event: React.TouchEvent) {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX || Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return;
+
+    if (deltaX > 0 && prevHref) router.push(prevHref);
+    else if (deltaX < 0 && nextHref) router.push(nextHref);
   }
 
   function handleSelectColor(verseNumber: number, color: HighlightColor, currentColor: HighlightColor | null) {
@@ -327,12 +360,36 @@ export function ReaderView({
     });
   }
 
+  function handleUnmarkAsRead() {
+    if (!data.planContext) return;
+    setActionError(undefined);
+    startTransition(async () => {
+      const result = await unmarkPlanDayRead(book, chapter, data.planContext!.planDayId);
+      if (result.error) setActionError(result.error);
+      else router.refresh();
+    });
+  }
+
   return (
-    <div className="flex min-h-full flex-col gap-[17px]">
+    <div
+      className="flex min-h-full flex-col gap-[17px]"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <header className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link href={parentHref} aria-label="Voltar" className="text-[calc(18px*var(--font-scale))] text-text-muted">
             ←
+          </Link>
+          <Link
+            href={prevHref ?? "#"}
+            aria-disabled={!prevHref}
+            aria-label="Capítulo anterior"
+            className={`text-[calc(16px*var(--font-scale))] font-semibold ${
+              prevHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
+            }`}
+          >
+            ‹
           </Link>
           <div>
             <div className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">{data.reference}</div>
@@ -342,6 +399,16 @@ export function ReaderView({
               </div>
             )}
           </div>
+          <Link
+            href={nextHref ?? "#"}
+            aria-disabled={!nextHref}
+            aria-label="Próximo capítulo"
+            className={`text-[calc(16px*var(--font-scale))] font-semibold ${
+              nextHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
+            }`}
+          >
+            ›
+          </Link>
         </div>
         <select
           value={version}
@@ -507,11 +574,13 @@ export function ReaderView({
 
       {data.planContext && (
         <button
-          onClick={handleMarkAsRead}
-          disabled={pending || data.planContext.alreadyCompleted}
-          className="mt-auto w-full rounded-[13px] bg-ink py-[15px] text-[calc(13px*var(--font-scale))] font-semibold text-background disabled:opacity-60"
+          onClick={data.planContext.alreadyCompleted ? handleUnmarkAsRead : handleMarkAsRead}
+          disabled={pending}
+          className={`mt-auto w-full rounded-[13px] py-[15px] text-[calc(13px*var(--font-scale))] font-semibold disabled:opacity-60 ${
+            data.planContext.alreadyCompleted ? "border border-input-border text-text-secondary" : "bg-ink text-background"
+          }`}
         >
-          {data.planContext.alreadyCompleted ? "Já lido" : "Marcar como lido"}
+          {data.planContext.alreadyCompleted ? "Já lido · toque para desfazer" : "Marcar como lido"}
         </button>
       )}
     </div>
