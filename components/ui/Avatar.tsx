@@ -30,11 +30,39 @@ export interface AvatarProps {
   /** Estilo neutro para membro pendente/sem atividade, sobrepõe colorIndex. */
   pending?: boolean;
   className?: string;
+  /** Foto de perfil, se o usuário tiver uma — substitui a bolinha com a inicial. */
+  avatarUrl?: string | null;
+  /** Contorno colorido (ex.: cor do destaque) — só faz sentido junto de avatarUrl. */
+  borderColor?: string;
+  /** Sobrepõe colorIndex/pending com uma cor específica (ex.: cor do destaque) na bolinha com inicial. */
+  fallbackColor?: AvatarColorStyle;
 }
 
-export function Avatar({ name, colorIndex = 0, size = "md", pending = false, className = "" }: AvatarProps) {
-  const style = pending ? AVATAR_PENDING_STYLE : AVATAR_PALETTE[colorIndex % AVATAR_PALETTE.length];
+export function Avatar({
+  name,
+  colorIndex = 0,
+  size = "md",
+  pending = false,
+  className = "",
+  avatarUrl,
+  borderColor,
+  fallbackColor,
+}: AvatarProps) {
+  const style = fallbackColor ?? (pending ? AVATAR_PENDING_STYLE : AVATAR_PALETTE[colorIndex % AVATAR_PALETTE.length]);
   const initial = name.trim().charAt(0).toUpperCase() || "?";
+
+  if (avatarUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={avatarUrl}
+        alt={name}
+        title={name}
+        className={`shrink-0 rounded-full object-cover ${SIZE_CLASSES[size]} ${className}`}
+        style={borderColor ? { border: `2px solid ${borderColor}` } : undefined}
+      />
+    );
+  }
 
   return (
     <div

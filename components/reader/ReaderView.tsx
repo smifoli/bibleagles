@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { Avatar } from "@/components/ui/Avatar";
 import type { BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
@@ -227,13 +228,7 @@ export function ReaderView({
 
     return (
       <div key={comment.id} className={`flex items-start gap-[11px] ${isReply ? "mt-3 pl-[15px]" : ""}`}>
-        <div
-          className={`flex shrink-0 items-center justify-center rounded-full bg-[#c98a52] text-[calc(10px*var(--font-scale))] font-semibold text-white ${
-            isReply ? "h-[22px] w-[22px]" : "h-[26px] w-[26px]"
-          }`}
-        >
-          {comment.userName.charAt(0).toUpperCase()}
-        </div>
+        <Avatar name={comment.userName} avatarUrl={comment.avatarUrl} colorIndex={1} size={isReply ? "sm" : "md"} />
         <div className="flex-1">
           <div className="flex items-baseline gap-[7px]">
             <span className="text-[calc(12px*var(--font-scale))] font-semibold text-ink">{comment.userName}</span>
@@ -486,14 +481,14 @@ export function ReaderView({
                     {verse.highlight.markedBy
                       .filter((mark) => !mark.isOwn)
                       .map((mark, index) => (
-                        <span
+                        <Avatar
                           key={`${mark.name}-${index}`}
-                          title={mark.name}
-                          className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full font-sans text-[calc(9px*var(--font-scale))] font-semibold"
-                          style={{ backgroundColor: HIGHLIGHT_COLORS[mark.color].bg, color: HIGHLIGHT_COLORS[mark.color].text }}
-                        >
-                          {mark.name.charAt(0).toUpperCase()}
-                        </span>
+                          name={mark.name}
+                          avatarUrl={mark.avatarUrl}
+                          size="sm"
+                          borderColor={HIGHLIGHT_COLORS[mark.color].bg}
+                          fallbackColor={{ bg: HIGHLIGHT_COLORS[mark.color].bg, text: HIGHLIGHT_COLORS[mark.color].text }}
+                        />
                       ))}
                   </span>
                 )}

@@ -25,7 +25,7 @@ export default async function ProfilePage() {
     <div className="flex flex-col gap-4">
       <h1 className="text-[calc(20px*var(--font-scale))] font-semibold text-text-primary">Perfil</h1>
 
-      <ProfileHeader name={profile.name} email={profile.email} />
+      <ProfileHeader userId={profile.id} name={profile.name} email={profile.email} avatarUrl={profile.avatarUrl} />
 
       {profile.role === "admin" ? (
         <Link

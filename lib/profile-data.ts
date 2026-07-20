@@ -10,6 +10,7 @@ export interface ProfileUser {
   name: string;
   email: string;
   role: UserRole;
+  avatarUrl: string | null;
   preferredVersion: string;
   preferredLanguage: Language;
   notificationEnabled: boolean;
@@ -47,7 +48,7 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
     supabase
       .from("users")
       .select(
-        "id, name, email, role, preferred_version, preferred_language, notification_enabled, notification_time, font_size"
+        "id, name, email, role, avatar_url, preferred_version, preferred_language, notification_enabled, notification_time, font_size"
       )
       .eq("id", userId)
       .single(),
@@ -68,6 +69,7 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
     name: userRow?.name ?? "",
     email: userRow?.email ?? "",
     role: userRow?.role ?? "member",
+    avatarUrl: userRow?.avatar_url ?? null,
     preferredVersion: version.abbreviation,
     preferredLanguage: version.language,
     notificationEnabled: userRow?.notification_enabled ?? false,

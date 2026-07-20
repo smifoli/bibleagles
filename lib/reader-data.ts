@@ -11,6 +11,7 @@ export interface VerseHighlightMark {
   name: string;
   color: HighlightColor;
   isOwn: boolean;
+  avatarUrl: string | null;
 }
 
 export interface VerseHighlight {
@@ -22,6 +23,7 @@ export interface VerseHighlight {
 export interface ReaderComment {
   id: string;
   userName: string;
+  avatarUrl: string | null;
   content: string;
   createdAt: string;
   isEdited: boolean;
@@ -74,7 +76,7 @@ export async function getReaderData(
       .eq("book", bookId)
       .eq("chapter", chapter)
       .order("created_at", { ascending: true }),
-    supabase.from("users").select("id, name, role, is_deleted"),
+    supabase.from("users").select("id, name, role, is_deleted, avatar_url"),
     getPlanContext(supabase, userId, bookId, chapter, requestedPlanDayId),
   ]);
 
@@ -84,6 +86,7 @@ export async function getReaderData(
   const memberNames = new Map(
     (familyMembers ?? []).map((member) => [member.id, member.is_deleted ? `${member.name} (deletado)` : member.name])
   );
+  const memberAvatars = new Map((familyMembers ?? []).map((member) => [member.id, member.avatar_url]));
 
   const highlightsByVerse = new Map<number, { userId: string; color: HighlightColor }[]>();
   for (const row of bookmarkRows ?? []) {
@@ -112,6 +115,7 @@ export async function getReaderData(
     commentById.set(row.id, {
       id: row.id,
       userName: memberNames.get(row.user_id) ?? "Alguém",
+      avatarUrl: memberAvatars.get(row.user_id) ?? null,
       content: row.content,
       createdAt: row.created_at,
       isEdited: row.updated_at !== row.created_at,
@@ -150,6 +154,7 @@ export async function getReaderData(
           name: memberNames.get(row.userId) ?? "Alguém",
           color: row.color,
           isOwn: row.userId === userId,
+          avatarUrl: memberAvatars.get(row.userId) ?? null,
         })),
       };
     }

@@ -78,6 +78,27 @@ export async function updateFontSize(fontSize: FontSizePreference): Promise<{ er
   return {};
 }
 
+/**
+ * Persiste a URL da foto de perfil já enviada pro bucket 'avatars' (upload
+ * feito client-side, direto no Storage, antes de chamar essa action). `null`
+ * remove a foto e volta pra bolinha com a inicial.
+ */
+export async function updateAvatarUrl(avatarUrl: string | null): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await getUser(supabase);
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = await supabase.from("users").update({ avatar_url: avatarUrl }).eq("id", user.id);
+  if (error) return { error: "Não foi possível salvar a foto." };
+
+  // A foto aparece em vários lugares do app (perfil, comentários, destaques) —
+  // mesmo alcance de revalidação usado pelo tamanho da letra.
+  revalidatePath("/", "layout");
+  return {};
+}
+
 export async function signOutAction(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();

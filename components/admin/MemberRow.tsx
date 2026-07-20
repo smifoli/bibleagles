@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Avatar } from "@/components/ui/Avatar";
 import { deleteMember, updateMemberRole } from "@/lib/admin-actions";
 import type { AdminMember } from "@/lib/admin-data";
 
@@ -25,7 +26,6 @@ export function MemberRow({
   const [isPending, startTransition] = useTransition();
 
   const isAdmin = member.role === "admin";
-  const initial = member.name.trim().charAt(0).toUpperCase() || "?";
 
   function handleToggle() {
     setError(undefined);
@@ -47,12 +47,7 @@ export function MemberRow({
   return (
     <div className={`py-2.5 ${isFirst ? "" : "border-t border-border"}`}>
       <div className="flex items-center gap-[11px]">
-        <div
-          className="flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full text-[calc(11px*var(--font-scale))] font-semibold"
-          style={{ backgroundColor: avatarColor.bg, color: avatarColor.text }}
-        >
-          {initial}
-        </div>
+        <Avatar name={member.name} avatarUrl={member.avatarUrl} fallbackColor={avatarColor} />
         <div className="min-w-0 flex-1">
           <div className="truncate text-[calc(14px*var(--font-scale))] font-semibold text-ink">{member.name}</div>
           <div className="truncate text-[calc(11px*var(--font-scale))] text-text-muted">{member.email}</div>
