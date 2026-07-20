@@ -4,7 +4,7 @@ export const FONT_SIZE_COOKIE = "font_size";
 
 export const FONT_SIZE_MULTIPLIER: Record<FontSizePreference, number> = {
   normal: 1.3,
-  large: 1.3,
+  large: 1.45,
   xlarge: 1.6,
 };
 
