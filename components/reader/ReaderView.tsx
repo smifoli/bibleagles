@@ -481,18 +481,20 @@ export function ReaderView({
                     {verse.commentCount} {verse.commentCount === 1 ? "comentário" : "comentários"}
                   </span>
                 )}
-                {verse.highlight && verse.highlight.markedBy.length > 0 && (
+                {verse.highlight && verse.highlight.markedBy.some((mark) => !mark.isOwn) && (
                   <span className="ml-1.5 inline-flex items-center gap-1 align-middle">
-                    {verse.highlight.markedBy.map((mark, index) => (
-                      <span
-                        key={`${mark.name}-${index}`}
-                        title={mark.name}
-                        className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full font-sans text-[calc(9px*var(--font-scale))] font-semibold"
-                        style={{ backgroundColor: HIGHLIGHT_COLORS[mark.color].bg, color: HIGHLIGHT_COLORS[mark.color].text }}
-                      >
-                        {mark.name.charAt(0).toUpperCase()}
-                      </span>
-                    ))}
+                    {verse.highlight.markedBy
+                      .filter((mark) => !mark.isOwn)
+                      .map((mark, index) => (
+                        <span
+                          key={`${mark.name}-${index}`}
+                          title={mark.name}
+                          className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full font-sans text-[calc(9px*var(--font-scale))] font-semibold"
+                          style={{ backgroundColor: HIGHLIGHT_COLORS[mark.color].bg, color: HIGHLIGHT_COLORS[mark.color].text }}
+                        >
+                          {mark.name.charAt(0).toUpperCase()}
+                        </span>
+                      ))}
                   </span>
                 )}
               </div>

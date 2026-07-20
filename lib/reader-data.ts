@@ -10,6 +10,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 export interface VerseHighlightMark {
   name: string;
   color: HighlightColor;
+  isOwn: boolean;
 }
 
 export interface VerseHighlight {
@@ -145,7 +146,11 @@ export async function getReaderData(
       highlight = {
         style: own ? HIGHLIGHT_COLORS[own.color] : SAND_HIGHLIGHT,
         ownColor: own?.color ?? null,
-        markedBy: highlightRows.map((row) => ({ name: memberNames.get(row.userId) ?? "Alguém", color: row.color })),
+        markedBy: highlightRows.map((row) => ({
+          name: memberNames.get(row.userId) ?? "Alguém",
+          color: row.color,
+          isOwn: row.userId === userId,
+        })),
       };
     }
 
