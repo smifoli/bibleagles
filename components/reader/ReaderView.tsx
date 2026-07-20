@@ -385,7 +385,7 @@ export function ReaderView({
             href={prevHref ?? "#"}
             aria-disabled={!prevHref}
             aria-label="Capítulo anterior"
-            className={`text-[calc(16px*var(--font-scale))] font-semibold ${
+            className={`rounded-[13px] border border-input-border px-2.5 py-1.5 text-center text-[calc(13px*var(--font-scale))] font-semibold ${
               prevHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
             }`}
           >
@@ -403,7 +403,7 @@ export function ReaderView({
             href={nextHref ?? "#"}
             aria-disabled={!nextHref}
             aria-label="Próximo capítulo"
-            className={`text-[calc(16px*var(--font-scale))] font-semibold ${
+            className={`rounded-[13px] border border-input-border px-2.5 py-1.5 text-center text-[calc(13px*var(--font-scale))] font-semibold ${
               nextHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
             }`}
           >
