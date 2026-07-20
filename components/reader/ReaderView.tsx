@@ -477,8 +477,22 @@ export function ReaderView({
                 </sup>
                 {verse.text}
                 {verse.commentCount > 0 && (
-                  <span className="ml-1.5 font-sans text-[calc(14px*var(--font-scale))] font-semibold" style={{ color: style ? style.verseNum : "#a3927d" }}>
-                    · {verse.commentCount} {verse.commentCount === 1 ? "comentário" : "comentários"}
+                  <span className="ml-1.5 inline-flex items-center rounded-full bg-ink px-2 py-0.5 align-middle font-sans text-[calc(11px*var(--font-scale))] font-semibold text-background">
+                    {verse.commentCount} {verse.commentCount === 1 ? "comentário" : "comentários"}
+                  </span>
+                )}
+                {verse.highlight && verse.highlight.markedBy.length > 0 && (
+                  <span className="ml-1.5 inline-flex items-center gap-1 align-middle">
+                    {verse.highlight.markedBy.map((mark, index) => (
+                      <span
+                        key={`${mark.name}-${index}`}
+                        title={mark.name}
+                        className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full font-sans text-[calc(9px*var(--font-scale))] font-semibold"
+                        style={{ backgroundColor: HIGHLIGHT_COLORS[mark.color].bg, color: HIGHLIGHT_COLORS[mark.color].text }}
+                      >
+                        {mark.name.charAt(0).toUpperCase()}
+                      </span>
+                    ))}
                   </span>
                 )}
               </div>
