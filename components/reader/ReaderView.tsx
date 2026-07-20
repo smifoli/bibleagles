@@ -377,19 +377,9 @@ export function ReaderView({
       onTouchEnd={handleTouchEnd}
     >
       <header className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Link href={parentHref} aria-label="Voltar" className="text-[calc(18px*var(--font-scale))] text-text-muted">
             ←
-          </Link>
-          <Link
-            href={prevHref ?? "#"}
-            aria-disabled={!prevHref}
-            aria-label="Capítulo anterior"
-            className={`rounded-[13px] border border-input-border px-2.5 py-1.5 text-center text-[calc(13px*var(--font-scale))] font-semibold ${
-              prevHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
-            }`}
-          >
-            ‹
           </Link>
           <div>
             <div className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">{data.reference}</div>
@@ -399,16 +389,6 @@ export function ReaderView({
               </div>
             )}
           </div>
-          <Link
-            href={nextHref ?? "#"}
-            aria-disabled={!nextHref}
-            aria-label="Próximo capítulo"
-            className={`rounded-[13px] border border-input-border px-2.5 py-1.5 text-center text-[calc(13px*var(--font-scale))] font-semibold ${
-              nextHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
-            }`}
-          >
-            ›
-          </Link>
         </div>
         <select
           value={version}
@@ -422,6 +402,27 @@ export function ReaderView({
           ))}
         </select>
       </header>
+
+      <div className="flex items-center gap-2.5">
+        <Link
+          href={prevHref ?? "#"}
+          aria-disabled={!prevHref}
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold ${
+            prevHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
+          }`}
+        >
+          ← Anterior
+        </Link>
+        <Link
+          href={nextHref ?? "#"}
+          aria-disabled={!nextHref}
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold ${
+            nextHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
+          }`}
+        >
+          Próximo →
+        </Link>
+      </div>
 
       <div className="flex items-center gap-2.5">
         <button
