@@ -11,6 +11,7 @@ export interface BookNavEntry {
   chapterCount: number;
   commentCount: number;
   highlightCount: number;
+  readPercent: number;
   isFullyRead: boolean;
 }
 
@@ -80,16 +81,18 @@ export async function getBibleNavData(supabase: SupabaseServerClient, version: s
           const summary = tryGetBookSummary(version, bookId);
           if (!summary) return null;
           const readChapters = readByBook.get(bookId);
-          const isFullyRead =
-            summary.chapterCount > 0 &&
-            Array.from({ length: summary.chapterCount }, (_, index) => index + 1).every((chapter) => readChapters?.has(chapter));
+          const readChapterCount = readChapters
+            ? Array.from({ length: summary.chapterCount }, (_, index) => index + 1).filter((chapter) => readChapters.has(chapter)).length
+            : 0;
+          const readPercent = summary.chapterCount > 0 ? Math.round((readChapterCount / summary.chapterCount) * 100) : 0;
           return {
             id: bookId,
             name: summary.name,
             chapterCount: summary.chapterCount,
             commentCount: commentCounts.get(bookId) ?? 0,
             highlightCount: highlightCounts.get(bookId) ?? 0,
-            isFullyRead,
+            readPercent,
+            isFullyRead: readPercent === 100,
           };
         })
         .filter((entry): entry is BookNavEntry => entry !== null),
