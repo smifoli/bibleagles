@@ -51,13 +51,12 @@ export function ActivityFeed({
                 />
                 <div className="text-[calc(13px*var(--font-scale))] leading-[1.5] text-text-secondary">
                   {describeActivity(item)}
-                  {item.kind === "comment" ? (
+                  {item.kind === "comment" && (
                     <div className="mt-0.5 font-serif text-[calc(13px*var(--font-scale))] italic text-text-muted">"{item.quote}"</div>
-                  ) : (
-                    <div className="mt-px text-[calc(11px*var(--font-scale))] text-[#a3927d]">
-                      {formatRelativeTime(new Date(item.createdAt))}
-                    </div>
                   )}
+                  <div className="mt-px text-[calc(11px*var(--font-scale))] text-[#a3927d]">
+                    {formatRelativeTime(new Date(item.createdAt))}
+                  </div>
                 </div>
               </Link>
               {(item.userId === currentUserId || isAdmin) && <ActivityDeleteButton kind={item.kind} id={item.id} />}
