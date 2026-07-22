@@ -1,5 +1,5 @@
 import { getChapter } from "@/lib/bible-data";
-import { toDateOnlyString } from "@/lib/format";
+import { formatShortDate, parseDateOnly, toDateOnlyString } from "@/lib/format";
 import { HIGHLIGHT_COLORS, SAND_HIGHLIGHT, type HighlightColorStyle } from "@/lib/highlight-colors";
 import { passageMatches } from "@/lib/reading-plan";
 import type { createClient } from "@/lib/supabase/server";
@@ -44,6 +44,8 @@ export interface ReaderPlanContext {
   planDayId: string;
   packageTitle: string;
   dayNumber: number;
+  /** Data do calendário em que esse dia do plano está programado, ex. "24 jul". */
+  dateLabel: string;
   alreadyCompleted: boolean;
 }
 
@@ -52,6 +54,10 @@ export interface ReaderData {
   verses: ReaderVerse[];
   commentsByVerse: Record<number, ReaderComment[]>;
   planContext: ReaderPlanContext | null;
+  // Com planContext, é planContext.alreadyCompleted (o dia inteiro). Sem plano
+  // nenhum cobrindo esse capítulo, reflete uma leitura livre (reading_progress
+  // com book/chapter, sem plan_day_id) — ver markChapterRead em reader-actions.ts.
+  isChapterRead: boolean;
   isAdmin: boolean;
 }
 
@@ -68,17 +74,21 @@ export async function getReaderData(
   // Destaques/comentários não filtram por bible_version: são sobre a
   // referência (livro/capítulo/versículo), não sobre o texto de uma tradução
   // específica — precisam aparecer independente de qual versão você está lendo.
-  const [{ data: bookmarkRows }, { data: commentRows }, { data: familyMembers }, planContext] = await Promise.all([
-    supabase.from("bookmarks").select("user_id, verse, color").eq("book", bookId).eq("chapter", chapter),
-    supabase
-      .from("comments")
-      .select("id, user_id, verse, content, parent_id, created_at, updated_at")
-      .eq("book", bookId)
-      .eq("chapter", chapter)
-      .order("created_at", { ascending: true }),
-    supabase.from("users").select("id, name, role, is_deleted, avatar_url"),
-    getPlanContext(supabase, userId, bookId, chapter, requestedPlanDayId),
-  ]);
+  const [{ data: bookmarkRows }, { data: commentRows }, { data: familyMembers }, planContext, { data: freeformRead }] =
+    await Promise.all([
+      supabase.from("bookmarks").select("user_id, verse, color").eq("book", bookId).eq("chapter", chapter),
+      supabase
+        .from("comments")
+        .select("id, user_id, verse, content, parent_id, created_at, updated_at")
+        .eq("book", bookId)
+        .eq("chapter", chapter)
+        .order("created_at", { ascending: true }),
+      supabase.from("users").select("id, name, role, is_deleted, avatar_url"),
+      getPlanContext(supabase, userId, bookId, chapter, requestedPlanDayId),
+      supabase.from("reading_progress").select("id").eq("user_id", userId).eq("book", bookId).eq("chapter", chapter).maybeSingle(),
+    ]);
+
+  const isChapterRead = planContext ? planContext.alreadyCompleted : Boolean(freeformRead);
 
   const isAdmin = (familyMembers ?? []).find((member) => member.id === userId)?.role === "admin";
   // Membro removido pelo admin, mas com destaques/comentários preservados —
@@ -172,6 +182,7 @@ export async function getReaderData(
     verses,
     commentsByVerse,
     planContext,
+    isChapterRead,
     isAdmin,
   };
 }
@@ -205,7 +216,7 @@ async function getPlanContextForDay(
 ): Promise<ReaderPlanContext | null> {
   const { data: day } = await supabase
     .from("reading_plan_days")
-    .select("id, package_id, passages")
+    .select("id, package_id, passages, date")
     .eq("id", planDayId)
     .maybeSingle();
   if (!day) return null;
@@ -229,6 +240,7 @@ async function getPlanContextForDay(
     planDayId: day.id,
     packageTitle: pkg.title,
     dayNumber: dayNumber > 0 ? dayNumber : 1,
+    dateLabel: formatShortDate(parseDateOnly(day.date)),
     alreadyCompleted: Boolean(progress),
   };
 }
@@ -285,6 +297,7 @@ async function getActivePlanContextForChapter(
     planDayId: chosen.id,
     packageTitle: pkg.title,
     dayNumber: dayNumber > 0 ? dayNumber : 1,
+    dateLabel: formatShortDate(parseDateOnly(chosen.date)),
     alreadyCompleted: Boolean(progress),
   };
 }

@@ -23,6 +23,8 @@ export interface BookNavSection {
 export interface BibleNavData {
   oldTestament: BookNavSection[];
   newTestament: BookNavSection[];
+  oldTestamentReadPercent: number;
+  newTestamentReadPercent: number;
 }
 
 function countByBook(rows: { book: string }[] | null): Map<string, number> {
@@ -31,31 +33,48 @@ function countByBook(rows: { book: string }[] | null): Map<string, number> {
   return counts;
 }
 
-type ProgressWithPassages = { reading_plan_days: { passages: Passage[] } | { passages: Passage[] }[] | null };
+type ProgressRow = {
+  book: string | null;
+  chapter: number | null;
+  reading_plan_days: { passages: Passage[] } | { passages: Passage[] }[] | null;
+};
 
 /**
- * Capítulos que o usuário já marcou como lido (em qualquer dia de qualquer pacote,
- * ativo ou arquivado — é histórico pessoal, não progresso de um plano em andamento),
- * agrupados por livro. Base de "isRead"/"isFullyRead" na grade de capítulos e na
- * lista de livros.
+ * Capítulos que o usuário já marcou como lido — via algum dia de algum pacote (ativo
+ * ou arquivado — é histórico pessoal, não progresso de um plano em andamento) OU
+ * marcado direto, fora de qualquer plano (ver markChapterRead em reader-actions.ts) —
+ * agrupados por livro. Base de "isRead"/"isFullyRead"/"readPercent" na grade de
+ * capítulos e na lista de livros.
  */
 async function getReadChaptersByBook(supabase: SupabaseServerClient, userId: string): Promise<Map<string, Set<number>>> {
-  const { data: progressRows } = await supabase.from("reading_progress").select("reading_plan_days(passages)").eq("user_id", userId);
+  const { data: progressRows } = await supabase
+    .from("reading_progress")
+    .select("book, chapter, reading_plan_days(passages)")
+    .eq("user_id", userId);
 
   const readByBook = new Map<string, Set<number>>();
-  for (const row of (progressRows ?? []) as ProgressWithPassages[]) {
+  const add = (book: string, chapter: number) => {
+    let chapters = readByBook.get(book);
+    if (!chapters) {
+      chapters = new Set();
+      readByBook.set(book, chapters);
+    }
+    chapters.add(chapter);
+  };
+
+  for (const row of (progressRows ?? []) as ProgressRow[]) {
+    if (row.book && row.chapter) {
+      add(row.book, row.chapter);
+      continue;
+    }
+
     const dayRef = row.reading_plan_days;
     const day = Array.isArray(dayRef) ? dayRef[0] : dayRef;
     if (!day) continue;
 
     for (const passage of day.passages) {
-      let chapters = readByBook.get(passage.book);
-      if (!chapters) {
-        chapters = new Set();
-        readByBook.set(passage.book, chapters);
-      }
       const end = passage.chapter_end ?? passage.chapter_start;
-      for (let chapter = passage.chapter_start; chapter <= end; chapter++) chapters.add(chapter);
+      for (let chapter = passage.chapter_start; chapter <= end; chapter++) add(passage.book, chapter);
     }
   }
   return readByBook;
@@ -72,6 +91,26 @@ export async function getBibleNavData(supabase: SupabaseServerClient, version: s
 
   const highlightCounts = countByBook(bookmarkRows);
   const commentCounts = countByBook(commentRows);
+
+  // % de capítulos lidos em todo o testamento (não a média dos % de cada livro —
+  // livros maiores pesam mais), pra barra de progresso de "Antigo"/"Novo Testamento".
+  const testamentReadPercent = (sections: typeof OLD_TESTAMENT_SECTIONS): number => {
+    let totalChapters = 0;
+    let totalRead = 0;
+    for (const section of sections) {
+      for (const bookId of section.books) {
+        const summary = tryGetBookSummary(version, bookId);
+        if (!summary) continue;
+        totalChapters += summary.chapterCount;
+        const readChapters = readByBook.get(bookId);
+        if (!readChapters) continue;
+        for (let chapter = 1; chapter <= summary.chapterCount; chapter++) {
+          if (readChapters.has(chapter)) totalRead++;
+        }
+      }
+    }
+    return totalChapters > 0 ? Math.round((totalRead / totalChapters) * 100) : 0;
+  };
 
   const buildSections = (sections: typeof OLD_TESTAMENT_SECTIONS): BookNavSection[] =>
     sections.map((section) => ({
@@ -101,7 +140,30 @@ export async function getBibleNavData(supabase: SupabaseServerClient, version: s
   return {
     oldTestament: buildSections(OLD_TESTAMENT_SECTIONS),
     newTestament: buildSections(NEW_TESTAMENT_SECTIONS),
+    oldTestamentReadPercent: testamentReadPercent(OLD_TESTAMENT_SECTIONS),
+    newTestamentReadPercent: testamentReadPercent(NEW_TESTAMENT_SECTIONS),
   };
+}
+
+/** % de capítulos lidos na Bíblia inteira (Antigo + Novo Testamento) — teaser da home. */
+export async function getOverallReadPercent(supabase: SupabaseServerClient, version: string, userId: string): Promise<number> {
+  const readByBook = await getReadChaptersByBook(supabase, userId);
+
+  let totalChapters = 0;
+  let totalRead = 0;
+  for (const section of [...OLD_TESTAMENT_SECTIONS, ...NEW_TESTAMENT_SECTIONS]) {
+    for (const bookId of section.books) {
+      const summary = tryGetBookSummary(version, bookId);
+      if (!summary) continue;
+      totalChapters += summary.chapterCount;
+      const readChapters = readByBook.get(bookId);
+      if (!readChapters) continue;
+      for (let chapter = 1; chapter <= summary.chapterCount; chapter++) {
+        if (readChapters.has(chapter)) totalRead++;
+      }
+    }
+  }
+  return totalChapters > 0 ? Math.round((totalRead / totalChapters) * 100) : 0;
 }
 
 export interface ChapterActivity {

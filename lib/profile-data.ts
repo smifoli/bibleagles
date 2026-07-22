@@ -108,7 +108,10 @@ async function getReadingCalendar(supabase: SupabaseServerClient, userId: string
 
   const readDates = new Set(
     (progress ?? [])
-      .map((row) => dateByPlanDayId.get(row.plan_day_id))
+      // plan_day_id é nullable no schema (também cobre leitura livre, fora de plano — ver
+      // reading_progress_target_check), mas o filtro .in(planDayIds) acima nunca traz uma
+      // linha com plan_day_id null (IN nunca casa NULL em SQL).
+      .map((row) => dateByPlanDayId.get(row.plan_day_id ?? ""))
       .filter((date): date is string => Boolean(date))
   );
 

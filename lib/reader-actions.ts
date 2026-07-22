@@ -139,11 +139,13 @@ export async function markPlanDayRead(book: string, chapter: number, planDayId: 
   // tocado de novo antes de re-renderizar como desabilitado.
   const { error } = await supabase
     .from("reading_progress")
-    .upsert({ user_id: user.id, plan_day_id: planDayId }, { onConflict: "user_id,plan_day_id" });
+    .upsert({ user_id: user.id, plan_day_id: planDayId, book: null, chapter: null }, { onConflict: "user_id,plan_day_id" });
 
   if (error) return { error: "Não foi possível marcar como lido." };
 
   revalidatePath(`/read/${book}/${chapter}`);
+  revalidatePath("/bible");
+  revalidatePath(`/bible/${book}`);
   revalidatePath("/");
   return {};
 }
@@ -163,6 +165,52 @@ export async function unmarkPlanDayRead(book: string, chapter: number, planDayId
   if (error) return { error: "Não foi possível desmarcar." };
 
   revalidatePath(`/read/${book}/${chapter}`);
+  revalidatePath("/bible");
+  revalidatePath(`/bible/${book}`);
+  revalidatePath("/");
+  return {};
+}
+
+/**
+ * Marca um capítulo como lido fora de qualquer plano — ex.: navegação livre pela
+ * Bíblia num capítulo que não faz parte de nenhum pacote. Grava direto em
+ * (book, chapter), sem plan_day_id (ver reading_progress_target_check na migration).
+ */
+export async function markChapterRead(book: string, chapter: number): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await getUser(supabase);
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = await supabase
+    .from("reading_progress")
+    .upsert({ user_id: user.id, book, chapter, plan_day_id: null }, { onConflict: "user_id,book,chapter" });
+
+  if (error) return { error: "Não foi possível marcar como lido." };
+
+  revalidatePath(`/read/${book}/${chapter}`);
+  revalidatePath("/bible");
+  revalidatePath(`/bible/${book}`);
+  revalidatePath("/");
+  return {};
+}
+
+export async function unmarkChapterRead(book: string, chapter: number): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await getUser(supabase);
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = await supabase
+    .from("reading_progress")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("book", book)
+    .eq("chapter", chapter);
+
+  if (error) return { error: "Não foi possível desmarcar." };
+
+  revalidatePath(`/read/${book}/${chapter}`);
+  revalidatePath("/bible");
+  revalidatePath(`/bible/${book}`);
   revalidatePath("/");
   return {};
 }

@@ -57,7 +57,11 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          plan_day_id: string;
+          // Mutuamente exclusivos (reading_progress_target_check): uma linha marca ou um
+          // dia de plano (plan_day_id) ou um capítulo livre (book + chapter), nunca os dois.
+          plan_day_id: string | null;
+          book: string | null;
+          chapter: number | null;
           completed_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["reading_progress"]["Row"], "id" | "completed_at"> & {

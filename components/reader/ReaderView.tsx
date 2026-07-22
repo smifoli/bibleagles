@@ -14,9 +14,11 @@ import {
   addComment,
   deleteComment,
   editComment,
+  markChapterRead,
   markPlanDayRead,
   toggleCommentLike,
   toggleHighlight,
+  unmarkChapterRead,
   unmarkPlanDayRead,
 } from "@/lib/reader-actions";
 import type { ReaderComment, ReaderData } from "@/lib/reader-data";
@@ -382,21 +384,24 @@ export function ReaderView({
     );
   }
 
+  // Com planContext, marcar/desmarcar afeta o dia do plano inteiro (todas as
+  // passagens dele, não só esse capítulo). Sem plano cobrindo esse capítulo,
+  // vira uma leitura livre — só esse (book, chapter), ver markChapterRead.
   function handleMarkAsRead() {
-    if (!data.planContext) return;
     setActionError(undefined);
     startTransition(async () => {
-      const result = await markPlanDayRead(book, chapter, data.planContext!.planDayId);
+      const result = data.planContext ? await markPlanDayRead(book, chapter, data.planContext.planDayId) : await markChapterRead(book, chapter);
       if (result.error) setActionError(result.error);
       else router.refresh();
     });
   }
 
   function handleUnmarkAsRead() {
-    if (!data.planContext) return;
     setActionError(undefined);
     startTransition(async () => {
-      const result = await unmarkPlanDayRead(book, chapter, data.planContext!.planDayId);
+      const result = data.planContext
+        ? await unmarkPlanDayRead(book, chapter, data.planContext.planDayId)
+        : await unmarkChapterRead(book, chapter);
       if (result.error) setActionError(result.error);
       else router.refresh();
     });
@@ -416,25 +421,21 @@ export function ReaderView({
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">{data.reference}</span>
-              {data.planContext && (
-                <button
-                  type="button"
-                  onClick={data.planContext.alreadyCompleted ? handleUnmarkAsRead : handleMarkAsRead}
-                  disabled={pending}
-                  aria-label={data.planContext.alreadyCompleted ? "Lido · toque pra desmarcar" : "Não lido · toque pra marcar como lido"}
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold leading-none ${
-                    data.planContext.alreadyCompleted
-                      ? "border-[#5c8a52] bg-[#5c8a52] text-white"
-                      : "border-[#c0ad94] bg-transparent text-transparent"
-                  }`}
-                >
-                  ✓
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={data.isChapterRead ? handleUnmarkAsRead : handleMarkAsRead}
+                disabled={pending}
+                aria-label={data.isChapterRead ? "Lido · toque pra desmarcar" : "Não lido · toque pra marcar como lido"}
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold leading-none ${
+                  data.isChapterRead ? "border-[#5c8a52] bg-[#5c8a52] text-white" : "border-[#c0ad94] bg-transparent text-transparent"
+                }`}
+              >
+                ✓
+              </button>
             </div>
             {data.planContext && (
               <div className="text-[calc(11px*var(--font-scale))] text-text-muted">
-                Lendo {data.planContext.packageTitle} · Dia {data.planContext.dayNumber}
+                Lendo {data.planContext.packageTitle} · Dia {data.planContext.dayNumber} · {data.planContext.dateLabel}
               </div>
             )}
           </div>
@@ -640,17 +641,15 @@ export function ReaderView({
         </Link>
       </div>
 
-      {data.planContext && (
-        <button
-          onClick={data.planContext.alreadyCompleted ? handleUnmarkAsRead : handleMarkAsRead}
-          disabled={pending}
-          className={`mt-auto w-full rounded-[13px] py-[15px] text-[calc(13px*var(--font-scale))] font-semibold disabled:opacity-60 ${
-            data.planContext.alreadyCompleted ? "border border-input-border text-text-secondary" : "bg-ink text-background"
-          }`}
-        >
-          {data.planContext.alreadyCompleted ? "Já lido · toque para desfazer" : "Marcar como lido"}
-        </button>
-      )}
+      <button
+        onClick={data.isChapterRead ? handleUnmarkAsRead : handleMarkAsRead}
+        disabled={pending}
+        className={`mt-auto w-full rounded-[13px] py-[15px] text-[calc(13px*var(--font-scale))] font-semibold disabled:opacity-60 ${
+          data.isChapterRead ? "border border-input-border text-text-secondary" : "bg-ink text-background"
+        }`}
+      >
+        {data.isChapterRead ? "Já lido · toque para desfazer" : "Marcar como lido"}
+      </button>
     </div>
   );
 }

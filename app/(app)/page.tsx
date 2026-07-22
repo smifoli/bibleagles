@@ -1,15 +1,27 @@
+import Link from "next/link";
 import { ActivePackageCard } from "@/components/home/ActivePackageCard";
 import { ActivityFeed } from "@/components/home/ActivityFeed";
 import { NoReadingToday } from "@/components/home/NoReadingToday";
 import { SecondaryPackageCard } from "@/components/home/SecondaryPackageCard";
 import { formatGreetingDate, getGreeting } from "@/lib/format";
 import { getHomeData } from "@/lib/home-data";
+import { getOverallReadPercent } from "@/lib/bible-nav-data";
+import { getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
 import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await getUser(supabase);
-  const { userName, isAdmin, featured, secondary, activity } = await getHomeData(supabase, user!.id);
+
+  const { data: profile } = await supabase.from("users").select("preferred_version, preferred_language").eq("id", user!.id).single();
+  const version =
+    (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??
+    getDefaultVersion(profile?.preferred_language ?? "pt");
+
+  const [{ userName, isAdmin, featured, secondary, activity }, biblePercent] = await Promise.all([
+    getHomeData(supabase, user!.id),
+    getOverallReadPercent(supabase, version.abbreviation, user!.id),
+  ]);
 
   const now = new Date();
 
@@ -26,6 +38,16 @@ export default async function HomePage() {
           <img src="/logo.svg" alt="" width={32} height={32} className="h-full w-full object-cover" />
         </div>
       </div>
+
+      <Link href="/bible" className="flex items-center gap-3 rounded-[14px] border border-border bg-surface p-3.5">
+        <div className="min-w-0 flex-1">
+          <div className="text-[calc(11px*var(--font-scale))] font-semibold text-text-secondary">Sua Bíblia</div>
+          <div className="mt-1.5 h-[5px] rounded-full bg-[#e8dcc6]">
+            <div className="h-full rounded-full bg-[#5c8a52]" style={{ width: `${biblePercent}%` }} />
+          </div>
+        </div>
+        <span className="shrink-0 text-[calc(14px*var(--font-scale))] font-bold text-ink">{biblePercent}%</span>
+      </Link>
 
       <div className="flex flex-col gap-4">
         <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">

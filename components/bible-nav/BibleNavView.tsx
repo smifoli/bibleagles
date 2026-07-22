@@ -22,6 +22,7 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
 
   const suggestions = useMemo(() => suggestBooks(query), [query]);
   const sections = testament === "AT" ? nav.oldTestament : nav.newTestament;
+  const testamentReadPercent = testament === "AT" ? nav.oldTestamentReadPercent : nav.newTestamentReadPercent;
 
   function goToBook(bookId: string) {
     router.push(`/bible/${bookId}?version=${version}`);
@@ -93,6 +94,13 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
         >
           Novo Testamento
         </button>
+      </div>
+
+      <div className="flex items-center gap-2.5">
+        <div className="h-[5px] flex-1 rounded-full bg-[#e8dcc6]">
+          <div className="h-full rounded-full bg-[#5c8a52]" style={{ width: `${testamentReadPercent}%` }} />
+        </div>
+        <span className="shrink-0 text-[calc(11px*var(--font-scale))] font-semibold text-text-muted">{testamentReadPercent}% lido</span>
       </div>
 
       {sections.map((section) => (
