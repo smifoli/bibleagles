@@ -33,7 +33,7 @@ export function BottomNav() {
   }, [pathname]);
 
   return (
-    <nav className="flex justify-around border-t border-border px-0 pt-[13px] pb-[max(15px,env(safe-area-inset-bottom))]">
+    <nav className="fixed inset-x-0 bottom-0 z-10 flex justify-around border-t border-border bg-background px-0 pt-[13px] pb-[max(15px,env(safe-area-inset-bottom))]">
       {NAV_ITEMS.map((item) => {
         const isActive = item.match(pathname);
         // Se já estava lendo um capítulo, "Bíblia" volta pra lá em vez de

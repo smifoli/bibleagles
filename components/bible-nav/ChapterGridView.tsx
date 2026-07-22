@@ -17,7 +17,7 @@ export function ChapterGridView({ bookId, bookName, chapterCount, version, versi
   const chapters = Array.from({ length: chapterCount }, (_, index) => index + 1);
 
   return (
-    <div className="flex min-h-full flex-col gap-[17px]">
+    <div className="flex min-h-dvh flex-col gap-[17px]">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/bible" aria-label="Voltar" className="text-[calc(18px*var(--font-scale))] text-text-muted">

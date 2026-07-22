@@ -25,7 +25,7 @@ export function FamilyFeedView({
   isAdmin: boolean;
 }) {
   return (
-    <div className="flex min-h-full flex-col gap-[17px]">
+    <div className="flex min-h-dvh flex-col gap-[17px]">
       <header>
         <div className="text-[calc(20px*var(--font-scale))] font-semibold text-text-primary">Família</div>
         <p className="mt-0.5 text-[calc(12px*var(--font-scale))] text-text-muted">Atividade de todos os membros, em ordem cronológica</p>

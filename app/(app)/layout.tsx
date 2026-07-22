@@ -9,10 +9,15 @@ import { BottomNav } from "@/components/layout/BottomNav";
 export const dynamic = "force-dynamic";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  // O conteúdo rola no documento (não numa div interna com overflow-y-auto) de
+  // propósito: o gesto do iOS de tocar a barra de status pra rolar ao topo só
+  // funciona quando quem rola é a janela — não afeta um container aninhado. O
+  // BottomNav vira `fixed` (ver components/layout/BottomNav.tsx) pra continuar
+  // fixo na tela, e o padding-bottom aqui evita que o conteúdo fique embaixo dele.
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-[18px] py-5">{children}</div>
+    <>
+      <div className="px-[18px] pb-[calc(56px+max(15px,env(safe-area-inset-bottom)))] pt-5">{children}</div>
       <BottomNav />
-    </div>
+    </>
   );
 }

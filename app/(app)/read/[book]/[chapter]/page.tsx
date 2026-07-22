@@ -13,7 +13,7 @@ export default async function ReaderPage({
   searchParams,
 }: {
   params: { book: string; chapter: string };
-  searchParams: { version?: string; verse?: string; planDay?: string; from?: string };
+  searchParams: { version?: string; verse?: string; v?: string; planDay?: string; from?: string };
 }) {
   const chapter = Number(params.chapter);
   if (!Number.isInteger(chapter) || chapter <= 0) notFound();
@@ -47,6 +47,7 @@ export default async function ReaderPage({
   }
 
   const initialVerse = searchParams.verse ? Number(searchParams.verse) : undefined;
+  const initialScrollVerse = searchParams.v ? Number(searchParams.v) : undefined;
   const cookieStore = await cookies();
   const initialVerseFontSize = parseVerseFontSize(cookieStore.get(VERSE_FONT_SIZE_COOKIE)?.value);
 
@@ -88,6 +89,7 @@ export default async function ReaderPage({
       versions={BIBLE_VERSIONS}
       data={data}
       initialVerse={Number.isInteger(initialVerse) ? initialVerse : undefined}
+      initialScrollVerse={Number.isInteger(initialScrollVerse) ? initialScrollVerse : undefined}
       initialVerseFontSize={initialVerseFontSize}
       backPath={searchParams.from}
       prevHref={prevHref}

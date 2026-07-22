@@ -43,7 +43,7 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-[17px]">
+    <div className="flex min-h-dvh flex-col gap-[17px]">
       <header className="flex items-center justify-between">
         <div className="text-[calc(20px*var(--font-scale))] font-semibold text-text-primary">Bíblia</div>
         <VersionSelect version={version} versions={versions} />

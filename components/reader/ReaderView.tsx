@@ -29,6 +29,7 @@ interface ReaderViewProps {
   versions: BibleVersion[];
   data: ReaderData;
   initialVerse?: number;
+  initialScrollVerse?: number;
   initialVerseFontSize: number;
   backPath?: string;
   prevHref: string | null;
@@ -42,6 +43,7 @@ export function ReaderView({
   versions,
   data,
   initialVerse,
+  initialScrollVerse,
   initialVerseFontSize,
   backPath,
   prevHref,
@@ -59,18 +61,50 @@ export function ReaderView({
   const [pending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string>();
 
-  // Veio de uma busca por referência (/bible) com verso específico — rola até ele.
+  // Veio de uma busca por referência (/bible), destaques, ou atividade da família
+  // com verso específico — rola até ele e abre o painel. Sem isso, mas com um
+  // verso salvo de uma visita anterior a este capítulo (initialScrollVerse), só
+  // rola até lá, sem abrir o painel — é retomar a leitura, não focar num verso.
   useEffect(() => {
-    if (!initialVerse) return;
-    document.getElementById(`verse-${initialVerse}`)?.scrollIntoView({ block: "center" });
+    const target = initialVerse ?? initialScrollVerse;
+    if (!target) return;
+    document.getElementById(`verse-${target}`)?.scrollIntoView({ block: initialVerse ? "center" : "start" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Lembra o último capítulo aberto — o BottomNav usa isso pra "Bíblia" voltar
-  // pra cá em vez de reiniciar na lista de livros, se o usuário navegar pra
-  // outra aba e voltar.
+  // Lembra o último capítulo E verso — o BottomNav usa isso pra "Bíblia" voltar
+  // pra cá (em vez de reiniciar na lista de livros) e retomar de onde parou, se
+  // o usuário navegar pra outra aba e voltar. Atualiza a cada scroll (rAF-throttled)
+  // pra sempre refletir o verso mais recente visível no topo, não só o de quando
+  // o capítulo foi aberto.
   useEffect(() => {
-    document.cookie = `${LAST_READ_COOKIE}=${encodeURIComponent(`/read/${book}/${chapter}?version=${version}`)}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    let rafId: number | null = null;
+
+    function topVisibleVerse(): number {
+      const elements = Array.from(document.querySelectorAll<HTMLElement>('[id^="verse-"]'));
+      const visible = elements.find((element) => element.getBoundingClientRect().bottom > 0);
+      return visible ? Number(visible.id.slice("verse-".length)) : 1;
+    }
+
+    function writeCookie() {
+      const path = `/read/${book}/${chapter}?version=${version}&v=${topVisibleVerse()}`;
+      document.cookie = `${LAST_READ_COOKIE}=${encodeURIComponent(path)}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    }
+
+    function onScroll() {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        writeCookie();
+      });
+    }
+
+    writeCookie();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, [book, chapter, version]);
 
   const bookName = data.reference.split(" ").slice(0, -1).join(" ") || data.reference;
@@ -370,7 +404,7 @@ export function ReaderView({
 
   return (
     <div
-      className="flex min-h-full flex-col gap-[17px]"
+      className="flex min-h-dvh flex-col gap-[17px]"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
