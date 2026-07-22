@@ -80,13 +80,16 @@ export function ReaderView({
   // `backPath` (query "from") vem de onde o usuário realmente entrou no leitor — home,
   // grade de capítulos, pacote, marcas, família — e usa sempre a versão ATUAL (não a de
   // quando entrou), pra trocar de versão no leitor não "voltar" pra uma versão antiga.
+  // Sem backPath (ex.: aba "Bíblia" pulando pro último capítulo lido via cookie), o
+  // fallback é sempre a grade de capítulos — NÃO dá pra usar data.planContext aqui pra
+  // decidir "veio da home": esse contexto é detectado de forma orgânica (ver
+  // getActivePlanContextForChapter em lib/reader-data.ts) e vale pra qualquer capítulo
+  // que bata com um plano ativo, mesmo fora do fluxo "Leitura de hoje".
   const parentHref = backPath
     ? backPath.startsWith("/bible")
       ? `${backPath}?version=${version}`
       : backPath
-    : data.planContext
-      ? "/"
-      : `/bible/${book}?version=${version}`;
+    : `/bible/${book}?version=${version}`;
 
   function handleVersionChange(next: string) {
     const url = new URL(window.location.href);
