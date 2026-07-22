@@ -12,15 +12,21 @@ export interface BibleVersion {
    */
   source:
     | { provider: "api.bible"; bibleId: string }
-    | { provider: "ebible.org"; id: string };
+    | { provider: "ebible.org"; id: string }
+    | { provider: "manual"; note: string };
 }
 
 /**
- * Só versões de domínio público / licença livre entram aqui — são as únicas que podem
- * ser baixadas uma vez e empacotadas como JSON estático no app (ver lib/bible-data.ts e
- * scripts/download-bibles.mjs). Traduções comerciais (NVI, ARA, ACF, NVT, NIV, ESV,
- * RVR1960, LUT 2017, SCH2000 etc.) mesmo quando acessíveis ao vivo via API.Bible, não
- * podem ser redistribuídas dentro do app sem licenciamento à parte — por isso ficam de fora.
+ * Fora a NVI (licenciada à parte, ver abaixo), só versões de domínio público / licença
+ * livre entram aqui — são as únicas que podem ser baixadas uma vez e empacotadas como
+ * JSON estático no app (ver lib/bible-data.ts e scripts/download-bibles.mjs). Traduções
+ * comerciais (ARA, ACF, NVT, NIV, ESV, RVR1960, LUT 2017, SCH2000 etc.) mesmo quando
+ * acessíveis ao vivo via API.Bible, não podem ser redistribuídas dentro do app sem
+ * licenciamento à parte — por isso ficam de fora.
+ *
+ * NVI: texto licenciado diretamente (não vem de api.bible/ebible.org) — importado uma
+ * única vez com scripts/import-nvi.mjs a partir do JSON fornecido. É a versão padrão em
+ * português.
  *
  * Duas versões por idioma, exceto italiano: não foi encontrada uma segunda tradução
  * italiana de licença livre com o cânon completo (só Diodati 1885). Pode ser adicionada
@@ -40,7 +46,8 @@ export interface BibleVersion {
  *    depois é só devolver as entradas aqui.
  */
 export const BIBLE_VERSIONS: BibleVersion[] = [
-  { abbreviation: "BLT", name: "Bíblia Livre Para Todos", language: "pt", isDefault: true, source: { provider: "ebible.org", id: "porbr2018" } },
+  { abbreviation: "NVI", name: "Nova Versão Internacional", language: "pt", isDefault: true, source: { provider: "manual", note: "Texto licenciado fornecido diretamente — ver scripts/import-nvi.mjs" } },
+  { abbreviation: "BLT", name: "Bíblia Livre Para Todos", language: "pt", source: { provider: "ebible.org", id: "porbr2018" } },
   { abbreviation: "ONBV", name: "Open Nova Bíblia Viva", language: "pt", source: { provider: "ebible.org", id: "poronbv" } },
   { abbreviation: "WEB", name: "World English Bible", language: "en", isDefault: true, source: { provider: "api.bible", bibleId: "9879dbb7cfe39e4d-04" } },
   { abbreviation: "KJV", name: "King James Version", language: "en", source: { provider: "api.bible", bibleId: "de4e12af7f28f599-02" } },

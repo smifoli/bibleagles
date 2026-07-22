@@ -31,6 +31,8 @@ const REQUEST_DELAY_MS = 120;
 const MAX_RETRIES = 5;
 
 // Mantido em sincronia manual com BIBLE_VERSIONS em lib/bible-versions.ts.
+// NVI fica de fora de propósito: é texto licenciado à parte, importado uma única vez
+// com scripts/import-nvi.mjs — não com este script.
 const VERSIONS = [
   { abbreviation: "BLT", source: { provider: "ebible.org", id: "porbr2018" } },
   { abbreviation: "ONBV", source: { provider: "ebible.org", id: "poronbv" } },
