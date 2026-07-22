@@ -414,7 +414,24 @@ export function ReaderView({
             ←
           </Link>
           <div>
-            <div className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">{data.reference}</div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">{data.reference}</span>
+              {data.planContext && (
+                <button
+                  type="button"
+                  onClick={data.planContext.alreadyCompleted ? handleUnmarkAsRead : handleMarkAsRead}
+                  disabled={pending}
+                  aria-label={data.planContext.alreadyCompleted ? "Lido · toque pra desmarcar" : "Não lido · toque pra marcar como lido"}
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold leading-none ${
+                    data.planContext.alreadyCompleted
+                      ? "border-[#5c8a52] bg-[#5c8a52] text-white"
+                      : "border-[#c0ad94] bg-transparent text-transparent"
+                  }`}
+                >
+                  ✓
+                </button>
+              )}
+            </div>
             {data.planContext && (
               <div className="text-[calc(11px*var(--font-scale))] text-text-muted">
                 Lendo {data.planContext.packageTitle} · Dia {data.planContext.dayNumber}
@@ -423,21 +440,6 @@ export function ReaderView({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {data.planContext && (
-            <button
-              type="button"
-              onClick={data.planContext.alreadyCompleted ? handleUnmarkAsRead : handleMarkAsRead}
-              disabled={pending}
-              aria-label={data.planContext.alreadyCompleted ? "Lido · toque pra desmarcar" : "Não lido · toque pra marcar como lido"}
-              className={`flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-bold leading-none ${
-                data.planContext.alreadyCompleted
-                  ? "border-[#5c8a52] bg-[#5c8a52] text-white"
-                  : "border-[#c0ad94] bg-transparent text-transparent"
-              }`}
-            >
-              ✓
-            </button>
-          )}
           <select
             value={version}
             onChange={(event) => handleVersionChange(event.target.value)}
