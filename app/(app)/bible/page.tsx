@@ -25,7 +25,7 @@ export default async function BiblePage({ searchParams }: { searchParams: { vers
     (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??
     getDefaultVersion(profile?.preferred_language ?? "pt");
 
-  const nav = await getBibleNavData(supabase, version.abbreviation);
+  const nav = await getBibleNavData(supabase, version.abbreviation, user.id);
 
   return <BibleNavView version={version.abbreviation} versions={BIBLE_VERSIONS} nav={nav} />;
 }

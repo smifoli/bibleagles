@@ -107,11 +107,19 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
                   onClick={() => goToBook(book.id)}
                   className={
                     hasActivity
-                      ? "rounded-[14px] border border-[#b3a48c] bg-background p-[13px] text-left"
-                      : "rounded-[14px] border border-border bg-surface p-[13px] text-left"
+                      ? "relative rounded-[14px] border border-[#b3a48c] bg-background p-[13px] text-left"
+                      : "relative rounded-[14px] border border-border bg-surface p-[13px] text-left"
                   }
                 >
-                  <div className="text-[calc(14px*var(--font-scale))] font-semibold text-text-primary">{book.name}</div>
+                  {book.isFullyRead && (
+                    <span
+                      aria-label="Lido por completo"
+                      className="absolute right-2.5 top-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#5c8a52] text-[9px] font-bold leading-none text-white"
+                    >
+                      ✓
+                    </span>
+                  )}
+                  <div className="pr-5 text-[calc(14px*var(--font-scale))] font-semibold text-text-primary">{book.name}</div>
                   <div className="mt-0.5 text-[calc(11px*var(--font-scale))] text-text-muted">{book.chapterCount} capítulos</div>
                   {hasActivity && (
                     <div className="mt-[7px] text-[calc(11px*var(--font-scale))] text-[#7d6c58]">

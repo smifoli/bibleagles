@@ -17,5 +17,5 @@ export default async function PackageStatsPage({ params }: { params: { id: strin
 
   if (!stats) notFound();
 
-  return <PackageStatsView stats={stats} canEdit={profile?.role === "admin"} />;
+  return <PackageStatsView stats={stats} canEdit={profile?.role === "admin"} currentUserId={user.id} />;
 }

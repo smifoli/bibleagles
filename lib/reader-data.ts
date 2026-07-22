@@ -180,8 +180,7 @@ export async function getReaderData(
  * Contexto de "marcar como lido" pra esse capítulo. Se `requestedPlanDayId` vier
  * (link "Ler" a partir de /package/[id]), usa exatamente esse dia. Sem isso, cai
  * na navegação orgânica pela Bíblia: qualquer capítulo que bata com algum dia de
- * um pacote ATIVO pode ser marcado como lido, passado, hoje ou futuro — só a lista
- * "Pendentes" de /package/[id] restringe a dias já vencidos (ver getPackageStats).
+ * um pacote ATIVO pode ser marcado como lido, passado, hoje ou futuro (ver getPackageStats).
  */
 async function getPlanContext(
   supabase: SupabaseServerClient,

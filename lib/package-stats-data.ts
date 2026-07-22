@@ -15,6 +15,9 @@ export interface PackageDayItem {
   passageLabel: string | null;
   readCount: number;
   isReadByMe: boolean;
+  readByMemberIds: string[];
+  firstPassageBook: string | null;
+  firstPassageChapterStart: number | null;
   readHref: string | null;
 }
 
@@ -175,6 +178,9 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
       passageLabel: firstPassage ? formatPassageLabel(firstPassage) : null,
       readCount: dayProgress.length,
       isReadByMe: dayProgress.some((row) => row.user_id === userId),
+      readByMemberIds: dayProgress.map((row) => row.user_id),
+      firstPassageBook: firstPassage?.book ?? null,
+      firstPassageChapterStart: firstPassage?.chapter_start ?? null,
       readHref: firstPassage
         ? `/read/${firstPassage.book}/${firstPassage.chapter_start}?planDay=${day.id}&from=${encodeURIComponent(`/package/${packageId}`)}`
         : null,

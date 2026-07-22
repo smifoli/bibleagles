@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
+import { PackageDayList } from "@/components/package/PackageDayList";
 import { toDateOnlyString } from "@/lib/format";
 import type { PackageStats } from "@/lib/package-stats-data";
 
@@ -9,11 +10,13 @@ function progressRemainingLabel(totalDays: number, daysRemaining: number): strin
   return `~${daysRemaining} ${daysRemaining === 1 ? "dia restante" : "dias restantes"}`;
 }
 
-export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canEdit: boolean }) {
+export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: PackageStats; canEdit: boolean; currentUserId: string }) {
   const today = toDateOnlyString();
-  // Só dias já vencidos (passado ou hoje) e não lidos contam como pendentes —
-  // dias futuros do plano não entram na lista, mesmo sem leitura ainda.
-  const pendingDays = stats.days.filter((day) => !day.isReadByMe && day.readHref && day.date <= today);
+  // Duas pilhas em vez de uma lista cronológica só: o que falta ler (ordenado por
+  // data, inclui dias futuros — é a fila do que vem a seguir) embaixo do que já
+  // foi lido (onde dá pra ver quem da família já leu cada dia).
+  const unreadDays = stats.days.filter((day) => !day.isReadByMe);
+  const readDays = stats.days.filter((day) => day.isReadByMe);
 
   return (
     <div className="flex flex-col gap-6">
@@ -56,43 +59,12 @@ export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canE
         <StatBox value={stats.totalDaysRead} label="dias lidos" />
       </div>
 
-      {pendingDays.length > 0 && (
+      {unreadDays.length > 0 && (
         <div className="flex flex-col gap-3">
           <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
-            Pendentes ({pendingDays.length})
+            Próximos no pacote ({unreadDays.length})
           </div>
-          <div className="flex flex-col gap-2.5">
-            {pendingDays.map((day) => {
-              const isOverdue = day.date < today;
-              return (
-                <Link
-                  key={day.id}
-                  href={day.readHref!}
-                  className={`flex items-center justify-between gap-3 rounded-[14px] border p-3.5 ${
-                    isOverdue ? "border-[#e6c4be] bg-[rgba(160,58,42,0.05)]" : "border-border bg-surface"
-                  }`}
-                >
-                  <div className="min-w-0">
-                    <div className={`truncate text-[calc(13px*var(--font-scale))] font-semibold ${isOverdue ? "text-error" : "text-ink"}`}>
-                      {day.title}
-                    </div>
-                    <div className={`mt-0.5 text-[calc(11px*var(--font-scale))] ${isOverdue ? "text-error/80" : "text-text-muted"}`}>
-                      {day.dateLabel}
-                      {day.passageLabel ? ` · ${day.passageLabel}` : ""}
-                      {isOverdue ? " · atrasado" : ""}
-                    </div>
-                  </div>
-                  <span
-                    className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[calc(11px*var(--font-scale))] font-semibold ${
-                      isOverdue ? "bg-error text-background" : "bg-ink text-background"
-                    }`}
-                  >
-                    Ler →
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+          <PackageDayList days={unreadDays} members={stats.members} currentUserId={currentUserId} today={today} highlightOverdue />
         </div>
       )}
 
@@ -154,49 +126,16 @@ export function PackageStatsView({ stats, canEdit }: { stats: PackageStats; canE
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Dias do pacote</div>
-        <div className="flex flex-col gap-3.5 rounded-[18px] border border-border bg-surface p-4">
-          {stats.days.length === 0 ? (
-            <p className="text-[calc(14px*var(--font-scale))] text-text-muted">Nenhum dia configurado neste pacote.</p>
-          ) : (
-            stats.days.map((day, index) => {
-              const content = (
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      {day.isReadByMe && <span className="text-[calc(11px*var(--font-scale))] text-ink">✓</span>}
-                      <span className="truncate text-[calc(13px*var(--font-scale))] font-semibold text-ink">{day.title}</span>
-                    </div>
-                    <div className="mt-0.5 text-[calc(11px*var(--font-scale))] text-text-muted">
-                      {day.dateLabel}
-                      {day.passageLabel ? ` · ${day.passageLabel}` : ""}
-                    </div>
-                  </div>
-                  {stats.members.length > 0 ? (
-                    <span className="shrink-0 whitespace-nowrap text-[calc(11px*var(--font-scale))] text-text-muted">
-                      {day.readCount} / {stats.members.length} leram
-                    </span>
-                  ) : null}
-                </div>
-              );
-
-              return (
-                <div key={day.id}>
-                  {index > 0 ? <div className="mb-3.5 h-px bg-border" /> : null}
-                  {day.readHref ? (
-                    <Link href={day.readHref} className="block">
-                      {content}
-                    </Link>
-                  ) : (
-                    content
-                  )}
-                </div>
-              );
-            })
-          )}
+      {readDays.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
+            Dias lidos ({readDays.length})
+          </div>
+          <PackageDayList days={readDays} members={stats.members} currentUserId={currentUserId} today={today} />
         </div>
-      </div>
+      )}
+
+      {stats.days.length === 0 && <p className="text-[calc(14px*var(--font-scale))] text-text-muted">Nenhum dia configurado neste pacote.</p>}
     </div>
   );
 }

@@ -32,7 +32,7 @@ export function ChapterGridView({ bookId, bookName, chapterCount, version, versi
 
       <div className="grid grid-cols-5 gap-2">
         {chapters.map((chapter) => {
-          const { commentCount = 0, highlightCount = 0 } = activity.get(chapter) ?? {};
+          const { commentCount = 0, highlightCount = 0, isRead = false } = activity.get(chapter) ?? {};
           const hasActivity = commentCount > 0 || highlightCount > 0;
 
           return (
@@ -41,10 +41,18 @@ export function ChapterGridView({ bookId, bookName, chapterCount, version, versi
               href={`/read/${bookId}/${chapter}?version=${version}&from=${encodeURIComponent(`/bible/${bookId}`)}`}
               className={
                 hasActivity
-                  ? "flex flex-col items-center justify-center gap-0.5 rounded-[14px] border border-[#b3a48c] bg-background py-3 text-[calc(14px*var(--font-scale))] font-semibold text-text-primary"
-                  : "flex flex-col items-center justify-center gap-0.5 rounded-[14px] border border-border bg-surface py-3 text-[calc(14px*var(--font-scale))] font-semibold text-text-primary"
+                  ? "relative flex flex-col items-center justify-center gap-0.5 rounded-[14px] border border-[#b3a48c] bg-background py-3 text-[calc(14px*var(--font-scale))] font-semibold text-text-primary"
+                  : "relative flex flex-col items-center justify-center gap-0.5 rounded-[14px] border border-border bg-surface py-3 text-[calc(14px*var(--font-scale))] font-semibold text-text-primary"
               }
             >
+              {isRead && (
+                <span
+                  aria-label="Lido"
+                  className="absolute right-1.5 top-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#5c8a52] text-[8px] font-bold leading-none text-white"
+                >
+                  ✓
+                </span>
+              )}
               {chapter}
               {hasActivity && (
                 <span className="text-[calc(9px*var(--font-scale))] font-semibold text-[#7d6c58]">
