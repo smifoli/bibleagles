@@ -76,21 +76,21 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
       <div className="flex gap-2">
         <button
           onClick={() => setTestament("AT")}
-          className={
+          className={`transition-transform active:scale-95 ${
             testament === "AT"
               ? "rounded-full bg-ink px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
               : "rounded-full border border-[#e0d3bf] px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
-          }
+          }`}
         >
           Antigo
         </button>
         <button
           onClick={() => setTestament("NT")}
-          className={
+          className={`transition-transform active:scale-95 ${
             testament === "NT"
               ? "rounded-full bg-ink px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
               : "rounded-full border border-[#e0d3bf] px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
-          }
+          }`}
         >
           Novo Testamento
         </button>
@@ -113,11 +113,11 @@ export function BibleNavView({ version, versions, nav }: BibleNavViewProps) {
                 <button
                   key={book.id}
                   onClick={() => goToBook(book.id)}
-                  className={
+                  className={`transition-transform active:scale-[0.97] ${
                     hasActivity
                       ? "relative overflow-hidden rounded-[14px] border border-[#b3a48c] bg-background p-[13px] text-left"
                       : "relative overflow-hidden rounded-[14px] border border-border bg-surface p-[13px] text-left"
-                  }
+                  }`}
                 >
                   {/* Fundo verde proporcional ao % de capítulos lidos — atrás do conteúdo (z-0), que fica em relative z-10 abaixo. */}
                   {book.readPercent > 0 && (

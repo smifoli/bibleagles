@@ -19,9 +19,12 @@ export default async function BibleBookPage({
   if (!user) notFound();
 
   const requestedVersion = searchParams.version ? getVersionByAbbreviation(searchParams.version) : undefined;
+  const bookId = params.book.toUpperCase();
 
-  // Só busca a preferência salva quando a versão não vier na URL (o seletor
-  // de versão e a navegação a partir de /bible sempre a incluem).
+  // getChapterActivityForBook não depende da versão preferida — dispara já, em
+  // paralelo com a busca de perfil (só feita quando a versão não vier na URL — o
+  // seletor de versão e a navegação a partir de /bible sempre a incluem).
+  const chapterActivityPromise = getChapterActivityForBook(supabase, bookId, user.id);
   const { data: profile } = requestedVersion
     ? { data: null }
     : await supabase.from("users").select("preferred_version, preferred_language").eq("id", user.id).single();
@@ -31,11 +34,10 @@ export default async function BibleBookPage({
     (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??
     getDefaultVersion(profile?.preferred_language ?? "pt");
 
-  const bookId = params.book.toUpperCase();
   const summary = tryGetBookSummary(version.abbreviation, bookId);
   if (!summary) notFound();
 
-  const chapterActivity = await getChapterActivityForBook(supabase, bookId, user.id);
+  const chapterActivity = await chapterActivityPromise;
 
   return (
     <ChapterGridView

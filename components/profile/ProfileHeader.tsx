@@ -4,7 +4,6 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { updateAvatarUrl, updateProfileName } from "@/lib/profile-actions";
-import { createClient } from "@/lib/supabase/client";
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
@@ -55,6 +54,9 @@ export function ProfileHeader({
     setError(undefined);
     setUploading(true);
 
+    // Import sob demanda: o client da Supabase (~190kB) só é baixado se o usuário
+    // realmente trocar a foto, em vez de inflar o bundle inicial de /profile.
+    const { createClient } = await import("@/lib/supabase/client");
     const supabase = createClient();
     const extension = file.type.split("/")[1] || "jpg";
     const path = `${userId}/avatar.${extension}`;

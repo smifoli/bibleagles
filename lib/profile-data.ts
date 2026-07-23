@@ -90,28 +90,22 @@ async function getReadingCalendar(supabase: SupabaseServerClient, userId: string
   const monthStart = toDateOnlyString(new Date(year, month, 1));
   const monthEnd = toDateOnlyString(new Date(year, month, daysInMonth));
 
-  // Segue o mesmo padrão de duas consultas + join em JS usado em lib/home-data.ts
-  // (sem embed do PostgREST): pega os plan_day_id do mês, depois a progresso do usuário.
-  const { data: monthDays } = await supabase
-    .from("reading_plan_days")
-    .select("id, date")
-    .gte("date", monthStart)
-    .lte("date", monthEnd);
+  // O progresso do usuário não depende dos dias do mês — dispara junto em vez de
+  // esperar os dias pra só então filtrar por plan_day_id (mesmo ajuste feito em
+  // getActivePlanContextForChapter, lib/reader-data.ts): busca todo o progresso
+  // ligado a plano do usuário e cruza com os dias do mês em JS.
+  const [{ data: monthDays }, { data: progress }] = await Promise.all([
+    supabase.from("reading_plan_days").select("id, date").gte("date", monthStart).lte("date", monthEnd),
+    supabase.from("reading_progress").select("plan_day_id").eq("user_id", userId).not("plan_day_id", "is", null),
+  ]);
 
   const dateByPlanDayId = new Map((monthDays ?? []).map((row) => [row.id, row.date]));
-  const planDayIds = Array.from(dateByPlanDayId.keys());
-
-  const { data: progress } =
-    planDayIds.length > 0
-      ? await supabase.from("reading_progress").select("plan_day_id").eq("user_id", userId).in("plan_day_id", planDayIds)
-      : { data: [] };
 
   const readDates = new Set(
     (progress ?? [])
-      // plan_day_id é nullable no schema (também cobre leitura livre, fora de plano — ver
-      // reading_progress_target_check), mas o filtro .in(planDayIds) acima nunca traz uma
-      // linha com plan_day_id null (IN nunca casa NULL em SQL).
-      .map((row) => dateByPlanDayId.get(row.plan_day_id ?? ""))
+      // dateByPlanDayId só tem os dias deste mês — progresso de outros meses/pacotes
+      // cai em undefined aqui e é descartado pelo filter abaixo.
+      .map((row) => dateByPlanDayId.get(row.plan_day_id!))
       .filter((date): date is string => Boolean(date))
   );
 

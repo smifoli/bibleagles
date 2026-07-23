@@ -62,6 +62,13 @@ export function ReaderView({
   const [editDraft, setEditDraft] = useState("");
   const [pending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string>();
+  // Espelha data.isChapterRead localmente pra virar o check/botão no instante do toque, sem
+  // esperar a viagem de rede da server action + o router.refresh() que sincroniza `data`
+  // depois — reconciliada pelo efeito abaixo sempre que `data` for de fato atualizado.
+  const [isReadOptimistic, setIsReadOptimistic] = useState(data.isChapterRead);
+  useEffect(() => {
+    setIsReadOptimistic(data.isChapterRead);
+  }, [data.isChapterRead]);
 
   // Veio de uma busca por referência (/bible), destaques, ou atividade da família
   // com verso específico — rola até ele e abre o painel. Sem isso, mas com um
@@ -389,21 +396,31 @@ export function ReaderView({
   // vira uma leitura livre — só esse (book, chapter), ver markChapterRead.
   function handleMarkAsRead() {
     setActionError(undefined);
+    setIsReadOptimistic(true);
     startTransition(async () => {
       const result = data.planContext ? await markPlanDayRead(book, chapter, data.planContext.planDayId) : await markChapterRead(book, chapter);
-      if (result.error) setActionError(result.error);
-      else router.refresh();
+      if (result.error) {
+        setIsReadOptimistic(false);
+        setActionError(result.error);
+      } else {
+        router.refresh();
+      }
     });
   }
 
   function handleUnmarkAsRead() {
     setActionError(undefined);
+    setIsReadOptimistic(false);
     startTransition(async () => {
       const result = data.planContext
         ? await unmarkPlanDayRead(book, chapter, data.planContext.planDayId)
         : await unmarkChapterRead(book, chapter);
-      if (result.error) setActionError(result.error);
-      else router.refresh();
+      if (result.error) {
+        setIsReadOptimistic(true);
+        setActionError(result.error);
+      } else {
+        router.refresh();
+      }
     });
   }
 
@@ -423,11 +440,10 @@ export function ReaderView({
               <span className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">{data.reference}</span>
               <button
                 type="button"
-                onClick={data.isChapterRead ? handleUnmarkAsRead : handleMarkAsRead}
-                disabled={pending}
-                aria-label={data.isChapterRead ? "Lido · toque pra desmarcar" : "Não lido · toque pra marcar como lido"}
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold leading-none ${
-                  data.isChapterRead ? "border-[#5c8a52] bg-[#5c8a52] text-white" : "border-[#c0ad94] bg-transparent text-transparent"
+                onClick={isReadOptimistic ? handleUnmarkAsRead : handleMarkAsRead}
+                aria-label={isReadOptimistic ? "Lido · toque pra desmarcar" : "Não lido · toque pra marcar como lido"}
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold leading-none transition-transform active:scale-90 ${
+                  isReadOptimistic ? "border-[#5c8a52] bg-[#5c8a52] text-white" : "border-[#c0ad94] bg-transparent text-transparent"
                 }`}
               >
                 ✓
@@ -459,7 +475,7 @@ export function ReaderView({
         <Link
           href={prevHref ?? "#"}
           aria-disabled={!prevHref}
-          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold ${
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold transition-transform active:scale-95 ${
             prevHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
           }`}
         >
@@ -468,7 +484,7 @@ export function ReaderView({
         <Link
           href={nextHref ?? "#"}
           aria-disabled={!nextHref}
-          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold ${
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold transition-transform active:scale-95 ${
             nextHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
           }`}
         >
@@ -481,7 +497,7 @@ export function ReaderView({
           onClick={handleDecreaseFont}
           disabled={verseFontSize <= VERSE_FONT_MIN}
           aria-label="Diminuir letra"
-          className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(11px*var(--font-scale))] font-semibold text-text-muted disabled:opacity-40"
+          className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(11px*var(--font-scale))] font-semibold text-text-muted transition-transform active:scale-90 disabled:opacity-40"
         >
           A−
         </button>
@@ -490,7 +506,7 @@ export function ReaderView({
           onClick={handleIncreaseFont}
           disabled={verseFontSize >= VERSE_FONT_MAX}
           aria-label="Aumentar letra"
-          className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(15px*var(--font-scale))] font-semibold text-text-muted disabled:opacity-40"
+          className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(15px*var(--font-scale))] font-semibold text-text-muted transition-transform active:scale-90 disabled:opacity-40"
         >
           A+
         </button>
@@ -624,7 +640,7 @@ export function ReaderView({
         <Link
           href={prevHref ?? "#"}
           aria-disabled={!prevHref}
-          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold ${
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold transition-transform active:scale-95 ${
             prevHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
           }`}
         >
@@ -633,7 +649,7 @@ export function ReaderView({
         <Link
           href={nextHref ?? "#"}
           aria-disabled={!nextHref}
-          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold ${
+          className={`flex-1 rounded-[13px] border border-input-border py-3 text-center text-[calc(12px*var(--font-scale))] font-semibold transition-transform active:scale-95 ${
             nextHref ? "text-text-secondary" : "pointer-events-none text-text-muted opacity-40"
           }`}
         >
@@ -642,13 +658,12 @@ export function ReaderView({
       </div>
 
       <button
-        onClick={data.isChapterRead ? handleUnmarkAsRead : handleMarkAsRead}
-        disabled={pending}
-        className={`mt-auto w-full rounded-[13px] py-[15px] text-[calc(13px*var(--font-scale))] font-semibold disabled:opacity-60 ${
-          data.isChapterRead ? "border border-input-border text-text-secondary" : "bg-ink text-background"
+        onClick={isReadOptimistic ? handleUnmarkAsRead : handleMarkAsRead}
+        className={`mt-auto w-full rounded-[13px] py-[15px] text-[calc(13px*var(--font-scale))] font-semibold transition-transform active:scale-[0.98] ${
+          isReadOptimistic ? "border border-input-border text-text-secondary" : "bg-ink text-background"
         }`}
       >
-        {data.isChapterRead ? "Já lido · toque para desfazer" : "Marcar como lido"}
+        {isReadOptimistic ? "Já lido · toque para desfazer" : "Marcar como lido"}
       </button>
     </div>
   );

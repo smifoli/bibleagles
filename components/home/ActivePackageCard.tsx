@@ -55,7 +55,7 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
         </div>
         <Link
           href={readHref}
-          className="rounded-full bg-[#f3ebdc] px-[18px] py-2.5 text-[calc(12px*var(--font-scale))] font-semibold text-card-dark"
+          className="rounded-full bg-[#f3ebdc] px-[18px] py-2.5 text-[calc(12px*var(--font-scale))] font-semibold text-card-dark transition-transform active:scale-[0.96]"
         >
           Ler agora
         </Link>

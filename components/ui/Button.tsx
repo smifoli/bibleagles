@@ -15,5 +15,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function Button({ variant = "primary", className = "", ...props }: ButtonProps) {
-  return <button className={`${VARIANT_CLASSES[variant]} ${className}`} {...props} />;
+  return (
+    <button
+      className={`transition-transform active:scale-[0.97] ${VARIANT_CLASSES[variant]} ${className}`}
+      {...props}
+    />
+  );
 }

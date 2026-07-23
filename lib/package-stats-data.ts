@@ -87,15 +87,26 @@ function formatPassageLabel(passage: Passage): string {
   return `${name} ${passage.chapter_start}`;
 }
 
+interface PackageDayWithProgressRow {
+  id: string;
+  date: string;
+  title: string;
+  passages: Passage[];
+  reading_progress: { user_id: string; plan_day_id: string }[];
+}
+
 /** Busca dados agregados de progresso/engajamento de um pacote pra tela /package/[id]. Retorna null se o pacote não existir. */
 export async function getPackageStats(supabase: SupabaseServerClient, packageId: string, userId: string): Promise<PackageStats | null> {
-  // Nada aqui depende do resultado de outra query — todas disparam juntas.
+  // Nada aqui depende do resultado de outra query — todas disparam juntas. O progresso
+  // vem embutido na própria query dos dias (reading_progress.plan_day_id referencia
+  // reading_plan_days.id) em vez de uma segunda viagem filtrando por planDayIds —
+  // types/database.ts não modela Relationships, daí o cast manual.
   const [{ data: pkg }, { data: days }, { data: familyMembers }, { data: allComments }, { data: allBookmarks }] =
     await Promise.all([
       supabase.from("reading_packages").select("id, title, status, start_date").eq("id", packageId).single(),
       supabase
         .from("reading_plan_days")
-        .select("id, date, title, passages")
+        .select("id, date, title, passages, reading_progress(user_id, plan_day_id)")
         .eq("package_id", packageId)
         .order("date", { ascending: true }),
       supabase.from("users").select("id, name, avatar_url").order("created_at", { ascending: true }),
@@ -105,10 +116,9 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
 
   if (!pkg) return null;
 
-  const planDays = days ?? [];
+  const planDays = (days ?? []) as unknown as PackageDayWithProgressRow[];
   const members = familyMembers ?? [];
   const totalDays = planDays.length;
-  const planDayIds = planDays.map((day) => day.id);
   const allPassages = planDays.flatMap((day) => day.passages);
 
   const today = toDateOnlyString();
@@ -116,12 +126,7 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
   const daysRemaining = Math.max(totalDays - currentDayNumber, 0);
   const progressPercent = totalDays === 0 ? 0 : Math.round((currentDayNumber / totalDays) * 100);
 
-  const { data: progress } =
-    planDayIds.length > 0
-      ? await supabase.from("reading_progress").select("user_id, plan_day_id").in("plan_day_id", planDayIds)
-      : { data: [] as { user_id: string; plan_day_id: string }[] };
-
-  const progressRows = progress ?? [];
+  const progressRows = planDays.flatMap((day) => day.reading_progress);
 
   // comments/bookmarks não são vinculados ao pacote no schema — pertencem ao pacote se
   // caírem em algum (book, chapter) coberto pelas passagens de algum dia do pacote.

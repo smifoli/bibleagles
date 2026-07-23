@@ -39,6 +39,9 @@ export function FamilyFeedView({
             <div key={item.id} className="flex items-start gap-3">
               <Link
                 href={`/read/${item.book}/${item.chapter}?version=${item.version}&verse=${item.verse}&from=${encodeURIComponent("/family")}`}
+                // Sem prefetch: a lista cresce com o tempo (atividade de toda a família) —
+                // mesmo risco de sobrecarga da grade de capítulos, ver ChapterGridView.tsx.
+                prefetch={false}
                 className="flex flex-1 items-start gap-3"
               >
                 <span

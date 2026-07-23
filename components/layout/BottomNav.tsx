@@ -82,7 +82,7 @@ export function BottomNav() {
             key={item.key}
             href={href}
             onClick={item.key === "bible" ? handleBibleClick : undefined}
-            className="flex flex-col items-center gap-1.5"
+            className="flex flex-col items-center gap-1.5 transition-transform active:scale-90"
           >
             <span className={`h-0.5 w-[18px] rounded-full ${isActive ? "bg-ink" : "bg-transparent"}`} />
             <span className={`text-[calc(11px*var(--font-scale))] font-medium ${isActive ? "text-ink" : "text-[#a3927d]"}`}>

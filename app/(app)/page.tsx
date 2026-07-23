@@ -5,7 +5,7 @@ import { NoReadingToday } from "@/components/home/NoReadingToday";
 import { SecondaryPackageCard } from "@/components/home/SecondaryPackageCard";
 import { formatGreetingDate, getGreeting } from "@/lib/format";
 import { getHomeData } from "@/lib/home-data";
-import { getOverallReadPercent } from "@/lib/bible-nav-data";
+import { computeOverallReadPercent, getReadChaptersByBook } from "@/lib/bible-nav-data";
 import { getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
 import { createClient, getUser } from "@/lib/supabase/server";
 
@@ -13,15 +13,22 @@ export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await getUser(supabase);
 
-  const { data: profile } = await supabase.from("users").select("preferred_version, preferred_language").eq("id", user!.id).single();
+  // getHomeData e getReadChaptersByBook não dependem da versão preferida — disparam já,
+  // em paralelo com a query de perfil, em vez de esperá-la terminar pra só então começar.
+  const profilePromise = supabase.from("users").select("preferred_version, preferred_language").eq("id", user!.id).single();
+  const homeDataPromise = getHomeData(supabase, user!.id);
+  const readByBookPromise = getReadChaptersByBook(supabase, user!.id);
+
+  const { data: profile } = await profilePromise;
   const version =
     (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??
     getDefaultVersion(profile?.preferred_language ?? "pt");
 
-  const [{ userName, isAdmin, featured, secondary, activity }, biblePercent] = await Promise.all([
-    getHomeData(supabase, user!.id),
-    getOverallReadPercent(supabase, version.abbreviation, user!.id),
+  const [{ userName, isAdmin, featured, secondary, activity }, readByBook] = await Promise.all([
+    homeDataPromise,
+    readByBookPromise,
   ]);
+  const biblePercent = computeOverallReadPercent(readByBook, version.abbreviation);
 
   const now = new Date();
 
@@ -39,7 +46,10 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <Link href="/bible" className="flex items-center gap-3 rounded-[14px] border border-border bg-surface p-3.5">
+      <Link
+        href="/bible"
+        className="flex items-center gap-3 rounded-[14px] border border-border bg-surface p-3.5 transition-transform active:scale-[0.98]"
+      >
         <div className="min-w-0 flex-1">
           <div className="text-[calc(11px*var(--font-scale))] font-semibold text-text-secondary">Sua Bíblia</div>
           <div className="mt-1.5 h-[5px] rounded-full bg-[#e8dcc6]">

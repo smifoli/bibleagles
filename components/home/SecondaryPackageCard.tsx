@@ -3,7 +3,10 @@ import type { PackageCardData } from "@/lib/home-data";
 
 export function SecondaryPackageCard({ card }: { card: PackageCardData }) {
   return (
-    <Link href={`/package/${card.packageId}`} className="flex flex-col gap-4 rounded-[20px] border border-border bg-surface p-[18px]">
+    <Link
+      href={`/package/${card.packageId}`}
+      className="flex flex-col gap-4 rounded-[20px] border border-border bg-surface p-[18px] transition-transform active:scale-[0.98]"
+    >
       <div className="flex items-start justify-between">
         <div>
           <div className="mb-1 text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1.5px] text-text-muted">

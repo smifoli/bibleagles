@@ -143,6 +143,9 @@ export function BookmarksView({ groups, books, people, currentUserId }: Bookmark
               <Link
                 key={`${group.book}-${group.chapter}-${group.verse}`}
                 href={`/read/${group.book}/${group.chapter}?version=${group.version}&verse=${group.verse}&from=${encodeURIComponent("/bookmarks")}`}
+                // Sem prefetch: a lista cresce com o tempo (destaques/comentários acumulados) —
+                // mesmo risco de sobrecarga da grade de capítulos, ver ChapterGridView.tsx.
+                prefetch={false}
                 className="flex items-start gap-3 rounded-[14px] border border-border bg-surface p-[13px]"
               >
                 <div className="mt-0.5 flex -space-x-1.5">

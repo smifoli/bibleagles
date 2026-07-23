@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { BibleNavView } from "@/components/bible-nav/BibleNavView";
 import { BIBLE_VERSIONS, getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
-import { getBibleNavData } from "@/lib/bible-nav-data";
+import { buildBibleNavData, fetchBibleNavRawData } from "@/lib/bible-nav-data";
 import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function BiblePage({ searchParams }: { searchParams: { version?: string } }) {
@@ -13,9 +13,11 @@ export default async function BiblePage({ searchParams }: { searchParams: { vers
 
   const requestedVersion = searchParams.version ? getVersionByAbbreviation(searchParams.version) : undefined;
 
-  // Só busca a preferência salva quando a versão não vier na URL (o seletor
-  // de versão sempre a inclui ao trocar; só a primeira visita via bottom nav
-  // chega sem ela).
+  // As queries de nav não dependem de `version` (só usada em lookups locais depois) —
+  // disparam já, em paralelo com a busca de preferência salva (só feita quando a
+  // versão não vier na URL — o seletor sempre a inclui ao trocar; só a primeira
+  // visita via bottom nav chega sem ela).
+  const rawDataPromise = fetchBibleNavRawData(supabase, user.id);
   const { data: profile } = requestedVersion
     ? { data: null }
     : await supabase.from("users").select("preferred_version, preferred_language").eq("id", user.id).single();
@@ -25,7 +27,7 @@ export default async function BiblePage({ searchParams }: { searchParams: { vers
     (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??
     getDefaultVersion(profile?.preferred_language ?? "pt");
 
-  const nav = await getBibleNavData(supabase, version.abbreviation, user.id);
+  const nav = buildBibleNavData(await rawDataPromise, version.abbreviation);
 
   return <BibleNavView version={version.abbreviation} versions={BIBLE_VERSIONS} nav={nav} />;
 }

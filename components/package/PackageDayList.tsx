@@ -42,7 +42,10 @@ export function PackageDayList({ days, members, currentUserId, today, highlightO
             className={`rounded-[14px] border p-3.5 ${isOverdue ? "border-[#e6c4be] bg-[rgba(160,58,42,0.05)]" : "border-border bg-surface"}`}
           >
             {day.readHref ? (
-              <Link href={day.readHref} className="flex items-center justify-between gap-3">
+              // Sem prefetch: pacotes podem ter dezenas/centenas de dias — prefetch=true
+              // default dispararia um RSC fetch dinâmico por link visível de uma vez (mesmo
+              // problema encontrado na grade de capítulos, ver ChapterGridView.tsx).
+              <Link href={day.readHref} prefetch={false} className="flex items-center justify-between gap-3">
                 <DayInfo day={day} isOverdue={isOverdue} />
                 <span
                   className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[calc(11px*var(--font-scale))] font-semibold ${

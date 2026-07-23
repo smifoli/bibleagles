@@ -46,7 +46,7 @@ type ProgressRow = {
  * agrupados por livro. Base de "isRead"/"isFullyRead"/"readPercent" na grade de
  * capítulos e na lista de livros.
  */
-async function getReadChaptersByBook(supabase: SupabaseServerClient, userId: string): Promise<Map<string, Set<number>>> {
+export async function getReadChaptersByBook(supabase: SupabaseServerClient, userId: string): Promise<Map<string, Set<number>>> {
   const { data: progressRows } = await supabase
     .from("reading_progress")
     .select("book, chapter, reading_plan_days(passages)")
@@ -80,8 +80,19 @@ async function getReadChaptersByBook(supabase: SupabaseServerClient, userId: str
   return readByBook;
 }
 
-/** Dados pra tela /bible: livros agrupados por seção, com contagem de comentários/destaques da família e se o usuário já leu o livro inteiro. */
-export async function getBibleNavData(supabase: SupabaseServerClient, version: string, userId: string): Promise<BibleNavData> {
+export interface BibleNavRawData {
+  highlightCounts: Map<string, number>;
+  commentCounts: Map<string, number>;
+  readByBook: Map<string, Set<number>>;
+}
+
+/**
+ * Só as queries de /bible, sem nenhuma dependência de `version` — dá pra disparar em
+ * paralelo com a busca da versão preferida do usuário (ver app/(app)/bible/page.tsx),
+ * já que `buildBibleNavData` só usa `version` pra lookups locais (nome/contagem de
+ * capítulos), nunca em filtro de query.
+ */
+export async function fetchBibleNavRawData(supabase: SupabaseServerClient, userId: string): Promise<BibleNavRawData> {
   // Sem filtro de bible_version: contagem é por referência, não por tradução.
   const [{ data: bookmarkRows }, { data: commentRows }, readByBook] = await Promise.all([
     supabase.from("bookmarks").select("book"),
@@ -89,8 +100,17 @@ export async function getBibleNavData(supabase: SupabaseServerClient, version: s
     getReadChaptersByBook(supabase, userId),
   ]);
 
-  const highlightCounts = countByBook(bookmarkRows);
-  const commentCounts = countByBook(commentRows);
+  return {
+    highlightCounts: countByBook(bookmarkRows),
+    commentCounts: countByBook(commentRows),
+    readByBook,
+  };
+}
+
+/** Monta os dados pra tela /bible a partir do bruto acima + `version`: livros agrupados por
+ * seção, com contagem de comentários/destaques da família e se o usuário já leu o livro inteiro. */
+export function buildBibleNavData(raw: BibleNavRawData, version: string): BibleNavData {
+  const { highlightCounts, commentCounts, readByBook } = raw;
 
   // % de capítulos lidos em todo o testamento (não a média dos % de cada livro —
   // livros maiores pesam mais), pra barra de progresso de "Antigo"/"Novo Testamento".
@@ -145,10 +165,13 @@ export async function getBibleNavData(supabase: SupabaseServerClient, version: s
   };
 }
 
-/** % de capítulos lidos na Bíblia inteira (Antigo + Novo Testamento) — teaser da home. */
-export async function getOverallReadPercent(supabase: SupabaseServerClient, version: string, userId: string): Promise<number> {
-  const readByBook = await getReadChaptersByBook(supabase, userId);
-
+/**
+ * % de capítulos lidos na Bíblia inteira (Antigo + Novo Testamento) — teaser da home.
+ * Recebe `readByBook` já buscado (ver getReadChaptersByBook) em vez de buscar aqui —
+ * a home dispara essa query em paralelo com a de preferência do usuário (de quem
+ * `version` depende) em vez de esperar uma pra só então começar a outra.
+ */
+export function computeOverallReadPercent(readByBook: Map<string, Set<number>>, version: string): number {
   let totalChapters = 0;
   let totalRead = 0;
   for (const section of [...OLD_TESTAMENT_SECTIONS, ...NEW_TESTAMENT_SECTIONS]) {

@@ -39,11 +39,17 @@ export function ChapterGridView({ bookId, bookName, chapterCount, version, versi
             <Link
               key={chapter}
               href={`/read/${bookId}/${chapter}?version=${version}&from=${encodeURIComponent(`/bible/${bookId}`)}`}
-              className={
+              // Sem prefetch: livros têm até 21+ links nessa grade (Salmos, 150) — o Next
+              // prefetch=true default dispararia um RSC fetch dinâmico (Supabase) por link
+              // visível de uma vez, sobrecarregando o servidor a ponto de derrubar essas
+              // requisições com 503 — e como o clique real reusa a promise do prefetch já
+              // falho, a navegação trava (medido: 7s+ sem navegar) em vez de só ficar lenta.
+              prefetch={false}
+              className={`transition-transform active:scale-[0.94] ${
                 hasActivity
                   ? "relative flex flex-col items-center justify-center gap-0.5 rounded-[14px] border border-[#b3a48c] bg-background py-3 text-[calc(14px*var(--font-scale))] font-semibold text-text-primary"
                   : "relative flex flex-col items-center justify-center gap-0.5 rounded-[14px] border border-border bg-surface py-3 text-[calc(14px*var(--font-scale))] font-semibold text-text-primary"
-              }
+              }`}
             >
               {isRead && (
                 <span

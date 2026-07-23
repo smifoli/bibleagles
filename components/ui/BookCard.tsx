@@ -14,11 +14,11 @@ export function BookCard({ name, chapterCount, commentCount = 0, highlightCount 
     <button
       type="button"
       onClick={onClick}
-      className={
+      className={`transition-transform active:scale-[0.97] ${
         hasActivity
           ? "rounded-[14px] border border-[#b3a48c] bg-background p-[13px] text-left"
           : "rounded-[14px] border border-border bg-surface p-[13px] text-left"
-      }
+      }`}
     >
       <div className="text-[calc(14px*var(--font-scale))] font-semibold text-text-primary">{name}</div>
       <div className="mt-0.5 text-[calc(11px*var(--font-scale))] text-text-muted">{chapterCount} capítulos</div>

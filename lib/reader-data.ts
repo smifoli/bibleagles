@@ -267,7 +267,14 @@ async function getActivePlanContextForChapter(
 ): Promise<ReaderPlanContext | null> {
   // Uma query só (dias embutidos) em vez de pacotes ativos + dias em duas viagens
   // separadas — types/database.ts não modela Relationships, daí o cast manual.
-  const { data } = await supabase.from("reading_packages").select("id, title, reading_plan_days(id, date, passages)").eq("status", "active");
+  // A busca de progresso do usuário dispara junto (sem filtrar por plan_day_id,
+  // que só sabemos depois de escolher `chosen` abaixo) em vez de esperar essa
+  // query terminar pra só então buscar o progresso — troca 2 viagens de rede
+  // sequenciais por 1.
+  const [{ data }, { data: userProgress }] = await Promise.all([
+    supabase.from("reading_packages").select("id, title, reading_plan_days(id, date, passages)").eq("status", "active"),
+    supabase.from("reading_progress").select("plan_day_id").eq("user_id", userId).not("plan_day_id", "is", null),
+  ]);
   const activePackages = (data ?? []) as unknown as ActivePackageWithDaysRow[];
   if (activePackages.length === 0) return null;
 
@@ -286,18 +293,13 @@ async function getActivePlanContextForChapter(
   const packageDays = allDays.filter((day) => day.package_id === chosen.package_id);
   const dayNumber = packageDays.findIndex((day) => day.id === chosen.id) + 1;
 
-  const { data: progress } = await supabase
-    .from("reading_progress")
-    .select("id")
-    .eq("plan_day_id", chosen.id)
-    .eq("user_id", userId)
-    .maybeSingle();
+  const alreadyCompleted = (userProgress ?? []).some((row) => row.plan_day_id === chosen.id);
 
   return {
     planDayId: chosen.id,
     packageTitle: pkg.title,
     dayNumber: dayNumber > 0 ? dayNumber : 1,
     dateLabel: formatShortDate(parseDateOnly(chosen.date)),
-    alreadyCompleted: Boolean(progress),
+    alreadyCompleted,
   };
 }
