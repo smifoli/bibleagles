@@ -17,9 +17,14 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
             </div>
             <div className="text-[calc(18px*var(--font-scale))] font-semibold text-[#f7f1e6]">{card.title}</div>
           </div>
-          <span className="whitespace-nowrap rounded-full border border-[#4a3d2c] px-2.5 py-1 text-[calc(10px*var(--font-scale))] tracking-wide text-[#cdbb9e]">
-            Dia {card.dayNumber} / {card.totalDays}
-          </span>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span className="whitespace-nowrap rounded-full border border-[#4a3d2c] px-2.5 py-1 text-[calc(10px*var(--font-scale))] tracking-wide text-[#cdbb9e]">
+              Dia {card.dayNumber} / {card.totalDays}
+            </span>
+            <svg aria-hidden viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5 text-[#a08e78]">
+              <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
         </div>
 
         <div>
