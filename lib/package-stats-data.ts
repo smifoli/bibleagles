@@ -38,6 +38,10 @@ export interface MostActiveMember {
 export interface MostCommentedVerse {
   reference: string;
   count: number;
+  book: string;
+  chapter: number;
+  verse: number;
+  version: string;
 }
 
 export interface PackageStats {
@@ -110,7 +114,7 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
         .eq("package_id", packageId)
         .order("date", { ascending: true }),
       supabase.from("users").select("id, name, avatar_url").order("created_at", { ascending: true }),
-      supabase.from("comments").select("id, user_id, book, chapter, verse, created_at"),
+      supabase.from("comments").select("id, user_id, book, chapter, verse, bible_version, created_at"),
       supabase.from("bookmarks").select("id, user_id, book, chapter, created_at"),
     ]);
 
@@ -159,16 +163,23 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
   }
 
   let mostCommentedVerse: MostCommentedVerse | null = null;
-  const verseCounts = new Map<string, { book: string; chapter: number; verse: number; count: number }>();
+  const verseCounts = new Map<string, { book: string; chapter: number; verse: number; version: string; count: number }>();
   for (const comment of packageComments) {
     const key = `${comment.book}:${comment.chapter}:${comment.verse}`;
     const entry = verseCounts.get(key);
     if (entry) entry.count += 1;
-    else verseCounts.set(key, { book: comment.book, chapter: comment.chapter, verse: comment.verse, count: 1 });
+    else verseCounts.set(key, { book: comment.book, chapter: comment.chapter, verse: comment.verse, version: comment.bible_version, count: 1 });
   }
   for (const entry of Array.from(verseCounts.values())) {
     if (mostCommentedVerse === null || entry.count > mostCommentedVerse.count) {
-      mostCommentedVerse = { reference: `${bookDisplayName(entry.book)} ${entry.chapter}:${entry.verse}`, count: entry.count };
+      mostCommentedVerse = {
+        reference: `${bookDisplayName(entry.book)} ${entry.chapter}:${entry.verse}`,
+        count: entry.count,
+        book: entry.book,
+        chapter: entry.chapter,
+        verse: entry.verse,
+        version: entry.version,
+      };
     }
   }
 

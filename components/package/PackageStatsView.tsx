@@ -101,7 +101,12 @@ export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: Pac
           Versículo mais comentado:{" "}
           {stats.mostCommentedVerse ? (
             <>
-              <span className="font-semibold text-ink">{stats.mostCommentedVerse.reference}</span>{" "}
+              <Link
+                href={`/read/${stats.mostCommentedVerse.book}/${stats.mostCommentedVerse.chapter}?version=${stats.mostCommentedVerse.version}&verse=${stats.mostCommentedVerse.verse}&from=${encodeURIComponent(`/package/${stats.id}`)}`}
+                className="font-semibold text-link underline"
+              >
+                {stats.mostCommentedVerse.reference}
+              </Link>{" "}
               <span className="text-text-muted">
                 ({stats.mostCommentedVerse.count} {stats.mostCommentedVerse.count === 1 ? "coment." : "coments."})
               </span>
