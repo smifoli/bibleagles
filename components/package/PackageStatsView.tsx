@@ -71,15 +71,6 @@ export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: Pac
         </div>
       )}
 
-      {unreadDays.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
-            Próximos no pacote ({unreadDays.length})
-          </div>
-          <PackageDayList days={unreadDays} members={stats.members} currentUserId={currentUserId} today={today} highlightOverdue />
-        </div>
-      )}
-
       <div className="flex flex-col gap-3">
         <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Progresso da família</div>
         <div className="flex flex-col gap-3.5 rounded-[18px] border border-border bg-surface p-4">
@@ -137,6 +128,15 @@ export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: Pac
           )}
         </div>
       </div>
+
+      {unreadDays.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
+            Próximos no pacote ({unreadDays.length})
+          </div>
+          <PackageDayList days={unreadDays} members={stats.members} currentUserId={currentUserId} today={today} highlightOverdue />
+        </div>
+      )}
 
       {readDays.length > 0 && (
         <div className="flex flex-col gap-3">
