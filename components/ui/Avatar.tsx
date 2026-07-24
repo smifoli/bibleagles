@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export interface AvatarColorStyle {
   bg: string;
   text: string;
@@ -19,6 +21,10 @@ const SIZE_CLASSES = {
   md: "h-[27px] w-[27px] text-[calc(11px*var(--font-scale))]",
   lg: "h-[68px] w-[68px] text-[calc(26px*var(--font-scale))] border-2 border-[#cdbfac]",
 } as const;
+
+// Tamanho real em px de cada variante (independe do --font-scale, que só afeta a inicial) —
+// next/image exige width/height numéricos pra saber o que servir/otimizar.
+const SIZE_PX = { sm: 22, md: 27, lg: 68 } as const;
 
 export type AvatarSize = keyof typeof SIZE_CLASSES;
 
@@ -53,11 +59,12 @@ export function Avatar({
 
   if (avatarUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={avatarUrl}
         alt={name}
         title={name}
+        width={SIZE_PX[size]}
+        height={SIZE_PX[size]}
         className={`shrink-0 rounded-full object-cover ${SIZE_CLASSES[size]} ${className}`}
         style={borderColor ? { border: `2px solid ${borderColor}` } : undefined}
       />
