@@ -73,11 +73,16 @@ export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: Pac
 
       <div className="flex flex-col gap-3">
         <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Progresso da família</div>
-        <div className="rounded-[18px] border border-border bg-surface p-4">
+        <div className="rounded-[18px] bg-card-dark p-4">
           {stats.members.length === 0 ? (
-            <p className="text-[calc(14px*var(--font-scale))] text-text-muted">Nenhum membro na família ainda.</p>
+            <p className="text-[calc(14px*var(--font-scale))] text-[#a08e78]">Nenhum membro na família ainda.</p>
           ) : (
-            <ReadingTimeline percent={stats.progressPercent} members={stats.members} variant="light" />
+            <>
+              <div className="mb-2 text-[calc(13px*var(--font-scale))] text-[#d8c9b3]">
+                Dia {stats.currentDayNumber} de {stats.totalDays}
+              </div>
+              <ReadingTimeline percent={stats.progressPercent} members={stats.members} variant="dark" />
+            </>
           )}
         </div>
       </div>

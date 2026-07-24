@@ -28,7 +28,7 @@ function clampedLeft(percent: number): string {
 }
 
 const LINE_BOTTOM_PX = 15;
-const LINE_HEIGHT_PX = 3;
+const LINE_HEIGHT_PX = 6;
 const AVATAR_SIZE_PX = 22;
 // Centraliza o avatar da base bem em cima da linha (linha passa atrás, pelo meio dele).
 const BASE_AVATAR_BOTTOM_PX = LINE_BOTTOM_PX + LINE_HEIGHT_PX / 2 - AVATAR_SIZE_PX / 2;
