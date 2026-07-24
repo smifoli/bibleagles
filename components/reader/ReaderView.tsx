@@ -25,13 +25,25 @@ import {
 import type { ReaderComment, ReaderData } from "@/lib/reader-data";
 import type { HighlightColor } from "@/types/database";
 
-function formatEngagementLabel(commentCount: number, highlightCount: number): string {
-  return [
-    commentCount > 0 ? `${commentCount} ${commentCount === 1 ? "comentário" : "comentários"}` : null,
-    highlightCount > 0 ? `${highlightCount} ${highlightCount === 1 ? "destaque" : "destaques"}` : null,
-  ]
-    .filter(Boolean)
-    .join(", ");
+// "N comentários" e "N destaques" ficam cada um numa unidade que não quebra
+// linha no meio (whitespace-nowrap) — se precisar quebrar por falta de espaço,
+// quebra entre as duas partes, nunca entre o número e a palavra.
+function EngagementBreakdown({ commentCount, highlightCount }: { commentCount: number; highlightCount: number }) {
+  return (
+    <span className="flex shrink-0 flex-wrap items-center justify-end gap-x-1 text-right text-[calc(11px*var(--font-scale))] text-text-muted">
+      {commentCount > 0 && (
+        <span className="whitespace-nowrap">
+          {commentCount} {commentCount === 1 ? "comentário" : "comentários"}
+          {highlightCount > 0 && ","}
+        </span>
+      )}
+      {highlightCount > 0 && (
+        <span className="whitespace-nowrap">
+          {highlightCount} {highlightCount === 1 ? "destaque" : "destaques"}
+        </span>
+      )}
+    </span>
+  );
 }
 
 interface ReaderViewProps {
@@ -66,6 +78,7 @@ export function ReaderView({
   const [verseFontSize, setVerseFontSize] = useState(initialVerseFontSize);
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
   const [chapterOverviewOpen, setChapterOverviewOpen] = useState(false);
+  const [expandedParticipantId, setExpandedParticipantId] = useState<string | null>(null);
   const [commentDraft, setCommentDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyDraft, setReplyDraft] = useState("");
@@ -403,6 +416,15 @@ export function ReaderView({
     );
   }
 
+  // Pular do detalhe do overview do capítulo direto pro verso — abre o painel dele
+  // (mesmo comportamento de chegar aqui via link com initialVerse) e rola até lá.
+  function handleJumpToVerse(verseNumber: number) {
+    setOpenVerse(verseNumber);
+    setReplyingTo(null);
+    setEditingId(null);
+    document.getElementById(`verse-${verseNumber}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+
   // Com planContext, marcar/desmarcar afeta o dia do plano inteiro (todas as
   // passagens dele, não só esse capítulo). Sem plano cobrindo esse capítulo,
   // vira uma leitura livre — só esse (book, chapter), ver markChapterRead.
@@ -551,8 +573,18 @@ export function ReaderView({
               ))}
             </span>
             <span className="flex items-center gap-2">
-              <span className="text-[calc(11px*var(--font-scale))] text-text-muted">
-                {formatEngagementLabel(data.chapterEngagement.commentCount, data.chapterEngagement.highlightCount)}
+              <span className="flex flex-col items-end text-right text-[calc(11px*var(--font-scale))] text-text-muted sm:flex-row sm:items-center sm:gap-1">
+                {data.chapterEngagement.commentCount > 0 && (
+                  <span className="whitespace-nowrap">
+                    {data.chapterEngagement.commentCount} {data.chapterEngagement.commentCount === 1 ? "comentário" : "comentários"}
+                    {data.chapterEngagement.highlightCount > 0 && <span className="hidden sm:inline">,</span>}
+                  </span>
+                )}
+                {data.chapterEngagement.highlightCount > 0 && (
+                  <span className="whitespace-nowrap">
+                    {data.chapterEngagement.highlightCount} {data.chapterEngagement.highlightCount === 1 ? "destaque" : "destaques"}
+                  </span>
+                )}
               </span>
               <svg
                 aria-hidden
@@ -567,16 +599,81 @@ export function ReaderView({
           </button>
 
           {chapterOverviewOpen && (
-            <div className="mt-2.5 flex flex-col gap-2.5 border-t border-border pt-2.5">
-              {data.chapterEngagement.participants.map((participant, index) => (
-                <div key={`${participant.name}-${index}`} className="flex items-center gap-2.5">
-                  <Avatar name={participant.name} avatarUrl={participant.avatarUrl} colorIndex={participant.colorIndex} size="sm" />
-                  <span className="text-[calc(12px*var(--font-scale))] font-semibold text-ink">{participant.name}</span>
-                  <span className="ml-auto text-[calc(11px*var(--font-scale))] text-text-muted">
-                    {formatEngagementLabel(participant.commentCount, participant.highlightCount)}
-                  </span>
-                </div>
-              ))}
+            <div className="mt-2.5 flex flex-col gap-1 border-t border-border pt-2.5">
+              {data.chapterEngagement.participants.map((participant) => {
+                const isExpanded = expandedParticipantId === participant.id;
+                // Comentários e destaques dessa pessoa juntos, ordenados por verso —
+                // pra listar em ordem de leitura em vez de "todos comentários, depois destaques".
+                const activity = [
+                  ...participant.comments.map((comment) => ({ verse: comment.verse, kind: "comment" as const, comment })),
+                  ...participant.highlights.map((highlight) => ({ verse: highlight.verse, kind: "highlight" as const, highlight })),
+                ].sort((a, b) => a.verse - b.verse);
+
+                return (
+                  <div key={participant.id}>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedParticipantId((current) => (current === participant.id ? null : participant.id))}
+                      aria-expanded={isExpanded}
+                      className="flex w-full items-center gap-2.5 py-1"
+                    >
+                      <Avatar name={participant.name} avatarUrl={participant.avatarUrl} colorIndex={participant.colorIndex} size="sm" />
+                      <span className="flex-1 text-left text-[calc(12px*var(--font-scale))] font-semibold text-ink">{participant.name}</span>
+                      <EngagementBreakdown commentCount={participant.commentCount} highlightCount={participant.highlightCount} />
+                      <svg
+                        aria-hidden
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        style={{ width: "calc(14px * var(--font-scale))", height: "calc(14px * var(--font-scale))" }}
+                        className={`shrink-0 text-text-muted transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                      >
+                        <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="ml-[35px] flex flex-col gap-1 pb-1.5">
+                        {activity.map((item, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleJumpToVerse(item.verse)}
+                            className="flex items-center gap-2 py-0.5 text-left"
+                          >
+                            <span className="flex w-4 shrink-0 items-center justify-center">
+                              {item.kind === "highlight" ? (
+                                <span
+                                  className="h-2 w-2 rounded-full"
+                                  style={{ backgroundColor: HIGHLIGHT_COLORS[item.highlight.color].bg }}
+                                />
+                              ) : (
+                                <svg
+                                  aria-hidden
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  style={{ width: "calc(11px * var(--font-scale))", height: "calc(11px * var(--font-scale))" }}
+                                  className="text-text-muted"
+                                >
+                                  <path
+                                    d="M4 5.5h16v10H9l-4 3.5v-3.5H4v-10Z"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              )}
+                            </span>
+                            <span className="shrink-0 text-[calc(11px*var(--font-scale))] font-semibold text-ink">v.{item.verse}</span>
+                            <span className="truncate text-[calc(11px*var(--font-scale))] text-text-muted">
+                              {item.kind === "comment" ? item.comment.content : "destacou este verso"}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

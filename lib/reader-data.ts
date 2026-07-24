@@ -34,11 +34,27 @@ export interface VerseParticipant {
   colorIndex: number;
 }
 
+export interface ChapterParticipantComment {
+  verse: number;
+  content: string;
+}
+
+export interface ChapterParticipantHighlight {
+  verse: number;
+  color: HighlightColor;
+}
+
 export interface ChapterParticipant extends VerseParticipant {
+  /** ID do usuário — chave estável pra abrir/fechar o detalhe dessa pessoa na UI. */
+  id: string;
   /** Quantos comentários/respostas essa pessoa fez no capítulo inteiro (não só num verso). */
   commentCount: number;
   /** Em quantos versos essa pessoa destacou algo no capítulo inteiro. */
   highlightCount: number;
+  /** Cada comentário/resposta dela no capítulo, com o verso — pra listar em detalhe e pular até lá. */
+  comments: ChapterParticipantComment[];
+  /** Cada destaque dela no capítulo, com o verso — mesma ideia. */
+  highlights: ChapterParticipantHighlight[];
 }
 
 // Quem comentou/destacou em QUALQUER verso do capítulo, deduplicado por pessoa, mais
@@ -252,6 +268,7 @@ export async function getReaderData(
     const existing = chapterParticipantsByUserId.get(memberId);
     if (existing) return existing;
     const created: ChapterParticipant = {
+      id: memberId,
       name: memberNames.get(memberId) ?? "Alguém",
       avatarUrl: memberAvatars.get(memberId) ?? null,
       isOwn: memberId === userId,
@@ -261,15 +278,21 @@ export async function getReaderData(
       colorIndex: colorIndexFor(memberId),
       commentCount: 0,
       highlightCount: 0,
+      comments: [],
+      highlights: [],
     };
     chapterParticipantsByUserId.set(memberId, created);
     return created;
   }
   for (const row of bookmarkRows ?? []) {
-    getOrCreateChapterParticipant(row.user_id).highlightCount++;
+    const participant = getOrCreateChapterParticipant(row.user_id);
+    participant.highlightCount++;
+    participant.highlights.push({ verse: row.verse, color: row.color as HighlightColor });
   }
   for (const row of commentRows ?? []) {
-    getOrCreateChapterParticipant(row.user_id).commentCount++;
+    const participant = getOrCreateChapterParticipant(row.user_id);
+    participant.commentCount++;
+    participant.comments.push({ verse: row.verse, content: row.content });
   }
 
   const chapterEngagement: ChapterEngagement = {
