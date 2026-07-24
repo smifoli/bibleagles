@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import type { BibleVersion } from "@/lib/bible-versions";
+import { markAllChaptersRead, unmarkAllChaptersRead } from "@/lib/chapter-grid-actions";
 import type { ChapterActivity } from "@/lib/bible-nav-data";
 import { VersionSelect } from "@/components/bible-nav/VersionSelect";
 
@@ -13,8 +18,35 @@ interface ChapterGridViewProps {
 }
 
 export function ChapterGridView({ bookId, bookName, chapterCount, version, versions, chapterActivity }: ChapterGridViewProps) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [actionError, setActionError] = useState<string>();
   const activity = new Map(chapterActivity);
   const chapters = Array.from({ length: chapterCount }, (_, index) => index + 1);
+
+  const readCount = chapters.filter((chapter) => activity.get(chapter)?.isRead).length;
+  const allRead = readCount === chapterCount;
+  const someRead = readCount > 0;
+
+  function handleMarkAllRead() {
+    if (!window.confirm(`Marcar todos os ${chapterCount} capítulos de ${bookName} como lidos?`)) return;
+    setActionError(undefined);
+    startTransition(async () => {
+      const result = await markAllChaptersRead(bookId, chapterCount);
+      if (result.error) setActionError(result.error);
+      else router.refresh();
+    });
+  }
+
+  function handleUnmarkAllRead() {
+    if (!window.confirm(`Remover a marcação de lido de todos os capítulos de ${bookName}?`)) return;
+    setActionError(undefined);
+    startTransition(async () => {
+      const result = await unmarkAllChaptersRead(bookId);
+      if (result.error) setActionError(result.error);
+      else router.refresh();
+    });
+  }
 
   return (
     <div className="flex min-h-dvh flex-col gap-[17px]">
@@ -27,6 +59,33 @@ export function ChapterGridView({ bookId, bookName, chapterCount, version, versi
         </div>
         <VersionSelect version={version} versions={versions} />
       </header>
+
+      {(!allRead || someRead) && (
+        <div className="flex items-center gap-2.5">
+          {!allRead && (
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              disabled={pending}
+              className="flex-1 rounded-[13px] border border-input-border py-2.5 text-center text-[calc(12px*var(--font-scale))] font-semibold text-text-secondary transition-transform active:scale-95 disabled:opacity-50"
+            >
+              Marcar tudo como lido
+            </button>
+          )}
+          {someRead && (
+            <button
+              type="button"
+              onClick={handleUnmarkAllRead}
+              disabled={pending}
+              className="flex-1 rounded-[13px] border border-input-border py-2.5 text-center text-[calc(12px*var(--font-scale))] font-semibold text-error transition-transform active:scale-95 disabled:opacity-50"
+            >
+              Remover leituras
+            </button>
+          )}
+        </div>
+      )}
+
+      {actionError && <p className="text-[calc(12px*var(--font-scale))] text-error">{actionError}</p>}
 
       <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Capítulos</div>
 
