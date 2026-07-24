@@ -28,21 +28,16 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
         </div>
 
         <div>
-          <div className="mb-[9px] flex items-start justify-between">
-            <span className="text-[calc(13px*var(--font-scale))] text-[#d8c9b3]">
-              {card.chapterTitle} · {card.dateLabel}
-            </span>
-            <div className="flex flex-col items-end">
-              <span className="text-[calc(13px*var(--font-scale))] font-semibold text-[#f7f1e6]">{card.percent}%</span>
-              <span className="text-[calc(8px*var(--font-scale))] font-semibold uppercase tracking-[0.5px] text-[#a08e78]">
-                linha do tempo
-              </span>
-            </div>
+          <div className="mb-[9px] text-[calc(13px*var(--font-scale))] text-[#d8c9b3]">
+            {card.chapterTitle} · {card.dateLabel}
           </div>
           <div className="h-[5px] rounded-full bg-[#43382a]">
             <div className="h-full rounded-full bg-[#ece0c8]" style={{ width: `${card.percent}%` }} />
           </div>
-          <div className="mt-2 text-[calc(11px*var(--font-scale))]">
+          <div className="mt-2 flex items-center justify-between text-[calc(11px*var(--font-scale))]">
+            <span className="text-[#a08e78]">
+              <span className="font-semibold text-[#f7f1e6]">{card.percent}%</span> linha do tempo
+            </span>
             {card.pendingCount === 0 ? (
               <span className="font-semibold text-[#9fb389]">Você está em dia</span>
             ) : (
