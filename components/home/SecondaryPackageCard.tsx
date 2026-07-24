@@ -25,15 +25,21 @@ export function SecondaryPackageCard({ card }: { card: PackageCardData }) {
       </div>
 
       <div>
-        <div className="mb-[9px] flex items-baseline justify-between">
-          <span className="text-[calc(13px*var(--font-scale))] text-link">{card.chapterTitle}</span>
-          <span className="text-[calc(13px*var(--font-scale))] font-semibold text-text-secondary">{card.percent}%</span>
+        <div className="mb-[9px] flex items-start justify-between">
+          <span className="text-[calc(13px*var(--font-scale))] text-link">
+            {card.chapterTitle} · {card.dateLabel}
+          </span>
+          <div className="flex flex-col items-end">
+            <span className="text-[calc(13px*var(--font-scale))] font-semibold text-text-secondary">{card.percent}%</span>
+            <span className="text-[calc(8px*var(--font-scale))] font-semibold uppercase tracking-[0.5px] text-text-muted">
+              linha do tempo
+            </span>
+          </div>
         </div>
         <div className="h-[5px] rounded-full bg-[#e8dcc6]">
           <div className="h-full rounded-full bg-[#b3a48c]" style={{ width: `${card.percent}%` }} />
         </div>
-        <div className="mt-2 flex items-center justify-between text-[calc(11px*var(--font-scale))]">
-          <span className="text-text-muted">{card.dateLabel}</span>
+        <div className="mt-2 text-[calc(11px*var(--font-scale))]">
           {card.pendingCount === 0 ? (
             <span className="font-semibold text-[#5e7350]">Você está em dia</span>
           ) : (
