@@ -12,11 +12,16 @@ function progressRemainingLabel(totalDays: number, daysRemaining: number): strin
 
 export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: PackageStats; canEdit: boolean; currentUserId: string }) {
   const today = toDateOnlyString();
+  // O dia de hoje sempre aparece destacado no topo, mesmo já lido — senão, ao marcar
+  // como lido, ele "sumiria" pra dentro de "Dias lidos" e ficaria fácil perder de vista
+  // qual é a leitura do dia enquanto ainda é hoje.
+  const todayDay = stats.days.find((day) => day.date === today);
   // Duas pilhas em vez de uma lista cronológica só: o que falta ler (ordenado por
   // data, inclui dias futuros — é a fila do que vem a seguir) embaixo do que já
-  // foi lido (onde dá pra ver quem da família já leu cada dia).
-  const unreadDays = stats.days.filter((day) => !day.isReadByMe);
-  const readDays = stats.days.filter((day) => day.isReadByMe);
+  // foi lido (onde dá pra ver quem da família já leu cada dia). O dia de hoje não
+  // entra em nenhuma das duas — já tem a seção própria acima.
+  const unreadDays = stats.days.filter((day) => !day.isReadByMe && day.date !== today);
+  const readDays = stats.days.filter((day) => day.isReadByMe && day.date !== today);
 
   return (
     <div className="flex flex-col gap-6">
@@ -58,6 +63,13 @@ export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: Pac
         <StatBox value={stats.totalHighlights} label="destaques" />
         <StatBox value={stats.totalDaysRead} label="dias lidos" />
       </div>
+
+      {todayDay && (
+        <div className="flex flex-col gap-3">
+          <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Hoje</div>
+          <PackageDayList days={[todayDay]} members={stats.members} currentUserId={currentUserId} today={today} />
+        </div>
+      )}
 
       {unreadDays.length > 0 && (
         <div className="flex flex-col gap-3">

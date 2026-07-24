@@ -485,7 +485,8 @@ export function ReaderView({
             </div>
             {data.planContext && (
               <div className="text-[calc(11px*var(--font-scale))] text-text-muted">
-                Lendo {data.planContext.packageTitle} · Dia {data.planContext.dayNumber} · {data.planContext.dateLabel}
+                Dia {data.planContext.dayNumber} de {data.planContext.packageTitle} ·{" "}
+                {data.verses.length} {data.verses.length === 1 ? "versículo" : "versículos"}
               </div>
             )}
           </div>
