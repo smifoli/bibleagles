@@ -679,6 +679,12 @@ export function ReaderView({
         </div>
       )}
 
+      {/* Fixo no topo da tela ao rolar pelos versos — lembrete de qual livro/capítulo
+          está aberto, pra não confundir com outro capítulo enquanto lê. */}
+      <div className="sticky top-0 z-10 -mx-[18px] bg-background px-[18px] py-1.5 text-[calc(11px*var(--font-scale))] font-semibold text-text-muted">
+        {data.reference}
+      </div>
+
       <div className="flex flex-col gap-1">
         {data.verses.map((verse) => {
           const style = verse.highlight?.style;
