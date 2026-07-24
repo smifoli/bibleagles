@@ -20,6 +20,35 @@ export interface VerseHighlight {
   markedBy: VerseHighlightMark[];
 }
 
+// Uma entrada por pessoa que interagiu com o verso (destacou e/ou comentou —
+// inclusive em mais de um comentário/resposta), pra mostrar um avatar só por
+// pessoa em vez de repetir por ação.
+export interface VerseParticipant {
+  name: string;
+  avatarUrl: string | null;
+  isOwn: boolean;
+  /** Cor do destaque, se essa pessoa destacou o verso — usada na borda do avatar. Null se só comentou. */
+  highlightColor: HighlightColor | null;
+  /** Índice estável do membro na família (ver colorIndexFor) — cor de identidade do
+   * avatar sem foto quando não há destaque (highlightColor null vence sobre isso). */
+  colorIndex: number;
+}
+
+export interface ChapterParticipant extends VerseParticipant {
+  /** Quantos comentários/respostas essa pessoa fez no capítulo inteiro (não só num verso). */
+  commentCount: number;
+  /** Em quantos versos essa pessoa destacou algo no capítulo inteiro. */
+  highlightCount: number;
+}
+
+// Quem comentou/destacou em QUALQUER verso do capítulo, deduplicado por pessoa, mais
+// os totais do capítulo inteiro — pra uma visão geral no topo, sem abrir cada verso.
+export interface ChapterEngagement {
+  participants: ChapterParticipant[];
+  commentCount: number;
+  highlightCount: number;
+}
+
 export interface ReaderComment {
   id: string;
   userName: string;
@@ -38,6 +67,7 @@ export interface ReaderVerse {
   text: string;
   highlight: VerseHighlight | null;
   commentCount: number;
+  participants: VerseParticipant[];
 }
 
 export interface ReaderPlanContext {
@@ -53,6 +83,7 @@ export interface ReaderData {
   reference: string;
   verses: ReaderVerse[];
   commentsByVerse: Record<number, ReaderComment[]>;
+  chapterEngagement: ChapterEngagement;
   planContext: ReaderPlanContext | null;
   // Com planContext, é planContext.alreadyCompleted (o dia inteiro). Sem plano
   // nenhum cobrindo esse capítulo, reflete uma leitura livre (reading_progress
@@ -83,7 +114,7 @@ export async function getReaderData(
         .eq("book", bookId)
         .eq("chapter", chapter)
         .order("created_at", { ascending: true }),
-      supabase.from("users").select("id, name, role, is_deleted, avatar_url"),
+      supabase.from("users").select("id, name, role, is_deleted, avatar_url").order("created_at", { ascending: true }),
       getPlanContext(supabase, userId, bookId, chapter, requestedPlanDayId),
       supabase.from("reading_progress").select("id").eq("user_id", userId).eq("book", bookId).eq("chapter", chapter).maybeSingle(),
     ]);
@@ -97,6 +128,10 @@ export async function getReaderData(
     (familyMembers ?? []).map((member) => [member.id, member.is_deleted ? `${member.name} (deletado)` : member.name])
   );
   const memberAvatars = new Map((familyMembers ?? []).map((member) => [member.id, member.avatar_url]));
+  // Mesma ideia de lib/bookmarks-data.ts: cor de identidade estável por pessoa (ordem de
+  // entrada na família), reaproveitada onde não há foto nem destaque pra colorir o avatar.
+  const memberOrder = new Map((familyMembers ?? []).map((member, index) => [member.id, index]));
+  const colorIndexFor = (memberId: string) => memberOrder.get(memberId) ?? 0;
 
   const highlightsByVerse = new Map<number, { userId: string; color: HighlightColor }[]>();
   for (const row of bookmarkRows ?? []) {
@@ -138,9 +173,16 @@ export async function getReaderData(
 
   const commentsByVerse: Record<number, ReaderComment[]> = {};
   const commentCountByVerse = new Map<number, number>();
+  // Ordem de primeira aparição, sem repetir user_id — uma pessoa pode ter várias
+  // linhas (comentário + respostas) no mesmo verso.
+  const commentAuthorsByVerse = new Map<number, string[]>();
   for (const row of commentRows ?? []) {
     const comment = commentById.get(row.id)!;
     commentCountByVerse.set(row.verse, (commentCountByVerse.get(row.verse) ?? 0) + 1);
+
+    const authors = commentAuthorsByVerse.get(row.verse) ?? [];
+    if (!authors.includes(row.user_id)) authors.push(row.user_id);
+    commentAuthorsByVerse.set(row.verse, authors);
 
     if (row.parent_id) {
       commentById.get(row.parent_id)?.replies.push(comment);
@@ -169,18 +211,78 @@ export async function getReaderData(
       };
     }
 
+    // Destaque + comentário/resposta na mesma pessoa vira uma entrada só —
+    // destaques primeiro (preserva o comportamento anterior do avatar com borda
+    // colorida), depois quem só comentou, sem repetir user_id já visto.
+    const participantsByUserId = new Map<string, VerseParticipant>();
+    for (const row of highlightRows ?? []) {
+      participantsByUserId.set(row.userId, {
+        name: memberNames.get(row.userId) ?? "Alguém",
+        avatarUrl: memberAvatars.get(row.userId) ?? null,
+        isOwn: row.userId === userId,
+        highlightColor: row.color,
+        colorIndex: colorIndexFor(row.userId),
+      });
+    }
+    for (const authorId of commentAuthorsByVerse.get(verse.number) ?? []) {
+      if (participantsByUserId.has(authorId)) continue;
+      participantsByUserId.set(authorId, {
+        name: memberNames.get(authorId) ?? "Alguém",
+        avatarUrl: memberAvatars.get(authorId) ?? null,
+        isOwn: authorId === userId,
+        highlightColor: null,
+        colorIndex: colorIndexFor(authorId),
+      });
+    }
+
     return {
       number: verse.number,
       text: verse.text,
       highlight,
       commentCount: commentCountByVerse.get(verse.number) ?? 0,
+      participants: Array.from(participantsByUserId.values()),
     };
   });
+
+  // Visão geral do capítulo inteiro — mesma ideia de merge/dedup de participants por
+  // verso, só que somando toda a atividade do capítulo (e contando por pessoa) em vez
+  // de um verso só.
+  const chapterParticipantsByUserId = new Map<string, ChapterParticipant>();
+  function getOrCreateChapterParticipant(memberId: string): ChapterParticipant {
+    const existing = chapterParticipantsByUserId.get(memberId);
+    if (existing) return existing;
+    const created: ChapterParticipant = {
+      name: memberNames.get(memberId) ?? "Alguém",
+      avatarUrl: memberAvatars.get(memberId) ?? null,
+      isOwn: memberId === userId,
+      // Uma pessoa pode ter destacado versos diferentes com cores diferentes no mesmo
+      // capítulo — sem uma cor única representativa, o avatar aqui não usa a borda colorida.
+      highlightColor: null,
+      colorIndex: colorIndexFor(memberId),
+      commentCount: 0,
+      highlightCount: 0,
+    };
+    chapterParticipantsByUserId.set(memberId, created);
+    return created;
+  }
+  for (const row of bookmarkRows ?? []) {
+    getOrCreateChapterParticipant(row.user_id).highlightCount++;
+  }
+  for (const row of commentRows ?? []) {
+    getOrCreateChapterParticipant(row.user_id).commentCount++;
+  }
+
+  const chapterEngagement: ChapterEngagement = {
+    participants: Array.from(chapterParticipantsByUserId.values()),
+    commentCount: (commentRows ?? []).length,
+    highlightCount: (bookmarkRows ?? []).length,
+  };
 
   return {
     reference: chapterContent.reference,
     verses,
     commentsByVerse,
+    chapterEngagement,
     planContext,
     isChapterRead,
     isAdmin,

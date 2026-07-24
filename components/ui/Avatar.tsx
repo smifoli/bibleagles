@@ -67,7 +67,7 @@ export function Avatar({
   return (
     <div
       title={name}
-      className={`flex shrink-0 items-center justify-center rounded-full font-semibold ${SIZE_CLASSES[size]} ${className}`}
+      className={`flex shrink-0 items-center justify-center rounded-full font-sans font-semibold ${SIZE_CLASSES[size]} ${className}`}
       style={{ backgroundColor: style.bg, color: style.text }}
     >
       {initial}

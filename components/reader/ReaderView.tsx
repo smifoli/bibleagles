@@ -25,6 +25,15 @@ import {
 import type { ReaderComment, ReaderData } from "@/lib/reader-data";
 import type { HighlightColor } from "@/types/database";
 
+function formatEngagementLabel(commentCount: number, highlightCount: number): string {
+  return [
+    commentCount > 0 ? `${commentCount} ${commentCount === 1 ? "comentário" : "comentários"}` : null,
+    highlightCount > 0 ? `${highlightCount} ${highlightCount === 1 ? "destaque" : "destaques"}` : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
 interface ReaderViewProps {
   book: string;
   chapter: number;
@@ -56,6 +65,7 @@ export function ReaderView({
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const [verseFontSize, setVerseFontSize] = useState(initialVerseFontSize);
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
+  const [chapterOverviewOpen, setChapterOverviewOpen] = useState(false);
   const [commentDraft, setCommentDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyDraft, setReplyDraft] = useState("");
@@ -516,6 +526,62 @@ export function ReaderView({
 
       <div className="h-px bg-border" />
 
+      {data.chapterEngagement.participants.length > 0 && (
+        <div className="rounded-[13px] border border-border bg-surface px-3.5 py-2.5">
+          <button
+            type="button"
+            onClick={() => setChapterOverviewOpen((open) => !open)}
+            aria-expanded={chapterOverviewOpen}
+            className="flex w-full items-center justify-between"
+          >
+            <span className="inline-flex items-center">
+              {data.chapterEngagement.participants.map((participant, index) => (
+                <span
+                  key={`${participant.name}-${index}`}
+                  className={index > 0 ? "-ml-2" : ""}
+                  style={{
+                    position: "relative",
+                    zIndex: data.chapterEngagement.participants.length - index,
+                    borderRadius: "9999px",
+                    boxShadow: "0 0 0 2px #fbf7ef",
+                  }}
+                >
+                  <Avatar name={participant.name} avatarUrl={participant.avatarUrl} colorIndex={participant.colorIndex} size="sm" />
+                </span>
+              ))}
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-[calc(11px*var(--font-scale))] text-text-muted">
+                {formatEngagementLabel(data.chapterEngagement.commentCount, data.chapterEngagement.highlightCount)}
+              </span>
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                fill="none"
+                style={{ width: "calc(20px * var(--font-scale))", height: "calc(20px * var(--font-scale))" }}
+                className={`shrink-0 text-text-muted transition-transform duration-200 ${chapterOverviewOpen ? "rotate-45" : ""}`}
+              >
+                <path d="M12 4v16M4 12h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </span>
+          </button>
+
+          {chapterOverviewOpen && (
+            <div className="mt-2.5 flex flex-col gap-2.5 border-t border-border pt-2.5">
+              {data.chapterEngagement.participants.map((participant, index) => (
+                <div key={`${participant.name}-${index}`} className="flex items-center gap-2.5">
+                  <Avatar name={participant.name} avatarUrl={participant.avatarUrl} colorIndex={participant.colorIndex} size="sm" />
+                  <span className="text-[calc(12px*var(--font-scale))] font-semibold text-ink">{participant.name}</span>
+                  <span className="ml-auto text-[calc(11px*var(--font-scale))] text-text-muted">
+                    {formatEngagementLabel(participant.commentCount, participant.highlightCount)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-col gap-1">
         {data.verses.map((verse) => {
           const style = verse.highlight?.style;
@@ -551,20 +617,33 @@ export function ReaderView({
                     {verse.commentCount} {verse.commentCount === 1 ? "comentário" : "comentários"}
                   </span>
                 )}
-                {verse.highlight && verse.highlight.markedBy.some((mark) => !mark.isOwn) && (
-                  <span className="ml-1.5 inline-flex items-center gap-1 align-middle">
-                    {verse.highlight.markedBy
-                      .filter((mark) => !mark.isOwn)
-                      .map((mark, index) => (
+                {verse.participants.length > 0 && (
+                  <span className="ml-1.5 inline-flex items-center align-middle">
+                    {verse.participants.map((participant, index) => (
+                      <span
+                        key={`${participant.name}-${index}`}
+                        className={index > 0 ? "-ml-2" : ""}
+                        style={{
+                          position: "relative",
+                          zIndex: verse.participants.length - index,
+                          borderRadius: "9999px",
+                          boxShadow: `0 0 0 2px ${style?.bg ?? "#f5efe4"}`,
+                        }}
+                      >
                         <Avatar
-                          key={`${mark.name}-${index}`}
-                          name={mark.name}
-                          avatarUrl={mark.avatarUrl}
+                          name={participant.name}
+                          avatarUrl={participant.avatarUrl}
+                          colorIndex={participant.colorIndex}
                           size="sm"
-                          borderColor={HIGHLIGHT_COLORS[mark.color].bg}
-                          fallbackColor={{ bg: HIGHLIGHT_COLORS[mark.color].bg, text: HIGHLIGHT_COLORS[mark.color].text }}
+                          borderColor={participant.highlightColor ? HIGHLIGHT_COLORS[participant.highlightColor].bg : undefined}
+                          fallbackColor={
+                            participant.highlightColor
+                              ? { bg: HIGHLIGHT_COLORS[participant.highlightColor].bg, text: HIGHLIGHT_COLORS[participant.highlightColor].text }
+                              : undefined
+                          }
                         />
-                      ))}
+                      </span>
+                    ))}
                   </span>
                 )}
               </div>
