@@ -10,6 +10,9 @@ export interface FamilyMemberStatus {
   name: string;
   avatarUrl: string | null;
   completed: boolean;
+  /** % de dias do pacote inteiro (passados, hoje e futuros) que essa pessoa já leu —
+   * posição dela na linha do tempo do plano, não só se leu hoje. */
+  percent: number;
 }
 
 export interface PackageCardData {
@@ -102,9 +105,11 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
     allDueDayIds.length > 0
       ? supabase.from("reading_progress").select("plan_day_id").eq("user_id", userId).in("plan_day_id", allDueDayIds)
       : Promise.resolve({ data: [] as { plan_day_id: string }[] }),
+    // Todos os dias do pacote (não só hoje) — precisamos do quanto cada pessoa já
+    // avançou no plano inteiro pra posicionar o avatar dela na linha do tempo.
     featuredPackage
-      ? supabase.from("reading_progress").select("user_id").eq("plan_day_id", featuredPackage.planDayId)
-      : Promise.resolve({ data: [] as { user_id: string }[] }),
+      ? supabase.from("reading_progress").select("user_id, plan_day_id").in("plan_day_id", featuredPackage.allDayIds)
+      : Promise.resolve({ data: [] as { user_id: string; plan_day_id: string }[] }),
   ]);
 
   const myCompletedDayIds = new Set((myProgress ?? []).map((row) => row.plan_day_id));
@@ -115,14 +120,21 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
 
   let featured: FeaturedPackageCardData | null = null;
   if (featuredCard) {
-    const completedIds = new Set((featuredProgress ?? []).map((row) => row.user_id));
+    const completedTodayIds = new Set(
+      (featuredProgress ?? []).filter((row) => row.plan_day_id === featuredPackage!.planDayId).map((row) => row.user_id)
+    );
+    const completedDaysByMember = new Map<string, number>();
+    for (const row of featuredProgress ?? []) {
+      completedDaysByMember.set(row.user_id, (completedDaysByMember.get(row.user_id) ?? 0) + 1);
+    }
     featured = {
       ...featuredCard,
       members: activeFamilyMembers.map((member) => ({
         id: member.id,
         name: member.name,
         avatarUrl: member.avatar_url,
-        completed: completedIds.has(member.id),
+        completed: completedTodayIds.has(member.id),
+        percent: featuredCard.totalDays > 0 ? Math.round(((completedDaysByMember.get(member.id) ?? 0) / featuredCard.totalDays) * 100) : 0,
       })),
     };
   }

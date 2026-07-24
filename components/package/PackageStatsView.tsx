@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Avatar } from "@/components/ui/Avatar";
 import { PackageDayList } from "@/components/package/PackageDayList";
+import { ReadingTimeline } from "@/components/ui/ReadingTimeline";
 import { toDateOnlyString } from "@/lib/format";
 import type { PackageStats } from "@/lib/package-stats-data";
 
@@ -73,33 +73,11 @@ export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: Pac
 
       <div className="flex flex-col gap-3">
         <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Progresso da família</div>
-        <div className="flex flex-col gap-3.5 rounded-[18px] border border-border bg-surface p-4">
+        <div className="rounded-[18px] border border-border bg-surface p-4">
           {stats.members.length === 0 ? (
             <p className="text-[calc(14px*var(--font-scale))] text-text-muted">Nenhum membro na família ainda.</p>
           ) : (
-            stats.members.map((member, index) => (
-              <div key={member.id}>
-                {index > 0 ? <div className="mb-3.5 h-px bg-border" /> : null}
-                <div className="flex flex-col gap-[5px]">
-                  <div className="flex items-center gap-2">
-                    <Avatar name={member.name} avatarUrl={member.avatarUrl} colorIndex={index} size="sm" />
-                    <span className="flex-1 text-[calc(13px*var(--font-scale))] font-semibold text-ink">{member.name}</span>
-                    <span className={`text-[calc(12px*var(--font-scale))] ${member.isFullyCompleted ? "font-semibold text-ink" : "text-text-muted"}`}>
-                      {member.completedDays} / {stats.totalDays}
-                    </span>
-                  </div>
-                  <div className="h-[5px] rounded-full bg-[#e8dcc6]">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${member.percent}%`,
-                        backgroundColor: member.isFullyCompleted ? "#2c2218" : "#b3a48c",
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))
+            <ReadingTimeline percent={stats.progressPercent} members={stats.members} variant="light" />
           )}
         </div>
       </div>

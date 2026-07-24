@@ -16,6 +16,9 @@ export interface TodayPlanDay {
   passages: Passage[];
   /** IDs de todos os dias do pacote com data <= hoje — pra calcular pendências por usuário. */
   dueDayIds: string[];
+  /** IDs de TODOS os dias do pacote (passados, hoje e futuros) — pra calcular o quanto
+   * cada pessoa da família já avançou no plano inteiro (não só o que já venceu). */
+  allDayIds: string[];
 }
 
 interface PackageWithDaysRow {
@@ -60,6 +63,7 @@ export async function getActivePackagesWithToday(supabase: SupabaseServerClient)
       chapterTitle: todayDay.title,
       passages: todayDay.passages,
       dueDayIds: days.filter((day) => day.date <= today).map((day) => day.id),
+      allDayIds: days.map((day) => day.id),
     });
   }
 
