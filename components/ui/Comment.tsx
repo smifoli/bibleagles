@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
+import { AutoResizeTextarea } from "@/components/ui/AutoResizeTextarea";
 import { formatRelativeTime } from "@/lib/format";
 
 export interface CommentData {
@@ -62,10 +63,11 @@ function CommentBody({
 
         {editing ? (
           <div className="mt-1 flex flex-col gap-1.5">
-            <textarea
+            <AutoResizeTextarea
               value={editValue}
               onChange={(event) => onEditValueChange?.(event.target.value)}
               rows={2}
+              autoFocus
               className="rounded-[10px] border border-input-border bg-background p-2.5 text-[calc(14px*var(--font-scale))] text-ink"
             />
             <div className="flex items-center gap-3">

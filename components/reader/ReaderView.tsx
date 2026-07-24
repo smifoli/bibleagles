@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Avatar } from "@/components/ui/Avatar";
+import { AutoResizeTextarea } from "@/components/ui/AutoResizeTextarea";
 import type { BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
@@ -284,10 +285,11 @@ export function ReaderView({
 
           {isEditing ? (
             <div className="mt-1 flex flex-col gap-1.5">
-              <textarea
+              <AutoResizeTextarea
                 value={editDraft}
                 onChange={(event) => setEditDraft(event.target.value)}
                 rows={2}
+                autoFocus
                 className="rounded-[10px] border border-input-border bg-background p-2.5 text-[calc(14px*var(--font-scale))] text-ink"
               />
               <div className="flex items-center gap-3">
@@ -360,7 +362,7 @@ export function ReaderView({
 
           {!isReply && replyingTo === comment.id && (
             <div className="mt-2.5 flex flex-col gap-1.5 pl-[15px]">
-              <textarea
+              <AutoResizeTextarea
                 value={replyDraft}
                 onChange={(event) => setReplyDraft(event.target.value)}
                 placeholder={`Responder a ${comment.userName}...`}
@@ -577,7 +579,7 @@ export function ReaderView({
 
                   {comments.map((comment) => renderComment(comment, verse.number, false))}
 
-                  <textarea
+                  <AutoResizeTextarea
                     value={commentDraft}
                     onChange={(event) => setCommentDraft(event.target.value)}
                     placeholder="Escreva um comentário..."
