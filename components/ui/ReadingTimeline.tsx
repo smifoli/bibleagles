@@ -27,8 +27,16 @@ function clampedLeft(percent: number): string {
   return `clamp(11px, ${safe}%, calc(100% - 11px))`;
 }
 
-const AVATAR_ROW_HEIGHT_PX = 22;
-const BASE_HEIGHT_PX = 42;
+const LINE_BOTTOM_PX = 15;
+const LINE_HEIGHT_PX = 3;
+const AVATAR_SIZE_PX = 22;
+// Centraliza o avatar da base bem em cima da linha (linha passa atrás, pelo meio dele).
+const BASE_AVATAR_BOTTOM_PX = LINE_BOTTOM_PX + LINE_HEIGHT_PX / 2 - AVATAR_SIZE_PX / 2;
+// Empilhados se sobrepõem um pouco (menos que a altura inteira do avatar) em vez de
+// ficarem em fileiras totalmente separadas — mesma ideia do overlap horizontal usado
+// em outras pilhas de avatar do app, só que na vertical.
+const STACK_STEP_PX = 14;
+const BASE_HEIGHT_PX = BASE_AVATAR_BOTTOM_PX + AVATAR_SIZE_PX + 2;
 
 // Onde cada pessoa da família está no plano inteiro (não só "leu hoje ou não") — a
 // linha preenchida mostra o calendário até hoje (como era antes), e cada avatar flutua
@@ -48,14 +56,17 @@ export function ReadingTimeline({ percent, members, variant = "dark" }: ReadingT
     countByPercent.set(member.percent, stackIndex + 1);
   }
   const maxStack = Math.max(1, ...Array.from(countByPercent.values()));
-  const containerHeight = BASE_HEIGHT_PX + (maxStack - 1) * AVATAR_ROW_HEIGHT_PX;
+  const containerHeight = BASE_HEIGHT_PX + (maxStack - 1) * STACK_STEP_PX;
 
   return (
     // Tudo ancorado por `bottom` (não `top`): quando o container cresce pra caber gente
     // empilhada, a linha continua fixa perto da base em vez de se afastar da primeira
     // fileira de avatares conforme a altura aumenta.
     <div className="relative" style={{ height: containerHeight }}>
-      <div className={`absolute bottom-[14px] left-0 right-0 h-[3px] rounded-full ${colors.track}`}>
+      <div
+        className={`absolute left-0 right-0 rounded-full ${colors.track}`}
+        style={{ bottom: LINE_BOTTOM_PX, height: LINE_HEIGHT_PX }}
+      >
         <div className={`h-full rounded-full ${colors.fill}`} style={{ width: `${safePercent}%` }} />
       </div>
 
@@ -65,7 +76,7 @@ export function ReadingTimeline({ percent, members, variant = "dark" }: ReadingT
           className="absolute -translate-x-1/2"
           style={{
             left: clampedLeft(member.percent),
-            bottom: 18 + (stackIndexByMemberId.get(member.id) ?? 0) * AVATAR_ROW_HEIGHT_PX,
+            bottom: BASE_AVATAR_BOTTOM_PX + (stackIndexByMemberId.get(member.id) ?? 0) * STACK_STEP_PX,
             zIndex: index + 1,
           }}
         >
