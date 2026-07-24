@@ -12,9 +12,14 @@ export function SecondaryPackageCard({ card }: { card: PackageCardData }) {
           <div className="mb-1 text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1.5px] text-text-muted">
             {card.eyebrow}
           </div>
-          <div className="text-[calc(18px*var(--font-scale))] font-semibold text-ink">{card.title}</div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[calc(18px*var(--font-scale))] font-semibold text-ink">{card.title}</span>
+            <svg aria-hidden viewBox="0 0 24 24" fill="none" className="h-5 w-5 shrink-0 text-ink">
+              <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
         </div>
-        <span className="whitespace-nowrap rounded-full border border-[#e0d3bf] px-2.5 py-1 text-[calc(10px*var(--font-scale))] tracking-wide text-text-muted">
+        <span className="shrink-0 whitespace-nowrap rounded-full border border-[#e0d3bf] px-2.5 py-1 text-[calc(10px*var(--font-scale))] tracking-wide text-text-muted">
           Dia {card.dayNumber} / {card.totalDays}
         </span>
       </div>
