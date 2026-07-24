@@ -81,7 +81,11 @@ export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: Pac
               <div className="mb-2 text-[calc(13px*var(--font-scale))] text-[#d8c9b3]">
                 Dia {stats.currentDayNumber} de {stats.totalDays}
               </div>
-              <ReadingTimeline percent={stats.progressPercent} members={stats.members} variant="dark" />
+              <ReadingTimeline
+                percent={stats.progressPercent}
+                members={stats.members.map((member) => ({ ...member, late: member.percent < stats.progressPercent }))}
+                variant="dark"
+              />
             </>
           )}
         </div>

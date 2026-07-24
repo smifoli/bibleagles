@@ -38,7 +38,7 @@ export interface AvatarProps {
   className?: string;
   /** Foto de perfil, se o usuário tiver uma — substitui a bolinha com a inicial. */
   avatarUrl?: string | null;
-  /** Contorno colorido (ex.: cor do destaque) — só faz sentido junto de avatarUrl. */
+  /** Contorno colorido (ex.: cor do destaque, status na linha do tempo) — funciona com foto ou com a bolinha de inicial. */
   borderColor?: string;
   /** Sobrepõe colorIndex/pending com uma cor específica (ex.: cor do destaque) na bolinha com inicial. */
   fallbackColor?: AvatarColorStyle;
@@ -75,7 +75,11 @@ export function Avatar({
     <div
       title={name}
       className={`flex shrink-0 items-center justify-center rounded-full font-sans font-semibold ${SIZE_CLASSES[size]} ${className}`}
-      style={{ backgroundColor: style.bg, color: style.text }}
+      style={{
+        backgroundColor: style.bg,
+        color: style.text,
+        border: borderColor ? `2px solid ${borderColor}` : undefined,
+      }}
     >
       {initial}
     </div>

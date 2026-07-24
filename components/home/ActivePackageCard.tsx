@@ -31,7 +31,11 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
           <div className="mb-1 text-[calc(13px*var(--font-scale))] text-[#d8c9b3]">
             {card.chapterTitle} · {card.dateLabel}
           </div>
-          <ReadingTimeline percent={card.percent} members={card.members} variant="dark" />
+          <ReadingTimeline
+            percent={card.percent}
+            members={card.members.map((member) => ({ ...member, late: !member.completed }))}
+            variant="dark"
+          />
           <div className="text-[calc(11px*var(--font-scale))]">
             {card.pendingCount === 0 ? (
               <span className="font-semibold text-[#9fb389]">Você está em dia</span>
