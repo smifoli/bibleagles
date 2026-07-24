@@ -49,6 +49,28 @@ export const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, AutoResizeText
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    // Abrir um verso via scroll-até-lá (ex.: clicar num item do overview do capítulo)
+    // dispara um scrollIntoView suave — a medição do mount roda ANTES desse scroll
+    // terminar, então o "top" usado pra calcular o limite fica errado (verso ainda não
+    // chegou na posição final) e a caixa nasce menor do que devia. Recalcula durante o
+    // scroll (rAF-throttled) pra corrigir assim que o layout se assenta.
+    let rafId: number | null = null;
+    function onScroll() {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        resize(innerRef.current);
+      });
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <textarea
       ref={(el) => {
