@@ -24,7 +24,10 @@ export const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, AutoResizeText
   function resize(el: HTMLTextAreaElement | null) {
     if (!el) return;
     el.style.height = "auto";
-    const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+    // window.innerHeight (viewport de layout), não visualViewport.height: no celular, o
+    // teclado encolhe o visualViewport enquanto está aberto — ou seja, bem no momento em
+    // que a pessoa está digitando — o que travava o crescimento da caixa quase no mínimo.
+    const viewportHeight = window.innerHeight;
     // O BottomNav é `fixed` na base da tela (ver components/layout/BottomNav.tsx)
     // e cobre fisicamente esse espaço, mesmo que a página role por baixo dele.
     const bottomNavHeight = document.querySelector<HTMLElement>("nav.fixed")?.getBoundingClientRect().height ?? 0;
