@@ -9,9 +9,9 @@ export const FONT_SIZE_MULTIPLIER: Record<FontSizePreference, number> = {
 };
 
 export const FONT_SIZE_LABELS: Record<FontSizePreference, string> = {
-  normal: "Normal",
-  large: "Grande",
-  xlarge: "Muito grande",
+  normal: "Pequeno",
+  large: "Normal",
+  xlarge: "Grande",
 };
 
 export const FONT_SIZE_ORDER: FontSizePreference[] = ["normal", "large", "xlarge"];
@@ -27,7 +27,7 @@ export const VERSE_FONT_SIZE_COOKIE = "bible_font_size";
 export const VERSE_FONT_MIN = 14;
 export const VERSE_FONT_MAX = 32;
 export const VERSE_FONT_STEP = 2;
-export const VERSE_FONT_DEFAULT = 16;
+export const VERSE_FONT_DEFAULT = 24;
 
 export function clampVerseFontSize(value: number): number {
   return Math.min(VERSE_FONT_MAX, Math.max(VERSE_FONT_MIN, value));
