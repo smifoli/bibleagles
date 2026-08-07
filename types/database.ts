@@ -3,6 +3,7 @@ export type PackageStatus = "draft" | "active" | "archived";
 export type Language = "pt" | "en" | "es" | "de" | "it";
 export type HighlightColor = "yellow" | "green" | "rose" | "blue";
 export type FontSizePreference = "normal" | "large" | "xlarge";
+export type NotificationType = "comment_reply" | "comment_on_thread" | "comment_like";
 
 export interface Database {
   public: {
@@ -20,6 +21,9 @@ export interface Database {
           notification_time: string;
           font_size: FontSizePreference;
           is_deleted: boolean;
+          // Última visita a /family — usado só pra marcar o que é "novo" no feed
+          // desde então; null enquanto o usuário nunca abriu a tela.
+          family_feed_seen_at: string | null;
           created_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["users"]["Row"], "id" | "created_at">;
@@ -111,6 +115,21 @@ export interface Database {
         };
         Insert: Omit<Database["public"]["Tables"]["comment_likes"]["Row"], "id" | "created_at">;
         Update: never;
+        Relationships: [];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          recipient_id: string;
+          actor_id: string;
+          type: NotificationType;
+          comment_id: string;
+          read_at: string | null;
+          created_at: string;
+        };
+        // Só nasce via trigger (security definer) — não há policy de insert pro usuário.
+        Insert: never;
+        Update: { read_at: string | null };
         Relationships: [];
       };
     };

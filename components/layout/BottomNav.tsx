@@ -14,6 +14,7 @@ const NAV_ITEMS = [
     match: (pathname: string) => pathname.startsWith("/bible") || pathname.startsWith("/read/"),
   },
   { key: "bookmarks", href: "/bookmarks", label: "Destaques", match: (pathname: string) => pathname === "/bookmarks" },
+  { key: "notifications", href: "/notifications", label: "Avisos", match: (pathname: string) => pathname === "/notifications" },
   { key: "profile", href: "/profile", label: "Perfil", match: (pathname: string) => pathname === "/profile" },
 ];
 
@@ -38,7 +39,7 @@ function bibleParentHref(pathname: string): string | null {
   return null;
 }
 
-export function BottomNav() {
+export function BottomNav({ unreadNotifications = 0 }: { unreadNotifications?: number }) {
   const pathname = usePathname();
   const router = useRouter();
   // Só existe no cliente (cookie) — nulo no SSR, então "Bíblia" cai no
@@ -85,8 +86,15 @@ export function BottomNav() {
             className="flex flex-col items-center gap-1.5 transition-transform active:scale-90"
           >
             <span className={`h-0.5 w-[18px] rounded-full ${isActive ? "bg-ink" : "bg-transparent"}`} />
-            <span className={`text-[calc(11px*var(--font-scale))] font-medium ${isActive ? "text-ink" : "text-[#a3927d]"}`}>
-              {item.label}
+            <span className="relative">
+              <span className={`text-[calc(11px*var(--font-scale))] font-medium ${isActive ? "text-ink" : "text-[#a3927d]"}`}>
+                {item.label}
+              </span>
+              {item.key === "notifications" && unreadNotifications > 0 && (
+                <span className="absolute -right-2.5 -top-1 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-ink px-1 text-[9px] font-semibold text-background">
+                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                </span>
+              )}
             </span>
           </Link>
         );
