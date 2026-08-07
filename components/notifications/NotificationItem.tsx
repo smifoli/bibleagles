@@ -9,6 +9,14 @@ const VERB_BY_TYPE: Record<NotificationItemData["type"], string> = {
   comment_reply: "respondeu seu comentário em",
   comment_on_thread: "comentou em",
   comment_like: "curtiu seu comentário em",
+  comment_on_read_chapter: "comentou em",
+};
+
+// Só o tipo "leu o capítulo" precisa desse lembrete — os outros já deixam a
+// relação com o destinatário clara pelo verbo (respondeu/comentou na mesma
+// conversa/curtiu).
+const SUFFIX_BY_TYPE: Partial<Record<NotificationItemData["type"], string>> = {
+  comment_on_read_chapter: ", que você já leu",
 };
 
 export function NotificationItem({ item }: { item: NotificationItemData }) {
@@ -32,6 +40,7 @@ export function NotificationItem({ item }: { item: NotificationItemData }) {
         <div className={`text-[calc(13px*var(--font-scale))] leading-[1.5] ${item.read ? "text-text-secondary" : "text-text-primary"}`}>
           <span className="font-medium">{item.actorName}</span> {VERB_BY_TYPE[item.type]}{" "}
           <span className="text-link">{reference}</span>
+          {SUFFIX_BY_TYPE[item.type]}
         </div>
         <div className="mt-0.5 truncate font-serif text-[calc(13px*var(--font-scale))] italic text-text-muted">
           &quot;{item.commentContent}&quot;

@@ -3,7 +3,7 @@ export type PackageStatus = "draft" | "active" | "archived";
 export type Language = "pt" | "en" | "es" | "de" | "it";
 export type HighlightColor = "yellow" | "green" | "rose" | "blue";
 export type FontSizePreference = "normal" | "large" | "xlarge";
-export type NotificationType = "comment_reply" | "comment_on_thread" | "comment_like";
+export type NotificationType = "comment_reply" | "comment_on_thread" | "comment_like" | "comment_on_read_chapter";
 
 export interface Database {
   public: {
