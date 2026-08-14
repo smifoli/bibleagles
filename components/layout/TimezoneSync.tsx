@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { saveUserTimezone } from "@/lib/timezone-actions";
 import { TIMEZONE_COOKIE } from "@/lib/timezone-cookie";
 
 function readCookie(name: string): string | null {
@@ -21,19 +22,29 @@ function readCookie(name: string): string | null {
  * nada; se mudou (primeira visita desse navegador, ou viagem pra outro
  * fuso), atualiza e força as Server Components a buscarem de novo — só
  * acontece uma vez por navegador/mudança de fuso, não em toda navegação.
+ *
+ * Também mantém users.timezone (savedTimezone) igual ao fuso real: o lembrete
+ * diário roda por cron, sem request de ninguém — logo sem cookie — e lê o
+ * fuso do banco. Sincronizações independentes: cookie por navegador, banco
+ * por usuário (o último aparelho usado ganha).
  */
-export function TimezoneSync() {
+export function TimezoneSync({ savedTimezone }: { savedTimezone: string | null }) {
   const router = useRouter();
 
   useEffect(() => {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (savedTimezone !== null && savedTimezone !== timeZone) {
+      void saveUserTimezone(timeZone);
+    }
+
     if (readCookie(TIMEZONE_COOKIE) === timeZone) return;
 
     // 1 ano — mesma ideia do last_read_path: um cookie de preferência de
     // dispositivo, não de sessão.
     document.cookie = `${TIMEZONE_COOKIE}=${encodeURIComponent(timeZone)}; path=/; max-age=31536000; samesite=lax`;
     router.refresh();
-  }, [router]);
+  }, [router, savedTimezone]);
 
   return null;
 }

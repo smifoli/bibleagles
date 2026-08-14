@@ -18,7 +18,17 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   } = await getUser(supabase);
   // Layout compartilhado por toda rota autenticada de (app) — badge do sino
   // busca a contagem aqui pra aparecer em qualquer tela, não só em /notifications.
-  const unreadNotifications = user ? await getUnreadNotificationCount(supabase, user.id) : 0;
+  // O timezone salvo vai junto pro TimezoneSync manter users.timezone em dia.
+  let unreadNotifications = 0;
+  let savedTimezone: string | null = null;
+  if (user) {
+    const [unread, { data: userRow }] = await Promise.all([
+      getUnreadNotificationCount(supabase, user.id),
+      supabase.from("users").select("timezone").eq("id", user.id).single(),
+    ]);
+    unreadNotifications = unread;
+    savedTimezone = userRow?.timezone ?? null;
+  }
 
   // O conteúdo rola no documento (não numa div interna com overflow-y-auto) de
   // propósito: o gesto do iOS de tocar a barra de status pra rolar ao topo só
@@ -27,7 +37,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // fixo na tela, e o padding-bottom aqui evita que o conteúdo fique embaixo dele.
   return (
     <>
-      <TimezoneSync />
+      <TimezoneSync savedTimezone={savedTimezone} />
       <div className="px-[18px] pb-[calc(56px+max(15px,env(safe-area-inset-bottom)))] pt-5">{children}</div>
       <BottomNav unreadNotifications={unreadNotifications} />
     </>

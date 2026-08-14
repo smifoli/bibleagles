@@ -27,6 +27,11 @@ export interface Database {
           notification_enabled: boolean;
           notification_time: string;
           comment_notification_scope: CommentNotificationScope;
+          // Fuso IANA do último aparelho usado (TimezoneSync) — o lembrete
+          // diário (cron, sem cookie de ninguém) lê daqui.
+          timezone: string;
+          // Data LOCAL (no fuso acima) do último lembrete diário enviado.
+          reminder_last_sent_on: string | null;
           font_size: FontSizePreference;
           is_deleted: boolean;
           // Última visita a /family — usado só pra marcar o que é "novo" no feed
