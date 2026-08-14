@@ -23,14 +23,16 @@ type NotificationType =
   | "comment_on_read_chapter"
   | "comment_on_any_chapter";
 
-// `ref` é "João 3:16" (mesmo formato da lista em /notifications) — ou "" se o
-// comentário não foi encontrado, caso em que os títulos ficam sem o "em ...".
-const TITLE_BY_TYPE: Record<NotificationType, (actor: string, ref: string) => string> = {
-  comment_reply: (actor, ref) => `${actor} respondeu seu comentário${ref && ` em ${ref}`}`,
-  comment_on_thread: (actor, ref) => `${actor} comentou na mesma conversa${ref && ` em ${ref}`}`,
-  comment_like: (actor, ref) => `${actor} curtiu seu comentário${ref && ` em ${ref}`}`,
-  comment_on_read_chapter: (actor, ref) => (ref ? `${actor} comentou em ${ref}, que você já leu` : `${actor} comentou num capítulo que você leu`),
-  comment_on_any_chapter: (actor, ref) => `${actor} comentou${ref && ` em ${ref}`}`,
+// O iOS corta o título de push com ~30 e poucos caracteres ("Kevin Schmidt
+// comentou em At…"), então o título carrega só o essencial — primeiro nome e
+// referência ("Kevin · Atos 11:26") — e a ação desce pra primeira linha do
+// corpo, que o sistema exibe em várias linhas sem cortar.
+const ACTION_BY_TYPE: Record<NotificationType, string> = {
+  comment_reply: "Respondeu seu comentário",
+  comment_on_thread: "Comentou na mesma conversa",
+  comment_like: "Curtiu seu comentário",
+  comment_on_read_chapter: "Comentou num capítulo que você leu",
+  comment_on_any_chapter: "Comentou",
 };
 
 interface WebhookPayload {
@@ -67,10 +69,12 @@ Deno.serve(async (req) => {
     supabase.from("comments").select("book, chapter, verse, content").eq("id", comment_id).single(),
   ]);
 
-  const actorName = actor?.name ?? "Alguém";
+  const firstName = (actor?.name ?? "Alguém").trim().split(/\s+/)[0];
   const reference = comment ? `${BOOK_NAMES_PT[comment.book] ?? comment.book} ${comment.chapter}:${comment.verse}` : "";
-  const title = (TITLE_BY_TYPE[type] ?? TITLE_BY_TYPE.comment_on_thread)(actorName, reference);
-  const body = comment?.content ? (comment.content.length > 120 ? `${comment.content.slice(0, 120)}…` : comment.content) : "";
+  const title = reference ? `${firstName} · ${reference}` : firstName;
+  const action = ACTION_BY_TYPE[type] ?? ACTION_BY_TYPE.comment_on_thread;
+  const content = comment?.content ? (comment.content.length > 120 ? `${comment.content.slice(0, 120)}…` : comment.content) : "";
+  const body = content ? `${action}: “${content}”` : action;
   const url = comment
     ? `/read/${comment.book}/${comment.chapter}?verse=${comment.verse}&from=${encodeURIComponent("/notifications")}`
     : "/notifications";
