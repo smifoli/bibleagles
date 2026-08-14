@@ -5,6 +5,7 @@ import { Toggle } from "@/components/ui/Toggle";
 import { deletePushSubscription, savePushSubscription } from "@/lib/push-actions";
 import {
   getCurrentSubscription,
+  getPushRegistration,
   isIos,
   isPushSupported,
   isStandalone,
@@ -13,7 +14,7 @@ import {
   unsubscribeFromPush,
 } from "@/lib/push-subscribe";
 
-type Status = "checking" | "unsupported" | "ios-install" | "denied" | "off" | "on" | "saving";
+type Status = "checking" | "unsupported" | "sw-unavailable" | "ios-install" | "denied" | "off" | "on" | "saving";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
@@ -38,7 +39,13 @@ export function PushNotificationsCard() {
         if (!cancelled) setStatus("denied");
         return;
       }
-      const current = await getCurrentSubscription();
+      const registration = await getPushRegistration();
+      if (cancelled) return;
+      if (!registration) {
+        setStatus("sw-unavailable");
+        return;
+      }
+      const current = await registration.pushManager.getSubscription();
       if (cancelled) return;
       setSubscription(current);
       setStatus(current ? "on" : "off");
@@ -66,8 +73,13 @@ export function PushNotificationsCard() {
         setSubscription(sub);
         setStatus("on");
       } catch (err) {
-        setStatus(err instanceof Error && err.message === "permission-denied" ? "denied" : "off");
-        if (!(err instanceof Error && err.message === "permission-denied")) {
+        const message = err instanceof Error ? err.message : "";
+        if (message === "permission-denied") {
+          setStatus("denied");
+        } else if (message === "sw-unavailable") {
+          setStatus("sw-unavailable");
+        } else {
+          setStatus("off");
           setError("Não foi possível ativar as notificações. Tente de novo.");
         }
       }
@@ -88,9 +100,9 @@ export function PushNotificationsCard() {
     <div className="flex flex-col rounded-[18px] border border-border bg-surface px-4">
       <div className="flex items-center justify-between py-2.5">
         <span className="text-[calc(13px*var(--font-scale))] text-[#2c2218]">Notificações neste aparelho</span>
-        {status === "checking" || status === "unsupported" ? (
+        {status === "checking" || status === "unsupported" || status === "sw-unavailable" ? (
           <span className="text-[calc(11px*var(--font-scale))] text-text-muted">
-            {status === "checking" ? "…" : "Não suportado"}
+            {status === "checking" ? "…" : status === "sw-unavailable" ? "Indisponível" : "Não suportado"}
           </span>
         ) : status === "ios-install" ? (
           <span className="text-[calc(11px*var(--font-scale))] text-text-muted">Instale o app</span>
@@ -110,6 +122,13 @@ export function PushNotificationsCard() {
           <span className="font-medium">Compartilhar</span> no Safari e depois em{" "}
           <span className="font-medium">Adicionar à Tela de Início</span>. Depois de instalado, abra o app por lá pra
           ativar aqui.
+        </div>
+      ) : null}
+
+      {status === "sw-unavailable" ? (
+        <div className="border-t border-border py-2.5 text-[calc(12px*var(--font-scale))] leading-[1.5] text-text-secondary">
+          Não foi possível preparar as notificações neste acesso — recarregue a página pra tentar de novo. (Rodando em
+          desenvolvimento local, este recurso fica desligado.)
         </div>
       ) : null}
 

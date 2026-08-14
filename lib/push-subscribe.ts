@@ -27,17 +27,34 @@ export function isStandalone(): boolean {
   return window.matchMedia("(display-mode: standalone)").matches || nav.standalone === true;
 }
 
-export async function getCurrentSubscription(): Promise<PushSubscription | null> {
+// navigator.serviceWorker.ready nunca resolve quando nenhum service worker chega
+// a ser registrado (PWA desligado em dev, registro que falhou, SW antigo quebrado
+// ainda no aparelho) — sem um teto de espera, qualquer problema no SW deixaria a
+// UI de push presa em "checando" pra sempre.
+const SW_READY_TIMEOUT_MS = 6000;
+
+export async function getPushRegistration(): Promise<ServiceWorkerRegistration | null> {
   if (!isPushSupported()) return null;
-  const registration = await navigator.serviceWorker.ready;
-  return registration.pushManager.getSubscription();
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<null>((resolve) => {
+      setTimeout(() => resolve(null), SW_READY_TIMEOUT_MS);
+    }),
+  ]);
+}
+
+export async function getCurrentSubscription(): Promise<PushSubscription | null> {
+  const registration = await getPushRegistration();
+  return registration ? registration.pushManager.getSubscription() : null;
 }
 
 export async function subscribeToPush(vapidPublicKey: string): Promise<PushSubscription> {
+  const registration = await getPushRegistration();
+  if (!registration) throw new Error("sw-unavailable");
+
   const permission = await Notification.requestPermission();
   if (permission !== "granted") throw new Error("permission-denied");
 
-  const registration = await navigator.serviceWorker.ready;
   return registration.pushManager.subscribe({
     userVisibleOnly: true,
     // lib.dom's PushSubscriptionOptionsInit espera BufferSource<ArrayBuffer>;
