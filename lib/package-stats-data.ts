@@ -1,5 +1,6 @@
 import type { createClient } from "@/lib/supabase/server";
 import { formatShortDate, parseDateOnly, todayDateString } from "@/lib/format";
+import { getUserTimeZone } from "@/lib/timezone";
 import { passageMatches } from "@/lib/reading-plan";
 import { tryGetBookSummary } from "@/lib/bible-data";
 import { getDefaultVersion } from "@/lib/bible-versions";
@@ -50,6 +51,10 @@ export interface PackageStats {
   status: PackageStatus;
   statusLabel: string;
   startDateLabel: string;
+  /** "Hoje" no fuso de quem pediu a página — computado aqui (Server Component
+   * já tem acesso a cookies()/getUserTimeZone()) pra a view não precisar
+   * recalcular no cliente nem virar async só por causa disso. */
+  today: string;
   currentDayNumber: number;
   totalDays: number;
   progressPercent: number;
@@ -125,7 +130,7 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
   const totalDays = planDays.length;
   const allPassages = planDays.flatMap((day) => day.passages);
 
-  const today = todayDateString();
+  const today = todayDateString(await getUserTimeZone());
   const currentDayNumber = totalDays === 0 ? 0 : Math.min(Math.max(planDays.filter((day) => day.date <= today).length, 1), totalDays);
   const daysRemaining = Math.max(totalDays - currentDayNumber, 0);
   const progressPercent = totalDays === 0 ? 0 : Math.round((currentDayNumber / totalDays) * 100);
@@ -209,6 +214,7 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
     status: pkg.status,
     statusLabel: STATUS_LABELS[pkg.status],
     startDateLabel: formatShortDateLabel(pkg.start_date),
+    today,
     currentDayNumber,
     totalDays,
     progressPercent,

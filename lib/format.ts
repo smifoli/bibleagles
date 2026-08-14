@@ -1,22 +1,22 @@
-// Família toda no Brasil (ver feedback_i18n_pt_only_until_20 na memória — só
-// PT até existir infra de i18n) — saudação e "que dia é hoje" sempre nesse
-// fuso, nunca no fuso do processo que roda o código (servidor, em produção,
-// normalmente UTC). Ver todayDateString() mais abaixo pro porquê disso importar.
-const FAMILY_TIMEZONE = "America/Sao_Paulo";
+// Saudação e "que dia é hoje" precisam do fuso de quem está lendo, nunca do
+// fuso do processo que roda o código (servidor, em produção, normalmente
+// UTC) — por isso essas funções pedem timeZone explícito em vez de um fuso
+// fixo aqui. Quem chama por Server Component/Action pega esse valor com
+// lib/timezone.ts (getUserTimeZone(), lê o cookie que
+// components/layout/TimezoneSync mantém sincronizado com o navegador).
 
-export function getGreeting(date: Date = new Date()): string {
+export function getGreeting(date: Date, timeZone: string): string {
   // % 24 porque hour12: false com Intl às vezes devolve "24" pra meia-noite
   // em vez de "0", dependendo do runtime.
-  const hour =
-    Number(new Intl.DateTimeFormat("en-US", { timeZone: FAMILY_TIMEZONE, hour: "numeric", hour12: false }).format(date)) % 24;
+  const hour = Number(new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", hour12: false }).format(date)) % 24;
   if (hour < 12) return "Bom dia";
   if (hour < 18) return "Boa tarde";
   return "Boa noite";
 }
 
-export function formatGreetingDate(date: Date = new Date()): string {
+export function formatGreetingDate(date: Date, timeZone: string): string {
   const formatted = new Intl.DateTimeFormat("pt-BR", {
-    timeZone: FAMILY_TIMEZONE,
+    timeZone,
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -51,20 +51,20 @@ export function formatRelativeTime(date: Date, now: Date = new Date()): string {
 // addDays em lib/package-generator.ts, o calendário em getReadingCalendar) —
 // nesses casos o Date já nasceu com componentes locais, e forçar um fuso
 // diferente na hora de formatar quebraria a simetria e devolveria o dia
-// errado. Pra "que dia é hoje pra família", use todayDateString() abaixo.
+// errado. Pra "que dia é hoje" de quem está lendo, use todayDateString() abaixo.
 export function toDateOnlyString(date: Date = new Date()): string {
   return date.toLocaleDateString("en-CA");
 }
 
 /**
- * "Hoje", sempre no fuso da família — não do processo que roda o código
+ * "Hoje", no fuso de quem está lendo — não no do processo que roda o código
  * (servidor, em produção, normalmente UTC). Sem isso, perto do fim da
- * tarde/noite no Brasil o servidor já tinha virado o dia: "hoje" virava
- * amanhã, e quem já tinha lido tudo aparecia como pendente/atrasado na
- * timeline (comparava o progresso de hoje contra o plan_day de amanhã).
+ * tarde/noite o servidor já tinha virado o dia: "hoje" virava amanhã, e quem
+ * já tinha lido tudo aparecia como pendente/atrasado na timeline (comparava
+ * o progresso de hoje contra o plan_day de amanhã).
  */
-export function todayDateString(): string {
-  return new Date().toLocaleDateString("en-CA", { timeZone: FAMILY_TIMEZONE });
+export function todayDateString(timeZone: string): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone });
 }
 
 /** "YYYY-MM-DD" -> Date à meia-noite local (evita o shift de fuso de `new Date("YYYY-MM-DD")`, que é UTC). */

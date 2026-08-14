@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { TimezoneSync } from "@/components/layout/TimezoneSync";
 import { getUnreadNotificationCount } from "@/lib/notifications-data";
 import { createClient, getUser } from "@/lib/supabase/server";
 
@@ -26,6 +27,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // fixo na tela, e o padding-bottom aqui evita que o conteúdo fique embaixo dele.
   return (
     <>
+      <TimezoneSync />
       <div className="px-[18px] pb-[calc(56px+max(15px,env(safe-area-inset-bottom)))] pt-5">{children}</div>
       <BottomNav unreadNotifications={unreadNotifications} />
     </>

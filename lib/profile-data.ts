@@ -1,5 +1,6 @@
 import type { createClient } from "@/lib/supabase/server";
 import { toDateOnlyString, todayDateString } from "@/lib/format";
+import { getUserTimeZone } from "@/lib/timezone";
 import { getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
 import type { FontSizePreference, Language, UserRole } from "@/types/database";
 
@@ -81,11 +82,12 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
 }
 
 async function getReadingCalendar(supabase: SupabaseServerClient, userId: string): Promise<ReadingCalendarData> {
-  // Ano/mês/dia extraídos de todayDateString() (fuso da família), não de
-  // now.getFullYear()/getMonth()/getDate() — esses usam o fuso do processo
-  // (servidor, em produção, normalmente UTC), que perto do fim da tarde/noite
-  // no Brasil já tinha virado o dia: o calendário marcava o dia errado como "hoje".
-  const [year, monthOneIndexed, today] = todayDateString().split("-").map(Number);
+  // Ano/mês/dia extraídos de todayDateString() (fuso de quem pediu a página),
+  // não de now.getFullYear()/getMonth()/getDate() — esses usam o fuso do
+  // processo (servidor, em produção, normalmente UTC), que perto do fim da
+  // tarde/noite já tinha virado o dia lá: o calendário marcava o dia errado
+  // como "hoje".
+  const [year, monthOneIndexed, today] = todayDateString(await getUserTimeZone()).split("-").map(Number);
   const month = monthOneIndexed - 1; // 0-indexed, pro resto da função
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 

@@ -8,6 +8,7 @@ import { getHomeData } from "@/lib/home-data";
 import { computeOverallReadPercent, getReadChaptersByBook } from "@/lib/bible-nav-data";
 import { getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
 import { createClient, getUser } from "@/lib/supabase/server";
+import { getUserTimeZone } from "@/lib/timezone";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -31,15 +32,16 @@ export default async function HomePage() {
   const biblePercent = computeOverallReadPercent(readByBook, version.abbreviation);
 
   const now = new Date();
+  const timeZone = await getUserTimeZone();
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-[calc(22px*var(--font-scale))] font-semibold tracking-[-0.5px] text-text-primary">
-            {getGreeting(now)}, {userName}
+            {getGreeting(now, timeZone)}, {userName}
           </h1>
-          <p className="mt-0.5 text-[calc(12px*var(--font-scale))] text-text-muted">{formatGreetingDate(now)}</p>
+          <p className="mt-0.5 text-[calc(12px*var(--font-scale))] text-text-muted">{formatGreetingDate(now, timeZone)}</p>
         </div>
         <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-input-border bg-[#ece3d6]">
           <img src="/logo.svg" alt="" width={32} height={32} className="h-full w-full object-cover" />

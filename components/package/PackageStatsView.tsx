@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { PackageDayList } from "@/components/package/PackageDayList";
 import { ReadingTimeline } from "@/components/ui/ReadingTimeline";
-import { todayDateString } from "@/lib/format";
 import type { PackageStats } from "@/lib/package-stats-data";
 
 function progressRemainingLabel(totalDays: number, daysRemaining: number): string {
@@ -11,7 +10,7 @@ function progressRemainingLabel(totalDays: number, daysRemaining: number): strin
 }
 
 export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: PackageStats; canEdit: boolean; currentUserId: string }) {
-  const today = todayDateString();
+  const today = stats.today;
   // O dia de hoje sempre aparece destacado no topo, mesmo já lido — senão, ao marcar
   // como lido, ele "sumiria" pra dentro de "Dias lidos" e ficaria fácil perder de vista
   // qual é a leitura do dia enquanto ainda é hoje.

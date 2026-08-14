@@ -1,5 +1,6 @@
 import type { createClient } from "@/lib/supabase/server";
 import { formatShortDate, parseDateOnly, todayDateString } from "@/lib/format";
+import { getUserTimeZone } from "@/lib/timezone";
 import type { PackageStatus } from "@/types/database";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -34,7 +35,7 @@ export async function getAdminPackagesOverview(supabase: SupabaseServerClient): 
     daysByPackage.set(day.package_id, list);
   }
 
-  const today = todayDateString();
+  const today = todayDateString(await getUserTimeZone());
   const overview: AdminPackagesOverview = { active: [], draft: [], archived: [] };
 
   for (const pkg of packages ?? []) {

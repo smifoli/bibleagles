@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { todayDateString } from "@/lib/format";
+import { getUserTimeZone } from "@/lib/timezone";
 import { passageMatches } from "@/lib/reading-plan";
 import { createClient, getUser } from "@/lib/supabase/server";
 import type { Passage } from "@/types/database";
@@ -37,7 +38,7 @@ export async function markAllChaptersRead(book: string, chapterCount: number): P
     .flatMap((pkg) => pkg.reading_plan_days)
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
-  const today = todayDateString();
+  const today = todayDateString(await getUserTimeZone());
   const planDayIdByChapter = new Map<number, string>();
   for (let chapter = 1; chapter <= chapterCount; chapter++) {
     const matches = activeDays.filter((day) => day.passages.some((passage) => passageMatches(passage, book, chapter)));
