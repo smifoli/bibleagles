@@ -91,7 +91,11 @@ export function BottomNav({ unreadNotifications = 0 }: { unreadNotifications?: n
                 {item.label}
               </span>
               {item.key === "notifications" && unreadNotifications > 0 && (
-                <span className="absolute -right-2.5 -top-1 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-ink px-1 text-[9px] font-semibold text-background">
+                // bottom-full ancora a bolinha (sem margem) no topo da caixa de linha
+                // do rótulo — como o line-height da fonte já deixa um respiro acima
+                // do texto visível, isso é o que centraliza a bolinha, na prática,
+                // entre a borda superior do nav e o "Avisos" que o olho enxerga.
+                <span className="absolute bottom-full left-1/2 flex h-4 min-w-4 -translate-x-1/2 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold leading-none text-background">
                   {unreadNotifications > 9 ? "9+" : unreadNotifications}
                 </span>
               )}
