@@ -26,16 +26,18 @@ export function CommentNotificationsCard({ scope }: { scope: CommentNotification
 
   return (
     <div className="flex flex-col rounded-[18px] border border-border bg-surface px-4">
-      <div className="flex items-center justify-between gap-3 py-2.5">
+      {/* Rótulo em cima e seletor em linha própria de largura total (cada opção com
+          flex-1): lado a lado, com fonte grande os dois textos estouravam o card. */}
+      <div className="flex flex-col gap-2 py-2.5">
         <span className="text-[calc(13px*var(--font-scale))] text-[#2c2218]">Comentários da família</span>
-        <div className="flex shrink-0 rounded-full border border-border p-0.5">
+        <div className="flex rounded-full border border-border p-0.5">
           {OPTIONS.map((option) => (
             <button
               key={option.value}
               type="button"
               onClick={() => handleSelect(option.value)}
               aria-pressed={current === option.value}
-              className={`rounded-full px-2.5 py-1 text-[calc(11px*var(--font-scale))] font-semibold transition-colors ${
+              className={`min-w-0 flex-1 rounded-full px-2 py-1 text-center text-[calc(11px*var(--font-scale))] font-semibold leading-tight transition-colors ${
                 current === option.value ? "bg-ink text-background" : "text-text-muted"
               }`}
             >

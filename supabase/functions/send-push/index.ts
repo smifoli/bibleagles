@@ -4,14 +4,9 @@
 // manda o Web Push de verdade — é essa função que faz a notificação aparecer
 // no aparelho (inclusive iPhone instalado na Tela de Início), não o insert
 // em si.
-//
-// Título/corpo ficam propositalmente sem o nome do livro (ex: "Gênesis"):
-// isso exigiria duplicar o catálogo de livros de lib/bible-books.ts aqui
-// dentro (Deno não importa fora de supabase/functions/**) só pra um texto de
-// notificação — o conteúdo do comentário já dá contexto, e o toque leva pra
-// referência exata.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3";
+import { BOOK_NAMES_PT } from "./book-names.ts";
 
 const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY")!;
 const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY")!;
@@ -28,12 +23,14 @@ type NotificationType =
   | "comment_on_read_chapter"
   | "comment_on_any_chapter";
 
-const TITLE_BY_TYPE: Record<NotificationType, (actor: string) => string> = {
-  comment_reply: (actor) => `${actor} respondeu seu comentário`,
-  comment_on_thread: (actor) => `${actor} comentou na mesma conversa`,
-  comment_like: (actor) => `${actor} curtiu seu comentário`,
-  comment_on_read_chapter: (actor) => `${actor} comentou num capítulo que você leu`,
-  comment_on_any_chapter: (actor) => `${actor} fez um novo comentário`,
+// `ref` é "João 3:16" (mesmo formato da lista em /notifications) — ou "" se o
+// comentário não foi encontrado, caso em que os títulos ficam sem o "em ...".
+const TITLE_BY_TYPE: Record<NotificationType, (actor: string, ref: string) => string> = {
+  comment_reply: (actor, ref) => `${actor} respondeu seu comentário${ref && ` em ${ref}`}`,
+  comment_on_thread: (actor, ref) => `${actor} comentou na mesma conversa${ref && ` em ${ref}`}`,
+  comment_like: (actor, ref) => `${actor} curtiu seu comentário${ref && ` em ${ref}`}`,
+  comment_on_read_chapter: (actor, ref) => (ref ? `${actor} comentou em ${ref}, que você já leu` : `${actor} comentou num capítulo que você leu`),
+  comment_on_any_chapter: (actor, ref) => `${actor} comentou${ref && ` em ${ref}`}`,
 };
 
 interface WebhookPayload {
@@ -71,7 +68,8 @@ Deno.serve(async (req) => {
   ]);
 
   const actorName = actor?.name ?? "Alguém";
-  const title = (TITLE_BY_TYPE[type] ?? TITLE_BY_TYPE.comment_on_thread)(actorName);
+  const reference = comment ? `${BOOK_NAMES_PT[comment.book] ?? comment.book} ${comment.chapter}:${comment.verse}` : "";
+  const title = (TITLE_BY_TYPE[type] ?? TITLE_BY_TYPE.comment_on_thread)(actorName, reference);
   const body = comment?.content ? (comment.content.length > 120 ? `${comment.content.slice(0, 120)}…` : comment.content) : "";
   const url = comment
     ? `/read/${comment.book}/${comment.chapter}?verse=${comment.verse}&from=${encodeURIComponent("/notifications")}`
