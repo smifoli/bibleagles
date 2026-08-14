@@ -82,7 +82,7 @@ export function PackageStatsView({ stats, canEdit, currentUserId }: { stats: Pac
               </div>
               <ReadingTimeline
                 percent={stats.progressPercent}
-                members={stats.members.map((member) => ({ ...member, late: member.percent < stats.progressPercent }))}
+                members={stats.members}
                 variant="dark"
               />
             </>

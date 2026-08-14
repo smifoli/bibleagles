@@ -28,6 +28,10 @@ export interface PackageMemberStat {
   avatarUrl: string | null;
   completedDays: number;
   isFullyCompleted: boolean;
+  /** Tem algum dia ANTERIOR a hoje ainda não lido — dia por dia, não por contagem:
+   * ler um dia futuro adiantado não compensa um dia passado em falta. Mesmo critério
+   * do card da home, pra ninguém mudar de status entre uma tela e outra. */
+  late: boolean;
   percent: number;
 }
 
@@ -146,13 +150,15 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
   const totalDaysRead = new Set(progressRows.map((row) => row.plan_day_id)).size;
 
   const memberStats: PackageMemberStat[] = members.map((member) => {
-    const completedDays = progressRows.filter((row) => row.user_id === member.id).length;
+    const readDayIds = new Set(progressRows.filter((row) => row.user_id === member.id).map((row) => row.plan_day_id));
+    const completedDays = readDayIds.size;
     return {
       id: member.id,
       name: member.name,
       avatarUrl: member.avatar_url,
       completedDays,
       isFullyCompleted: totalDays > 0 && completedDays === totalDays,
+      late: planDays.some((day) => day.date < today && !readDayIds.has(day.id)),
       percent: totalDays === 0 ? 0 : Math.round((completedDays / totalDays) * 100),
     };
   });

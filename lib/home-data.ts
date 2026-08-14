@@ -10,6 +10,11 @@ export interface FamilyMemberStatus {
   name: string;
   avatarUrl: string | null;
   completed: boolean;
+  /** Tem algum dia ANTERIOR a hoje ainda não lido. "Ainda não leu hoje" não conta
+   * como atraso — senão a família inteira amanheceria "atrasada" todo dia antes da
+   * leitura. Mesmo critério da tela de stats do pacote, pra ninguém mudar de status
+   * entre uma tela e outra. */
+  late: boolean;
   /** % de dias do pacote inteiro (passados, hoje e futuros) que essa pessoa já leu —
    * posição dela na linha do tempo do plano, não só se leu hoje. */
   percent: number;
@@ -120,22 +125,29 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
 
   let featured: FeaturedPackageCardData | null = null;
   if (featuredCard) {
-    const completedTodayIds = new Set(
-      (featuredProgress ?? []).filter((row) => row.plan_day_id === featuredPackage!.planDayId).map((row) => row.user_id)
-    );
-    const completedDaysByMember = new Map<string, number>();
+    const readDayIdsByMember = new Map<string, Set<string>>();
     for (const row of featuredProgress ?? []) {
-      completedDaysByMember.set(row.user_id, (completedDaysByMember.get(row.user_id) ?? 0) + 1);
+      if (!row.plan_day_id) continue;
+      let readDayIds = readDayIdsByMember.get(row.user_id);
+      if (!readDayIds) readDayIdsByMember.set(row.user_id, (readDayIds = new Set()));
+      readDayIds.add(row.plan_day_id);
     }
+    // Dias já vencidos (antes de hoje) — quem deve algum deles está atrasado. O dia
+    // de hoje fica de fora: enquanto ainda é hoje, não ler ainda não é atraso.
+    const pastDueDayIds = featuredPackage!.dueDayIds.filter((id) => id !== featuredPackage!.planDayId);
     featured = {
       ...featuredCard,
-      members: activeFamilyMembers.map((member) => ({
-        id: member.id,
-        name: member.name,
-        avatarUrl: member.avatar_url,
-        completed: completedTodayIds.has(member.id),
-        percent: featuredCard.totalDays > 0 ? Math.round(((completedDaysByMember.get(member.id) ?? 0) / featuredCard.totalDays) * 100) : 0,
-      })),
+      members: activeFamilyMembers.map((member) => {
+        const readDayIds = readDayIdsByMember.get(member.id) ?? new Set<string>();
+        return {
+          id: member.id,
+          name: member.name,
+          avatarUrl: member.avatar_url,
+          completed: readDayIds.has(featuredPackage!.planDayId),
+          late: pastDueDayIds.some((id) => !readDayIds.has(id)),
+          percent: featuredCard.totalDays > 0 ? Math.round((readDayIds.size / featuredCard.totalDays) * 100) : 0,
+        };
+      }),
     };
   }
 

@@ -33,7 +33,7 @@ export function ActivePackageCard({ card }: { card: FeaturedPackageCardData }) {
           </div>
           <ReadingTimeline
             percent={card.percent}
-            members={card.members.map((member) => ({ ...member, late: !member.completed }))}
+            members={card.members}
             variant="dark"
           />
           <div className="text-[calc(11px*var(--font-scale))]">
