@@ -23,6 +23,11 @@ const withPWA = withPWAInit({
     document: "/offline",
   },
   buildExcludes: [/middleware-manifest\.json$/, /app-build-manifest\.json$/],
+  // Handlers de "push"/"notificationclick" (public/push-sw.js) — importScripts
+  // injeta um `importScripts("/push-sw.js")` no topo do sw.js que o Workbox
+  // gera, sem precisar trocar pro modo swSrc/injectManifest (que perderia o
+  // fallback offline configurado acima).
+  importScripts: ["/push-sw.js"],
 });
 
 export default withPWA(nextConfig);

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { NotificationsCard } from "@/components/profile/NotificationsCard";
 import { PreferencesCard } from "@/components/profile/PreferencesCard";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { PushNotificationsCard } from "@/components/profile/PushNotificationsCard";
 import { ReadingCalendar } from "@/components/profile/ReadingCalendar";
 import { SignOutButton } from "@/components/profile/SignOutButton";
 import { BIBLE_VERSIONS } from "@/lib/bible-versions";
@@ -52,6 +53,7 @@ export default async function ProfilePage() {
       <div className="flex flex-col gap-2">
         <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Notificações</div>
         <NotificationsCard enabled={profile.notificationEnabled} time={profile.notificationTime} />
+        <PushNotificationsCard />
       </div>
 
       <div className="flex flex-col gap-2">
