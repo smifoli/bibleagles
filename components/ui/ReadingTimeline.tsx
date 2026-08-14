@@ -36,6 +36,10 @@ function joinNames(names: string[]): string {
   return `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}`;
 }
 
+function firstNameOf(name: string): string {
+  return name.trim().split(/\s+/)[0];
+}
+
 // Clamp em px (via CSS clamp()), não só %, pra um avatar em 0% ou 100% não ficar com
 // metade cortada fora do card — o miolo continua seguindo a % normalmente.
 function clampedLeft(percent: number): string {
@@ -84,6 +88,19 @@ export function ReadingTimeline({ percent, members, variant = "dark" }: ReadingT
   // Só os grupos de fato agrupados (2+) ganham legenda — quem tem posição própria já
   // se identifica pela própria bolinha, não precisa ser nomeado por escrito.
   const clusters = groupList.filter((group) => group.length > 1);
+
+  // A legenda usa só o primeiro nome ("Alessandra", não "Alessandra Figueira
+  // de O. Schmidt") — nome completo volta apenas pra quem divide o primeiro
+  // nome com outra pessoa da timeline, senão a legenda ficaria ambígua.
+  const firstNameCounts = new Map<string, number>();
+  for (const member of members) {
+    const first = firstNameOf(member.name);
+    firstNameCounts.set(first, (firstNameCounts.get(first) ?? 0) + 1);
+  }
+  const legendName = (member: ReadingTimelineMember) => {
+    const first = firstNameOf(member.name);
+    return (firstNameCounts.get(first) ?? 0) > 1 ? member.name : first;
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -146,7 +163,7 @@ export function ReadingTimeline({ percent, members, variant = "dark" }: ReadingT
                 className="text-[calc(11px*var(--font-scale))] font-semibold"
                 style={{ color: isLate ? STATUS_TEXT.late : STATUS_TEXT.onTrack }}
               >
-                {joinNames(group.map((member) => member.name))} · {isLate ? "atrasados" : "em dia"}
+                {joinNames(group.map(legendName))} · {isLate ? "atrasados" : "em dia"}
               </p>
             );
           })}
