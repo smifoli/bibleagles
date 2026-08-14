@@ -1,5 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
-import { toDateOnlyString } from "@/lib/format";
+import { toDateOnlyString, todayDateString } from "@/lib/format";
 import { getDefaultVersion, getVersionByAbbreviation } from "@/lib/bible-versions";
 import type { FontSizePreference, Language, UserRole } from "@/types/database";
 
@@ -81,11 +81,13 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
 }
 
 async function getReadingCalendar(supabase: SupabaseServerClient, userId: string): Promise<ReadingCalendarData> {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth(); // 0-indexed
+  // Ano/mês/dia extraídos de todayDateString() (fuso da família), não de
+  // now.getFullYear()/getMonth()/getDate() — esses usam o fuso do processo
+  // (servidor, em produção, normalmente UTC), que perto do fim da tarde/noite
+  // no Brasil já tinha virado o dia: o calendário marcava o dia errado como "hoje".
+  const [year, monthOneIndexed, today] = todayDateString().split("-").map(Number);
+  const month = monthOneIndexed - 1; // 0-indexed, pro resto da função
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const today = now.getDate();
 
   const monthStart = toDateOnlyString(new Date(year, month, 1));
   const monthEnd = toDateOnlyString(new Date(year, month, daysInMonth));
@@ -116,12 +118,14 @@ async function getReadingCalendar(supabase: SupabaseServerClient, userId: string
     return { day, status };
   });
 
+  const firstOfMonth = new Date(year, month, 1);
+
   // getDay(): 0=domingo..6=sábado. Convertendo pra semana começando na segunda
   // (índice 0), pra bater com os rótulos "S T Q Q S S D" do mockup.
-  const leadingBlanks = (new Date(year, month, 1).getDay() + 6) % 7;
+  const leadingBlanks = (firstOfMonth.getDay() + 6) % 7;
 
   const monthFormatter = new Intl.DateTimeFormat("pt-BR", { month: "long" });
-  const monthNameLower = monthFormatter.format(now);
+  const monthNameLower = monthFormatter.format(firstOfMonth);
   const monthLabel = `${monthNameLower.charAt(0).toUpperCase()}${monthNameLower.slice(1)} ${year}`;
 
   return {

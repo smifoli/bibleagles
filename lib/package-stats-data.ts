@@ -1,5 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
-import { formatShortDate, parseDateOnly, toDateOnlyString } from "@/lib/format";
+import { formatShortDate, parseDateOnly, todayDateString } from "@/lib/format";
 import { passageMatches } from "@/lib/reading-plan";
 import { tryGetBookSummary } from "@/lib/bible-data";
 import { getDefaultVersion } from "@/lib/bible-versions";
@@ -125,7 +125,7 @@ export async function getPackageStats(supabase: SupabaseServerClient, packageId:
   const totalDays = planDays.length;
   const allPassages = planDays.flatMap((day) => day.passages);
 
-  const today = toDateOnlyString();
+  const today = todayDateString();
   const currentDayNumber = totalDays === 0 ? 0 : Math.min(Math.max(planDays.filter((day) => day.date <= today).length, 1), totalDays);
   const daysRemaining = Math.max(totalDays - currentDayNumber, 0);
   const progressPercent = totalDays === 0 ? 0 : Math.round((currentDayNumber / totalDays) * 100);

@@ -1,5 +1,5 @@
 import { getChapter } from "@/lib/bible-data";
-import { formatShortDate, parseDateOnly, toDateOnlyString } from "@/lib/format";
+import { formatShortDate, parseDateOnly, todayDateString } from "@/lib/format";
 import { HIGHLIGHT_COLORS, SAND_HIGHLIGHT, type HighlightColorStyle } from "@/lib/highlight-colors";
 import { passageMatches } from "@/lib/reading-plan";
 import type { createClient } from "@/lib/supabase/server";
@@ -410,7 +410,7 @@ async function getActivePlanContextForChapter(
   const matches = allDays.filter((day) => day.passages.some((passage) => passageMatches(passage, bookId, chapter)));
   if (matches.length === 0) return null;
 
-  const today = toDateOnlyString();
+  const today = todayDateString();
   const dueMatches = matches.filter((day) => day.date <= today);
   const chosen = dueMatches.length > 0 ? dueMatches[dueMatches.length - 1] : matches[0];
 

@@ -1,5 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
-import { toDateOnlyString } from "@/lib/format";
+import { todayDateString } from "@/lib/format";
 import type { Passage } from "@/types/database";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -33,7 +33,7 @@ interface PackageWithDaysRow {
  * `types/database.ts` é escrito à mão e não modela Relationships, então o client
  * tipado não infere o formato do embed — o shape real é o de PackageWithDaysRow. */
 export async function getActivePackagesWithToday(supabase: SupabaseServerClient): Promise<TodayPlanDay[]> {
-  const today = toDateOnlyString();
+  const today = todayDateString();
 
   const { data } = await supabase
     .from("reading_packages")
