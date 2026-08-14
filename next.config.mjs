@@ -16,7 +16,10 @@ const nextConfig = {
 
 const withPWA = withPWAInit({
   dest: "public",
-  register: true,
+  // register: true não funciona em App Router (o next-pwa 5.x injeta o script
+  // de registro na entry "main.js" do Pages Router, que aqui nunca carrega) —
+  // o registro é feito à mão em components/pwa/ServiceWorkerRegistration.tsx.
+  register: false,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
   fallbacks: {

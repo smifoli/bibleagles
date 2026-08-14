@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Spectral } from "next/font/google";
 import { cookies } from "next/headers";
 import { FONT_SIZE_COOKIE, FONT_SIZE_MULTIPLIER, isFontSizePreference } from "@/lib/font-size";
+import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -66,7 +67,10 @@ export default async function RootLayout({
       // que muda com a preferência. Só escala fonte, nada de bordas/ícones.
       style={{ "--font-scale": FONT_SIZE_MULTIPLIER[fontSize] } as React.CSSProperties}
     >
-      <body>{children}</body>
+      <body>
+        <ServiceWorkerRegistration />
+        {children}
+      </body>
     </html>
   );
 }
