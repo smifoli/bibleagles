@@ -21,13 +21,19 @@ webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
 const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
-type NotificationType = "comment_reply" | "comment_on_thread" | "comment_like" | "comment_on_read_chapter";
+type NotificationType =
+  | "comment_reply"
+  | "comment_on_thread"
+  | "comment_like"
+  | "comment_on_read_chapter"
+  | "comment_on_any_chapter";
 
 const TITLE_BY_TYPE: Record<NotificationType, (actor: string) => string> = {
   comment_reply: (actor) => `${actor} respondeu seu comentário`,
   comment_on_thread: (actor) => `${actor} comentou na mesma conversa`,
   comment_like: (actor) => `${actor} curtiu seu comentário`,
   comment_on_read_chapter: (actor) => `${actor} comentou num capítulo que você leu`,
+  comment_on_any_chapter: (actor) => `${actor} fez um novo comentário`,
 };
 
 interface WebhookPayload {

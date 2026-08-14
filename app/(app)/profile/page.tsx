@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CommentNotificationsCard } from "@/components/profile/CommentNotificationsCard";
 import { NotificationsCard } from "@/components/profile/NotificationsCard";
 import { PreferencesCard } from "@/components/profile/PreferencesCard";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
@@ -54,6 +55,7 @@ export default async function ProfilePage() {
         <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Notificações</div>
         <NotificationsCard enabled={profile.notificationEnabled} time={profile.notificationTime} />
         <PushNotificationsCard />
+        <CommentNotificationsCard scope={profile.commentNotificationScope} />
       </div>
 
       <div className="flex flex-col gap-2">

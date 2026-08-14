@@ -10,6 +10,7 @@ const VERB_BY_TYPE: Record<NotificationItemData["type"], string> = {
   comment_on_thread: "comentou em",
   comment_like: "curtiu seu comentário em",
   comment_on_read_chapter: "comentou em",
+  comment_on_any_chapter: "comentou em",
 };
 
 // Só o tipo "leu o capítulo" precisa desse lembrete — os outros já deixam a

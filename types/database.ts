@@ -3,7 +3,14 @@ export type PackageStatus = "draft" | "active" | "archived";
 export type Language = "pt" | "en" | "es" | "de" | "it";
 export type HighlightColor = "yellow" | "green" | "rose" | "blue";
 export type FontSizePreference = "normal" | "large" | "xlarge";
-export type NotificationType = "comment_reply" | "comment_on_thread" | "comment_like" | "comment_on_read_chapter";
+export type NotificationType =
+  | "comment_reply"
+  | "comment_on_thread"
+  | "comment_like"
+  | "comment_on_read_chapter"
+  | "comment_on_any_chapter";
+/** Alcance das notificações de comentários novos: só em capítulos já lidos (padrão) ou em toda a Bíblia. */
+export type CommentNotificationScope = "read_chapters" | "all";
 
 export interface Database {
   public: {
@@ -19,6 +26,7 @@ export interface Database {
           preferred_language: Language;
           notification_enabled: boolean;
           notification_time: string;
+          comment_notification_scope: CommentNotificationScope;
           font_size: FontSizePreference;
           is_deleted: boolean;
           // Última visita a /family — usado só pra marcar o que é "novo" no feed

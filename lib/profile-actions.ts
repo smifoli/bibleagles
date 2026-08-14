@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { FONT_SIZE_COOKIE } from "@/lib/font-size";
-import type { FontSizePreference, Language } from "@/types/database";
+import type { CommentNotificationScope, FontSizePreference, Language } from "@/types/database";
 
 export async function updateProfileName(name: string): Promise<{ error?: string }> {
   const trimmed = name.trim();
@@ -36,6 +36,20 @@ export async function updatePreferences(version: string, language: Language): Pr
     .update({ preferred_version: version, preferred_language: language })
     .eq("id", user.id);
   if (error) return { error: "Não foi possível salvar as preferências." };
+
+  revalidatePath("/profile");
+  return {};
+}
+
+export async function updateCommentNotificationScope(scope: CommentNotificationScope): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await getUser(supabase);
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = await supabase.from("users").update({ comment_notification_scope: scope }).eq("id", user.id);
+  if (error) return { error: "Não foi possível salvar a preferência." };
 
   revalidatePath("/profile");
   return {};
