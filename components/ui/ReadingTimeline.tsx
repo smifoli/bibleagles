@@ -60,16 +60,30 @@ export function ReadingTimeline({ percent, members, variant = "dark" }: ReadingT
 
   // Duas ou mais pessoas no mesmo % (ex.: mesmo tanto de dias lidos) cairiam exatamente
   // na mesma posição — em vez de empilhar avatares individuais, agrupa num marcador
-  // "+N" só, cujo anel reflete o pior status do grupo (um atrasado já marca o grupo).
-  const groups = new Map<number, ReadingTimelineMember[]>();
+  // "+N" só. Agrupa por (percent, late) juntos, não só percent: assim um grupo nunca
+  // mistura status — ninguém em dia sai com o anel/legenda de atrasado (ou vice-versa)
+  // só por coincidir de ter a mesma % de progresso que outra pessoa com status diferente.
+  const groups = new Map<string, ReadingTimelineMember[]>();
   for (const member of members) {
-    const group = groups.get(member.percent);
+    const key = `${member.percent}:${member.late}`;
+    const group = groups.get(key);
     if (group) group.push(member);
-    else groups.set(member.percent, [member]);
+    else groups.set(key, [member]);
   }
+  const groupList = Array.from(groups.values());
+
+  // Dois grupos com status diferente ainda podem cair na mesma %; sem afastar um
+  // do outro, um marcador ficaria escondido embaixo do outro na mesma posição.
+  const groupsByPercent = new Map<number, number>();
+  for (const group of groupList) {
+    const percent = group[0].percent;
+    groupsByPercent.set(percent, (groupsByPercent.get(percent) ?? 0) + 1);
+  }
+  const renderedAtPercent = new Map<number, number>();
+
   // Só os grupos de fato agrupados (2+) ganham legenda — quem tem posição própria já
   // se identifica pela própria bolinha, não precisa ser nomeado por escrito.
-  const clusters = Array.from(groups.values()).filter((group) => group.length > 1);
+  const clusters = groupList.filter((group) => group.length > 1);
 
   return (
     <div className="flex flex-col gap-2">
@@ -81,14 +95,22 @@ export function ReadingTimeline({ percent, members, variant = "dark" }: ReadingT
           <div className={`h-full rounded-full ${colors.fill}`} style={{ width: `${safePercent}%` }} />
         </div>
 
-        {Array.from(groups.entries()).map(([groupPercent, group], index) => {
-          const ringColor = group.some((member) => member.late) ? STATUS_RING.late : STATUS_RING.onTrack;
+        {groupList.map((group, index) => {
+          const groupPercent = group[0].percent;
+          const ringColor = group[0].late ? STATUS_RING.late : STATUS_RING.onTrack;
+
+          const siblingsAtPercent = groupsByPercent.get(groupPercent) ?? 1;
+          const renderedIndex = renderedAtPercent.get(groupPercent) ?? 0;
+          renderedAtPercent.set(groupPercent, renderedIndex + 1);
+          // Espalha simetricamente em torno do centro — 0px se só há um grupo nessa %.
+          const offsetPx = siblingsAtPercent > 1 ? (renderedIndex - (siblingsAtPercent - 1) / 2) * 14 : 0;
+          const left = offsetPx ? `calc(${clampedLeft(groupPercent)} + ${offsetPx}px)` : clampedLeft(groupPercent);
 
           return (
             <div
               key={group[0].id}
               className="absolute -translate-x-1/2"
-              style={{ left: clampedLeft(groupPercent), bottom: BASE_AVATAR_BOTTOM_PX, zIndex: index + 1 }}
+              style={{ left, bottom: BASE_AVATAR_BOTTOM_PX, zIndex: index + 1 }}
             >
               {group.length === 1 ? (
                 <Avatar name={group[0].name} avatarUrl={group[0].avatarUrl} size="sm" borderColor={ringColor} />
@@ -115,7 +137,9 @@ export function ReadingTimeline({ percent, members, variant = "dark" }: ReadingT
       {clusters.length > 0 && (
         <div className="flex flex-col gap-0.5">
           {clusters.map((group) => {
-            const isLate = group.some((member) => member.late);
+            // Grupo já é homogêneo (agrupado por percent *e* late juntos) — todo
+            // membro aqui tem o mesmo status, então o primeiro já representa o resto.
+            const isLate = group[0].late;
             return (
               <p
                 key={group.map((member) => member.id).join("-")}
