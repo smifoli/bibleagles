@@ -96,16 +96,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Dias de pacote ativo com data de hoje (no fuso do usuário) que a pessoa
-    // ainda não marcou como lidos — sem pendência, sem lembrete.
-    const { data: todayDays } = await supabase
+    // Todos os dias já vencidos (até hoje, no fuso do usuário) de pacotes
+    // ativos — o lembrete diz o que ler hoje E o que ficou pra trás, e ainda
+    // dispara pra quem já leu hoje mas deve dias antigos.
+    const { data: dueDays } = await supabase
       .from("reading_plan_days")
-      .select("id, title, reading_packages!inner(status)")
-      .eq("date", localDate)
-      .eq("reading_packages.status", "active");
-    const dayIds = (todayDays ?? []).map((day) => day.id);
+      .select("id, title, date, reading_packages!inner(status)")
+      .lte("date", localDate)
+      .eq("reading_packages.status", "active")
+      .order("date", { ascending: true });
+    const dayIds = (dueDays ?? []).map((day) => day.id);
 
-    let pendingTitles: string[] = [];
+    let todayTitles: string[] = [];
+    let overdueTitles: string[] = [];
     if (dayIds.length > 0) {
       const { data: progress } = await supabase
         .from("reading_progress")
@@ -113,11 +116,13 @@ Deno.serve(async (req) => {
         .eq("user_id", user.id)
         .in("plan_day_id", dayIds);
       const readIds = new Set((progress ?? []).map((row) => row.plan_day_id));
-      pendingTitles = (todayDays ?? []).filter((day) => !readIds.has(day.id)).map((day) => day.title);
+      const pending = (dueDays ?? []).filter((day) => !readIds.has(day.id));
+      todayTitles = pending.filter((day) => day.date === localDate).map((day) => day.title);
+      overdueTitles = pending.filter((day) => day.date < localDate).map((day) => day.title);
     }
 
-    if (pendingTitles.length === 0 && !isTest) {
-      skipped[user.id] = dayIds.length === 0 ? "sem-leitura-hoje" : "ja-leu-hoje";
+    if (todayTitles.length === 0 && overdueTitles.length === 0 && !isTest) {
+      skipped[user.id] = dayIds.length === 0 ? "sem-leitura-hoje" : "em-dia";
       continue;
     }
 
@@ -131,9 +136,19 @@ Deno.serve(async (req) => {
       continue;
     }
 
+    // "Hoje: Atos 11 · Em atraso: Atos 7, Atos 9" — atrasos listados até 3,
+    // depois vira contagem pra o corpo do push não virar um parágrafo.
+    const bodyParts: string[] = [];
+    if (todayTitles.length > 0) bodyParts.push(`Hoje: ${todayTitles.join(" · ")}`);
+    if (overdueTitles.length > 0) {
+      const shown = overdueTitles.slice(0, 3).join(", ");
+      const rest = overdueTitles.length - 3;
+      bodyParts.push(`Em atraso: ${shown}${rest > 0 ? ` e mais ${rest}` : ""}`);
+    }
+
     const message = JSON.stringify({
       title: "Hora da leitura 📖",
-      body: pendingTitles.length > 0 ? `Hoje: ${pendingTitles.join(" · ")}` : "Sua leitura de hoje te espera.",
+      body: bodyParts.length > 0 ? bodyParts.join(" · ") : "Sua leitura de hoje te espera.",
       url: "/",
     });
 
