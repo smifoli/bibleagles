@@ -9,10 +9,11 @@ const OPTIONS: { value: CommentNotificationScope; label: string }[] = [
   { value: "all", label: "Em toda a Bíblia" },
 ];
 
-// Alcance das notificações de comentário novo da família. Respostas, conversas
-// em que você participa e curtidas não passam por aqui — são sempre sobre um
+// Linhas do alcance das notificações de comentário novo, dentro do bloco único
+// de Notificações (NotificationsSettingsCard). Respostas, conversas em que
+// você participa e curtidas não passam por aqui — são sempre sobre um
 // comentário seu, então notificam independente desta escolha.
-export function CommentNotificationsCard({ scope }: { scope: CommentNotificationScope }) {
+export function CommentNotificationRows({ scope }: { scope: CommentNotificationScope }) {
   const [current, setCurrent] = useState(scope);
   const [, startTransition] = useTransition();
 
@@ -25,7 +26,7 @@ export function CommentNotificationsCard({ scope }: { scope: CommentNotification
   }
 
   return (
-    <div className="flex flex-col rounded-[18px] border border-border bg-surface px-4">
+    <>
       {/* Rótulo em cima e seletor em linha própria de largura total (cada opção com
           flex-1): lado a lado, com fonte grande os dois textos estouravam o card. */}
       <div className="flex flex-col gap-2 py-2.5">
@@ -45,12 +46,12 @@ export function CommentNotificationsCard({ scope }: { scope: CommentNotification
             </button>
           ))}
         </div>
+        <p className="text-[calc(12px*var(--font-scale))] leading-[1.5] text-text-secondary">
+          {current === "read_chapters"
+            ? "Você é avisado de comentários novos só em capítulos que já leu. Respostas e curtidas nos seus comentários avisam sempre."
+            : "Você é avisado de qualquer comentário novo da família, mesmo em capítulos que ainda não leu."}
+        </p>
       </div>
-      <div className="border-t border-border py-2.5 text-[calc(12px*var(--font-scale))] leading-[1.5] text-text-secondary">
-        {current === "read_chapters"
-          ? "Você é avisado de comentários novos só em capítulos que já leu. Respostas e curtidas nos seus comentários avisam sempre."
-          : "Você é avisado de qualquer comentário novo da família, mesmo em capítulos que ainda não leu."}
-      </div>
-    </div>
+    </>
   );
 }

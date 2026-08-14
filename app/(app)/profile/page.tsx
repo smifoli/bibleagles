@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChapterReadNotificationsCard } from "@/components/profile/ChapterReadNotificationsCard";
-import { CommentNotificationsCard } from "@/components/profile/CommentNotificationsCard";
-import { NotificationsCard } from "@/components/profile/NotificationsCard";
+import { NotificationsSettingsCard } from "@/components/profile/NotificationsSettingsCard";
 import { PreferencesCard } from "@/components/profile/PreferencesCard";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { PushNotificationsCard } from "@/components/profile/PushNotificationsCard";
 import { ReadingCalendar } from "@/components/profile/ReadingCalendar";
 import { SignOutButton } from "@/components/profile/SignOutButton";
 import { BIBLE_VERSIONS } from "@/lib/bible-versions";
@@ -54,10 +51,12 @@ export default async function ProfilePage() {
 
       <div className="flex flex-col gap-2">
         <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">Notificações</div>
-        <NotificationsCard enabled={profile.notificationEnabled} time={profile.notificationTime} />
-        <PushNotificationsCard />
-        <CommentNotificationsCard scope={profile.commentNotificationScope} />
-        <ChapterReadNotificationsCard enabled={profile.chapterReadNotifications} />
+        <NotificationsSettingsCard
+          reminderEnabled={profile.notificationEnabled}
+          reminderTime={profile.notificationTime}
+          commentScope={profile.commentNotificationScope}
+          chapterReadEnabled={profile.chapterReadNotifications}
+        />
       </div>
 
       <div className="flex flex-col gap-2">

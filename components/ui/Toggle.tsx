@@ -5,7 +5,7 @@ export interface ToggleProps {
   ariaLabel?: string;
 }
 
-// Padrão já usado em components/profile/NotificationsCard.tsx, extraído aqui como componente reutilizável.
+// Padrão do switch do perfil (hoje em NotificationsSettingsCard e afins), extraído como componente reutilizável.
 export function Toggle({ checked, onChange, disabled = false, ariaLabel }: ToggleProps) {
   return (
     <button

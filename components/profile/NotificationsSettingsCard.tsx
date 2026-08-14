@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ChapterReadNotificationRow } from "@/components/profile/ChapterReadNotificationRow";
+import { CommentNotificationRows } from "@/components/profile/CommentNotificationRows";
+import { DailyReminderRows } from "@/components/profile/DailyReminderRows";
 import { Toggle } from "@/components/ui/Toggle";
 import { deletePushSubscription, savePushSubscription } from "@/lib/push-actions";
 import {
@@ -13,16 +16,30 @@ import {
   subscriptionToRow,
   unsubscribeFromPush,
 } from "@/lib/push-subscribe";
+import type { CommentNotificationScope } from "@/types/database";
 
 type Status = "checking" | "unsupported" | "sw-unavailable" | "ios-install" | "denied" | "off" | "on" | "saving";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
-// Cartão separado do "Lembrete diário" (NotificationsCard) — aquele é uma
-// preferência de horário salva no perfil; este é a permissão de push de
-// verdade do navegador/aparelho, específica de cada dispositivo (por isso o
-// estado vem do próprio PushManager, não de uma coluna em users).
-export function PushNotificationsCard() {
+interface NotificationsSettingsCardProps {
+  reminderEnabled: boolean;
+  reminderTime: string; // "HH:MM"
+  commentScope: CommentNotificationScope;
+  chapterReadEnabled: boolean;
+}
+
+// Bloco único da seção Notificações do perfil. A linha de cima é a permissão
+// de push deste aparelho (estado vem do próprio PushManager, específico de
+// cada dispositivo — não de uma coluna em users); as demais preferências
+// (lembrete diário, comentários, leituras) só aparecem com o push ativo,
+// porque sem inscrição de push nenhuma delas chega mesmo.
+export function NotificationsSettingsCard({
+  reminderEnabled,
+  reminderTime,
+  commentScope,
+  chapterReadEnabled,
+}: NotificationsSettingsCardProps) {
   const [status, setStatus] = useState<Status>("checking");
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +113,11 @@ export function PushNotificationsCard() {
     setStatus("off");
   }
 
+  // "saving" com inscrição existente = desativando (mantém as linhas até
+  // concluir); "saving" ainda sem inscrição = ativando (só mostra depois que
+  // der certo, senão as opções piscariam numa ativação que falhou).
+  const showSettings = status === "on" || (status === "saving" && subscription !== null);
+
   return (
     <div className="flex flex-col rounded-[18px] border border-border bg-surface px-4">
       <div className="flex items-center justify-between py-2.5">
@@ -141,6 +163,17 @@ export function PushNotificationsCard() {
 
       {error ? (
         <div className="border-t border-border py-2.5 text-[calc(12px*var(--font-scale))] text-error">{error}</div>
+      ) : null}
+
+      {showSettings ? (
+        <>
+          <div className="h-px bg-border" />
+          <DailyReminderRows enabled={reminderEnabled} time={reminderTime} />
+          <div className="h-px bg-border" />
+          <CommentNotificationRows scope={commentScope} />
+          <div className="h-px bg-border" />
+          <ChapterReadNotificationRow enabled={chapterReadEnabled} />
+        </>
       ) : null}
     </div>
   );
