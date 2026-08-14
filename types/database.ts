@@ -8,7 +8,8 @@ export type NotificationType =
   | "comment_on_thread"
   | "comment_like"
   | "comment_on_read_chapter"
-  | "comment_on_any_chapter";
+  | "comment_on_any_chapter"
+  | "chapter_read";
 /** Alcance das notificações de comentários novos: só em capítulos já lidos (padrão) ou em toda a Bíblia. */
 export type CommentNotificationScope = "read_chapters" | "all";
 
@@ -27,6 +28,8 @@ export interface Database {
           notification_enabled: boolean;
           notification_time: string;
           comment_notification_scope: CommentNotificationScope;
+          // Avisar quando alguém da família marcar um capítulo como lido.
+          chapter_read_notifications: boolean;
           // Fuso IANA do último aparelho usado (TimezoneSync) — o lembrete
           // diário (cron, sem cookie de ninguém) lê daqui.
           timezone: string;
@@ -136,7 +139,11 @@ export interface Database {
           recipient_id: string;
           actor_id: string;
           type: NotificationType;
-          comment_id: string;
+          // Tipos de comentário carregam comment_id; chapter_read carrega
+          // book+chapter (ver notifications_payload_check na migration).
+          comment_id: string | null;
+          book: string | null;
+          chapter: number | null;
           read_at: string | null;
           created_at: string;
         };

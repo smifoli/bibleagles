@@ -55,6 +55,20 @@ export async function updateCommentNotificationScope(scope: CommentNotificationS
   return {};
 }
 
+export async function updateChapterReadNotifications(enabled: boolean): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await getUser(supabase);
+  if (!user) return { error: "Sessão expirada." };
+
+  const { error } = await supabase.from("users").update({ chapter_read_notifications: enabled }).eq("id", user.id);
+  if (error) return { error: "Não foi possível salvar a preferência." };
+
+  revalidatePath("/profile");
+  return {};
+}
+
 export async function updateNotifications(enabled: boolean, time: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const {

@@ -21,7 +21,8 @@ type NotificationType =
   | "comment_on_thread"
   | "comment_like"
   | "comment_on_read_chapter"
-  | "comment_on_any_chapter";
+  | "comment_on_any_chapter"
+  | "chapter_read";
 
 // O iOS corta o título de push com ~30 e poucos caracteres ("Kevin Schmidt
 // comentou em At…"), então o título carrega só o essencial — primeiro nome e
@@ -33,6 +34,7 @@ const ACTION_BY_TYPE: Record<NotificationType, string> = {
   comment_like: "Curtiu seu comentário",
   comment_on_read_chapter: "Comentou num capítulo que você leu",
   comment_on_any_chapter: "Comentou",
+  chapter_read: "Leu este capítulo",
 };
 
 interface WebhookPayload {
@@ -40,7 +42,10 @@ interface WebhookPayload {
   recipient_id: string;
   actor_id: string;
   type: NotificationType;
-  comment_id: string;
+  // Tipos de comentário carregam comment_id; chapter_read carrega book+chapter.
+  comment_id: string | null;
+  book: string | null;
+  chapter: number | null;
 }
 
 Deno.serve(async (req) => {
@@ -66,18 +71,30 @@ Deno.serve(async (req) => {
 
   const [{ data: actor }, { data: comment }] = await Promise.all([
     supabase.from("users").select("name").eq("id", actor_id).single(),
-    supabase.from("comments").select("book, chapter, verse, content").eq("id", comment_id).single(),
+    comment_id
+      ? supabase.from("comments").select("book, chapter, verse, content").eq("id", comment_id).single()
+      : Promise.resolve({ data: null }),
   ]);
 
   const firstName = (actor?.name ?? "Alguém").trim().split(/\s+/)[0];
-  const reference = comment ? `${BOOK_NAMES_PT[comment.book] ?? comment.book} ${comment.chapter}:${comment.verse}` : "";
+
+  // chapter_read referencia só o capítulo ("Atos 11"); tipos de comentário
+  // apontam o versículo exato ("Atos 11:26") e levam o conteúdo no corpo.
+  let reference = "";
+  let content = "";
+  let url = "/notifications";
+  if (type === "chapter_read" && payload.book && payload.chapter) {
+    reference = `${BOOK_NAMES_PT[payload.book] ?? payload.book} ${payload.chapter}`;
+    url = `/read/${payload.book}/${payload.chapter}?from=${encodeURIComponent("/notifications")}`;
+  } else if (comment) {
+    reference = `${BOOK_NAMES_PT[comment.book] ?? comment.book} ${comment.chapter}:${comment.verse}`;
+    content = comment.content ? (comment.content.length > 120 ? `${comment.content.slice(0, 120)}…` : comment.content) : "";
+    url = `/read/${comment.book}/${comment.chapter}?verse=${comment.verse}&from=${encodeURIComponent("/notifications")}`;
+  }
+
   const title = reference ? `${firstName} · ${reference}` : firstName;
   const action = ACTION_BY_TYPE[type] ?? ACTION_BY_TYPE.comment_on_thread;
-  const content = comment?.content ? (comment.content.length > 120 ? `${comment.content.slice(0, 120)}…` : comment.content) : "";
   const body = content ? `${action}: “${content}”` : action;
-  const url = comment
-    ? `/read/${comment.book}/${comment.chapter}?verse=${comment.verse}&from=${encodeURIComponent("/notifications")}`
-    : "/notifications";
 
   const message = JSON.stringify({ title, body, url });
 

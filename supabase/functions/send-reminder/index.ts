@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
     }
 
     const message = JSON.stringify({
-      title: "Hora da leitura 📖",
+      title: "Hora de ler 📖",
       body: bodyParts.length > 0 ? bodyParts.join(" · ") : "Sua leitura de hoje te espera.",
       url: "/",
     });

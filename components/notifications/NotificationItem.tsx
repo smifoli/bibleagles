@@ -11,6 +11,7 @@ const VERB_BY_TYPE: Record<NotificationItemData["type"], string> = {
   comment_like: "curtiu seu comentário em",
   comment_on_read_chapter: "comentou em",
   comment_on_any_chapter: "comentou em",
+  chapter_read: "leu",
 };
 
 // Só o tipo "leu o capítulo" precisa desse lembrete — os outros já deixam a
@@ -21,8 +22,13 @@ const SUFFIX_BY_TYPE: Partial<Record<NotificationItemData["type"], string>> = {
 };
 
 export function NotificationItem({ item }: { item: NotificationItemData }) {
-  const reference = `${item.bookName} ${item.chapter}:${item.verse}`;
-  const href = `/read/${item.book}/${item.chapter}?version=${item.version}&verse=${item.verse}&from=${encodeURIComponent("/notifications")}`;
+  // chapter_read (verse null) referencia o capítulo inteiro ("Atos 11") e abre
+  // o leitor sem fixar versículo nem versão — vale a preferida de quem clica.
+  const reference = item.verse !== null ? `${item.bookName} ${item.chapter}:${item.verse}` : `${item.bookName} ${item.chapter}`;
+  const params = new URLSearchParams({ from: "/notifications" });
+  if (item.version !== null) params.set("version", item.version);
+  if (item.verse !== null) params.set("verse", String(item.verse));
+  const href = `/read/${item.book}/${item.chapter}?${params.toString()}`;
 
   return (
     <Link
@@ -43,9 +49,11 @@ export function NotificationItem({ item }: { item: NotificationItemData }) {
           <span className="text-link">{reference}</span>
           {SUFFIX_BY_TYPE[item.type]}
         </div>
-        <div className="mt-0.5 truncate font-serif text-[calc(13px*var(--font-scale))] italic text-text-muted">
-          &quot;{item.commentContent}&quot;
-        </div>
+        {item.commentContent !== null && (
+          <div className="mt-0.5 truncate font-serif text-[calc(13px*var(--font-scale))] italic text-text-muted">
+            &quot;{item.commentContent}&quot;
+          </div>
+        )}
         <div className="mt-px text-[calc(11px*var(--font-scale))] text-[#a3927d]">{formatRelativeTime(new Date(item.createdAt))}</div>
       </div>
     </Link>

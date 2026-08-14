@@ -17,6 +17,7 @@ export interface ProfileUser {
   notificationEnabled: boolean;
   notificationTime: string; // "HH:MM"
   commentNotificationScope: CommentNotificationScope;
+  chapterReadNotifications: boolean;
   fontSize: FontSizePreference;
 }
 
@@ -50,7 +51,7 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
     supabase
       .from("users")
       .select(
-        "id, name, email, role, avatar_url, preferred_version, preferred_language, notification_enabled, notification_time, comment_notification_scope, font_size"
+        "id, name, email, role, avatar_url, preferred_version, preferred_language, notification_enabled, notification_time, comment_notification_scope, chapter_read_notifications, font_size"
       )
       .eq("id", userId)
       .single(),
@@ -77,6 +78,7 @@ export async function getProfileData(supabase: SupabaseServerClient, userId: str
     notificationEnabled: userRow?.notification_enabled ?? false,
     notificationTime: (userRow?.notification_time ?? "07:00:00").slice(0, 5),
     commentNotificationScope: userRow?.comment_notification_scope ?? "read_chapters",
+    chapterReadNotifications: userRow?.chapter_read_notifications ?? true,
     fontSize: userRow?.font_size ?? "normal",
   };
 

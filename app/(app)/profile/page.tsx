@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ChapterReadNotificationsCard } from "@/components/profile/ChapterReadNotificationsCard";
 import { CommentNotificationsCard } from "@/components/profile/CommentNotificationsCard";
 import { NotificationsCard } from "@/components/profile/NotificationsCard";
 import { PreferencesCard } from "@/components/profile/PreferencesCard";
@@ -56,6 +57,7 @@ export default async function ProfilePage() {
         <NotificationsCard enabled={profile.notificationEnabled} time={profile.notificationTime} />
         <PushNotificationsCard />
         <CommentNotificationsCard scope={profile.commentNotificationScope} />
+        <ChapterReadNotificationsCard enabled={profile.chapterReadNotifications} />
       </div>
 
       <div className="flex flex-col gap-2">
