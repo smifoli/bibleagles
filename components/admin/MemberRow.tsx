@@ -23,6 +23,7 @@ export function MemberRow({
 }) {
   const [error, setError] = useState<string>();
   const [confirmingRemove, setConfirmingRemove] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const isAdmin = member.role === "admin";
@@ -53,38 +54,89 @@ export function MemberRow({
           <div className="truncate text-[calc(11px*var(--font-scale))] text-text-muted">{member.email}</div>
           {error ? <div className="mt-0.5 text-[calc(11px*var(--font-scale))] text-error">{error}</div> : null}
         </div>
-        <span
-          className={
-            isAdmin
-              ? "shrink-0 whitespace-nowrap rounded-full bg-[rgba(44,34,24,0.1)] px-2.5 py-1 text-[calc(10px*var(--font-scale))] font-semibold text-ink"
-              : "shrink-0 whitespace-nowrap rounded-full bg-[#ece3d6] px-2.5 py-1 text-[calc(10px*var(--font-scale))] font-semibold text-text-muted"
-          }
-        >
-          {isAdmin ? "Admin" : "Membro"}
-        </span>
-        {isSelf ? null : (
-          <div className="flex shrink-0 flex-col items-end gap-1">
-            {!(isAdmin && isSelf) && (
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span
+            className={
+              isAdmin
+                ? "whitespace-nowrap rounded-full bg-[rgba(44,34,24,0.1)] px-2.5 py-1 text-[calc(10px*var(--font-scale))] font-semibold text-ink"
+                : "whitespace-nowrap rounded-full bg-[#ece3d6] px-2.5 py-1 text-[calc(10px*var(--font-scale))] font-semibold text-text-muted"
+            }
+          >
+            {isAdmin ? "Admin" : "Membro"}
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowNotifications((value) => !value)}
+            className={`whitespace-nowrap text-[calc(12px*var(--font-scale))] ${member.pushActive ? "text-ink" : "text-link"}`}
+          >
+            {member.pushActive ? "Notificações ativas" : "Notificações"} ▾
+          </button>
+          {isSelf ? null : (
+            <>
+              {!(isAdmin && isSelf) && (
+                <button
+                  type="button"
+                  onClick={handleToggle}
+                  disabled={isPending}
+                  className="whitespace-nowrap text-[calc(12px*var(--font-scale))] text-link disabled:opacity-60"
+                >
+                  {isAdmin ? "Remover Admin" : "Tornar Admin"} ▾
+                </button>
+              )}
               <button
                 type="button"
-                onClick={handleToggle}
+                onClick={() => setConfirmingRemove(true)}
                 disabled={isPending}
-                className="whitespace-nowrap text-[calc(12px*var(--font-scale))] text-link disabled:opacity-60"
+                className="whitespace-nowrap text-[calc(12px*var(--font-scale))] text-error disabled:opacity-60"
               >
-                {isAdmin ? "Remover Admin" : "Tornar Admin"} ▾
+                Remover membro
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setConfirmingRemove(true)}
-              disabled={isPending}
-              className="whitespace-nowrap text-[calc(12px*var(--font-scale))] text-error disabled:opacity-60"
-            >
-              Remover membro
-            </button>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
+
+      {showNotifications && (
+        <div className="mt-2.5 flex flex-col gap-1.5 rounded-[12px] border border-border bg-background p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[calc(12px*var(--font-scale))] text-text-secondary">Push</span>
+            <span
+              className={`text-[calc(12px*var(--font-scale))] font-semibold ${member.pushActive ? "text-ink" : "text-text-muted"}`}
+            >
+              {member.pushActive
+                ? `Ativo (${member.pushDeviceCount} aparelho${member.pushDeviceCount > 1 ? "s" : ""})`
+                : "Inativo"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[calc(12px*var(--font-scale))] text-text-secondary">Lembrete diário</span>
+            <span
+              className={`text-[calc(12px*var(--font-scale))] font-semibold ${member.reminderEnabled ? "text-ink" : "text-text-muted"}`}
+            >
+              {member.reminderEnabled ? member.reminderTime : "Desativado"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[calc(12px*var(--font-scale))] text-text-secondary">Comentários da família</span>
+            <span className="text-[calc(12px*var(--font-scale))] font-semibold text-ink">
+              {member.commentScope === "all" ? "Toda a Bíblia" : "Só onde já leu"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[calc(12px*var(--font-scale))] text-text-secondary">Quando alguém lê um capítulo</span>
+            <span
+              className={`text-[calc(12px*var(--font-scale))] font-semibold ${member.chapterReadEnabled ? "text-ink" : "text-text-muted"}`}
+            >
+              {member.chapterReadEnabled ? "Ativado" : "Desativado"}
+            </span>
+          </div>
+          {!member.pushActive && (
+            <p className="text-[calc(11px*var(--font-scale))] leading-[1.4] text-text-muted">
+              Sem push ativo em nenhum aparelho, essas preferências ficam salvas mas não chegam a notificar ninguém.
+            </p>
+          )}
+        </div>
+      )}
 
       {confirmingRemove && (
         <div className="mt-2.5 flex flex-col gap-2 rounded-[12px] border border-border bg-background p-3">
