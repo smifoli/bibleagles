@@ -94,6 +94,7 @@ export default async function ReaderPage({
       backPath={searchParams.from}
       prevHref={prevHref}
       nextHref={nextHref}
+      bookChapterCount={currentBookSummary?.chapterCount ?? chapter}
     />
   );
 }

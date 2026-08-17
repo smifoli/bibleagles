@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { AutoResizeTextarea } from "@/components/ui/AutoResizeTextarea";
+import { getBookMeta, NEW_TESTAMENT_SECTIONS, OLD_TESTAMENT_SECTIONS } from "@/lib/bible-books";
 import type { BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
@@ -24,6 +25,23 @@ import {
 } from "@/lib/reader-actions";
 import type { ReaderComment, ReaderData } from "@/lib/reader-data";
 import type { HighlightColor } from "@/types/database";
+
+// Seta do seletor livro/capítulo (ver BookChapterBar) — aponta pra baixo fechado,
+// vira de cabeça pra baixo aberto. Mesmo idioma visual do "+" que gira 45° no
+// overview de engajamento (chapterOverviewOpen), só que com um chevron de verdade.
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      fill="none"
+      style={{ width: "calc(13px * var(--font-scale))", height: "calc(13px * var(--font-scale))" }}
+      className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+    >
+      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 // "N comentários" e "N destaques" ficam cada um numa unidade que não quebra
 // linha no meio (whitespace-nowrap) — se precisar quebrar por falta de espaço,
@@ -58,6 +76,8 @@ interface ReaderViewProps {
   backPath?: string;
   prevHref: string | null;
   nextHref: string | null;
+  /** Total de capítulos do livro atual (nesta versão) — alcance do grid do seletor de capítulo. */
+  bookChapterCount: number;
 }
 
 export function ReaderView({
@@ -72,12 +92,15 @@ export function ReaderView({
   backPath,
   prevHref,
   nextHref,
+  bookChapterCount,
 }: ReaderViewProps) {
   const router = useRouter();
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const [verseFontSize, setVerseFontSize] = useState(initialVerseFontSize);
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
   const [chapterOverviewOpen, setChapterOverviewOpen] = useState(false);
+  const [picker, setPicker] = useState<"book" | "chapter" | null>(null);
+  const pickerPanelRef = useRef<HTMLDivElement | null>(null);
   const [expandedParticipantId, setExpandedParticipantId] = useState<string | null>(null);
   const [commentDraft, setCommentDraft] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -157,6 +180,25 @@ export function ReaderView({
       ? `${backPath}?version=${version}`
       : backPath
     : `/bible/${book}?version=${version}`;
+
+  // Seletor livro/capítulo da barra fixa (ver BookChapterBar mais abaixo): pula
+  // direto pro capítulo escolhido sem sair da tela de leitura. Preserva `from`
+  // igual buildChapterHref (page.tsx) faz pro anterior/próximo, pra "voltar"
+  // continuar apontando pro mesmo lugar depois do salto.
+  function navigateToChapter(targetBook: string, targetChapter: number) {
+    const params = new URLSearchParams({ version });
+    if (backPath) params.set("from", backPath);
+    setPicker(null);
+    router.push(`/read/${targetBook}/${targetChapter}?${params.toString()}`);
+  }
+
+  // Ao abrir o seletor, rola até o livro/capítulo atual dentro do painel — evita
+  // que a pessoa precise caçar manualmente entre 66 livros ou dezenas de capítulos.
+  useEffect(() => {
+    if (!picker) return;
+    const current = pickerPanelRef.current?.querySelector('[data-current="true"]');
+    current?.scrollIntoView({ block: "center" });
+  }, [picker]);
 
   function handleVersionChange(next: string) {
     const url = new URL(window.location.href);
@@ -480,8 +522,22 @@ export function ReaderView({
             ←
           </Link>
           <div>
+            {/* Livro e capítulo viram dois links separados — toque no livro pra trocar de
+                livro (lista completa em /bible), toque no capítulo pra trocar só de capítulo
+                dentro deste livro (grade em /bible/[book]) — em vez de texto estático. */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">{data.reference}</span>
+              <Link
+                href={`/bible?version=${version}`}
+                className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary active:opacity-60"
+              >
+                {bookName}
+              </Link>
+              <Link
+                href={`/bible/${book}?version=${version}`}
+                className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary active:opacity-60"
+              >
+                {chapter}
+              </Link>
               <button
                 type="button"
                 onClick={isReadOptimistic ? handleUnmarkAsRead : handleMarkAsRead}
@@ -690,10 +746,82 @@ export function ReaderView({
         </div>
       )}
 
-      {/* Fixo no topo da tela ao rolar pelos versos — lembrete de qual livro/capítulo
-          está aberto, pra não confundir com outro capítulo enquanto lê. */}
-      <div className="sticky top-0 z-10 -mx-[18px] bg-background px-[18px] py-1.5 text-[calc(11px*var(--font-scale))] font-semibold text-text-muted">
-        {data.reference}
+      {/* Fixo no topo da tela ao rolar pelos versos — além de lembrete de qual livro/
+          capítulo está aberto, livro e capítulo são botões: cada um abre um seletor
+          rápido (lista de livros / grade de capítulos deste livro) sem sair da leitura. */}
+      <div className="sticky top-0 z-20 -mx-[18px] bg-background px-[18px] py-2">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPicker((current) => (current === "book" ? null : "book"))}
+            aria-expanded={picker === "book"}
+            className="inline-flex items-center gap-1 rounded-full border border-[#d4c5ac] bg-surface px-3 py-1.5 text-[calc(14px*var(--font-scale))] font-semibold text-ink transition-transform active:scale-95"
+          >
+            {bookName}
+            <ChevronIcon open={picker === "book"} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setPicker((current) => (current === "chapter" ? null : "chapter"))}
+            aria-expanded={picker === "chapter"}
+            className="inline-flex items-center gap-1 rounded-full border border-[#d4c5ac] bg-surface px-3 py-1.5 text-[calc(14px*var(--font-scale))] font-semibold text-ink transition-transform active:scale-95"
+          >
+            {chapter}
+            <ChevronIcon open={picker === "chapter"} />
+          </button>
+        </div>
+
+        {picker && (
+          <div ref={pickerPanelRef} className="mt-1.5 max-h-[60vh] overflow-y-auto rounded-[14px] border border-border bg-surface p-3 shadow-sm">
+            {picker === "book" ? (
+              <div className="flex flex-col gap-3">
+                {[...OLD_TESTAMENT_SECTIONS, ...NEW_TESTAMENT_SECTIONS].map((section) => (
+                  <div key={section.label}>
+                    <div className="mb-1 px-2.5 text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
+                      {section.label}
+                    </div>
+                    <div className="flex flex-col">
+                      {section.books.map((sectionBookId) => {
+                        const meta = getBookMeta(sectionBookId);
+                        if (!meta) return null;
+                        const isCurrent = sectionBookId === book;
+                        return (
+                          <button
+                            key={sectionBookId}
+                            type="button"
+                            data-current={isCurrent || undefined}
+                            onClick={() => navigateToChapter(sectionBookId, 1)}
+                            className={`rounded-[10px] px-2.5 py-2 text-left text-[calc(14px*var(--font-scale))] transition-transform active:scale-[0.98] ${
+                              isCurrent ? "bg-canvas font-semibold text-ink" : "text-text-secondary"
+                            }`}
+                          >
+                            {meta.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-5 gap-2">
+                {Array.from({ length: bookChapterCount }, (_, index) => index + 1).map((chapterOption) => (
+                  <button
+                    key={chapterOption}
+                    type="button"
+                    data-current={chapterOption === chapter || undefined}
+                    onClick={() => navigateToChapter(book, chapterOption)}
+                    className={`rounded-[10px] border py-2.5 text-center text-[calc(13px*var(--font-scale))] font-semibold transition-transform active:scale-[0.94] ${
+                      chapterOption === chapter ? "border-ink bg-ink text-background" : "border-border bg-background text-text-primary"
+                    }`}
+                  >
+                    {chapterOption}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
