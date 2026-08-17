@@ -53,6 +53,16 @@ export const BIBLE_VERSIONS: BibleVersion[] = [
   { abbreviation: "KJV", name: "King James Version", language: "en", source: { provider: "api.bible", bibleId: "de4e12af7f28f599-02" } },
 ];
 
+// Nome de exibição de cada idioma — usado em qualquer lugar que agrupe/rotule
+// versões por idioma (perfil, seletor de versão do leitor).
+export const LANGUAGE_LABELS: Record<Language, string> = {
+  pt: "Português",
+  en: "English",
+  es: "Español",
+  de: "Deutsch",
+  it: "Italiano",
+};
+
 export function getVersionByAbbreviation(abbreviation: string): BibleVersion | undefined {
   return BIBLE_VERSIONS.find((version) => version.abbreviation === abbreviation);
 }

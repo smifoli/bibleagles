@@ -1,18 +1,10 @@
 "use client";
 
 import { type ReactNode, useState, useTransition } from "react";
-import type { BibleVersion } from "@/lib/bible-versions";
+import { LANGUAGE_LABELS, type BibleVersion } from "@/lib/bible-versions";
 import { FONT_SIZE_LABELS, FONT_SIZE_ORDER } from "@/lib/font-size";
 import { updateFontSize, updatePreferences } from "@/lib/profile-actions";
 import type { FontSizePreference, Language } from "@/types/database";
-
-const LANGUAGE_LABELS: Record<Language, string> = {
-  pt: "Português",
-  en: "English",
-  es: "Español",
-  de: "Deutsch",
-  it: "Italiano",
-};
 
 interface PreferencesCardProps {
   version: string;
@@ -23,7 +15,6 @@ interface PreferencesCardProps {
 }
 
 export function PreferencesCard({ version, language, versions, languages, fontSize }: PreferencesCardProps) {
-  const [currentVersion, setCurrentVersion] = useState(version);
   const [currentLanguage, setCurrentLanguage] = useState(language);
   const [currentFontSize, setCurrentFontSize] = useState(fontSize);
   const [, startTransition] = useTransition();
@@ -40,46 +31,22 @@ export function PreferencesCard({ version, language, versions, languages, fontSi
     });
   }
 
-  const versionsForLanguage = versions.filter((item) => item.language === currentLanguage);
-  const safeVersion = versionsForLanguage.some((item) => item.abbreviation === currentVersion)
-    ? currentVersion
-    : versionsForLanguage[0]?.abbreviation ?? currentVersion;
-
-  function save(nextVersion: string, nextLanguage: Language) {
-    startTransition(async () => {
-      await updatePreferences(nextVersion, nextLanguage);
-    });
-  }
-
-  function handleVersionChange(next: string) {
-    setCurrentVersion(next);
-    save(next, currentLanguage);
-  }
-
+  // Versão padrão não tem mais seletor próprio aqui — o seletor de versão do
+  // próprio leitor (ver "version" em ReaderView) já salva a versão atual como
+  // novo padrão a cada troca, então essa escolha ficou redundante. Trocar de
+  // idioma ainda precisa mandar uma versão junto (preferred_version é campo
+  // obrigatório na tabela) — usa a versão padrão desse idioma.
   function handleLanguageChange(next: Language) {
     const options = versions.filter((item) => item.language === next);
-    const nextVersion = options.find((item) => item.isDefault)?.abbreviation ?? options[0]?.abbreviation ?? currentVersion;
+    const nextVersion = options.find((item) => item.isDefault)?.abbreviation ?? options[0]?.abbreviation ?? version;
     setCurrentLanguage(next);
-    setCurrentVersion(nextVersion);
-    save(nextVersion, next);
+    startTransition(async () => {
+      await updatePreferences(nextVersion, next);
+    });
   }
 
   return (
     <div className="flex flex-col rounded-[18px] border border-border bg-surface px-4">
-      <Row label="Versão padrão">
-        <select
-          value={safeVersion}
-          onChange={(event) => handleVersionChange(event.target.value)}
-          className="rounded-[10px] border border-border bg-surface px-3 py-1.5 text-[calc(12px*var(--font-scale))] text-ink"
-        >
-          {versionsForLanguage.map((item) => (
-            <option key={item.abbreviation} value={item.abbreviation}>
-              {item.abbreviation}
-            </option>
-          ))}
-        </select>
-      </Row>
-      <div className="h-px bg-border" />
       <Row label="Idioma">
         <select
           value={currentLanguage}
