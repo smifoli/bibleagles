@@ -46,6 +46,13 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
+  // Sem isso, o teclado virtual só encolhe a "visual viewport" (resizes-visual,
+  // padrão) — a layout viewport, onde o BottomNav `fixed` (bottom: 0) se ancora,
+  // não muda de tamanho, e é isso que faz elementos fixos "flutuarem"/pularem de
+  // posição quando o teclado abre (bug clássico de iOS/Android). resizes-content
+  // encolhe a própria layout viewport junto com o teclado, então o BottomNav
+  // continua colado no fundo do que está visível, sem pulo.
+  interactiveWidget: "resizes-content",
 };
 
 export default async function RootLayout({
