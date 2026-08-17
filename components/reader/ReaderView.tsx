@@ -74,7 +74,7 @@ export function ReaderView({
   nextHref,
 }: ReaderViewProps) {
   const router = useRouter();
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const [verseFontSize, setVerseFontSize] = useState(initialVerseFontSize);
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
   const [chapterOverviewOpen, setChapterOverviewOpen] = useState(false);
@@ -195,18 +195,28 @@ export function ReaderView({
 
   // Navegação por gesto: arrasta pra direita volta um capítulo, pra
   // esquerda avança — só dispara se o gesto for majoritariamente horizontal,
-  // pra não brigar com o scroll vertical da página.
+  // rápido (um "flick") e não pra não brigar com o scroll vertical da
+  // página nem com a seleção de texto (que é um arrasto lento e demorado).
   const SWIPE_THRESHOLD_PX = 60;
+  const SWIPE_MAX_DURATION_MS = 400;
 
   function handleTouchStart(event: React.TouchEvent) {
     const touch = event.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
   }
 
   function handleTouchEnd(event: React.TouchEvent) {
     const start = touchStartRef.current;
     touchStartRef.current = null;
     if (!start) return;
+
+    // Se o usuário está selecionando texto, o toque terminou em seleção —
+    // não interpreta como swipe de navegação.
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) return;
+
+    const elapsed = Date.now() - start.time;
+    if (elapsed > SWIPE_MAX_DURATION_MS) return;
 
     const touch = event.changedTouches[0];
     const deltaX = touch.clientX - start.x;
