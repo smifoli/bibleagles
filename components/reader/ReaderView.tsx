@@ -2,14 +2,23 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { AutoResizeTextarea } from "@/components/ui/AutoResizeTextarea";
 import { getBookMeta, NEW_TESTAMENT_SECTIONS, OLD_TESTAMENT_SECTIONS } from "@/lib/bible-books";
-import type { BibleVersion } from "@/lib/bible-versions";
+import { LANGUAGE_LABELS, type BibleVersion } from "@/lib/bible-versions";
 import { formatRelativeTime } from "@/lib/format";
 import { HIGHLIGHT_COLOR_ORDER, HIGHLIGHT_COLORS } from "@/lib/highlight-colors";
-import { clampVerseFontSize, VERSE_FONT_MAX, VERSE_FONT_MIN, VERSE_FONT_SIZE_COOKIE, VERSE_FONT_STEP } from "@/lib/font-size";
+import {
+  clampVerseFontSize,
+  VERSE_FONT_FAMILY_COOKIE,
+  VERSE_FONT_FAMILY_OPTIONS,
+  VERSE_FONT_MAX,
+  VERSE_FONT_MIN,
+  VERSE_FONT_SIZE_COOKIE,
+  VERSE_FONT_STEP,
+  type VerseFontFamily,
+} from "@/lib/font-size";
 import { LAST_READ_COOKIE } from "@/lib/last-read";
 import { updatePreferences } from "@/lib/profile-actions";
 import {
@@ -73,6 +82,7 @@ interface ReaderViewProps {
   initialVerse?: number;
   initialScrollVerse?: number;
   initialVerseFontSize: number;
+  initialVerseFontFamily: VerseFontFamily;
   backPath?: string;
   prevHref: string | null;
   nextHref: string | null;
@@ -89,6 +99,7 @@ export function ReaderView({
   initialVerse,
   initialScrollVerse,
   initialVerseFontSize,
+  initialVerseFontFamily,
   backPath,
   prevHref,
   nextHref,
@@ -96,10 +107,22 @@ export function ReaderView({
 }: ReaderViewProps) {
   const router = useRouter();
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  // Verso que estava no topo da tela no instante em que "Versão" ou "Aa" foi
+  // aberto — capturado uma única vez, na abertura (nunca de novo enquanto o
+  // painel segue aberto, nem ao trocar de fato a versão/fonte). Fica fixo ali
+  // até o painel fechar (clique fora ou no próprio botão de novo), quando os
+  // efeitos abaixo consomem o valor pra devolver a rolagem pra esse verso.
+  const pinnedVerseRef = useRef<number | null>(null);
+  // Altura real da barra fixa (livro/capítulo/versão/Aa) — cresce quando um
+  // seletor está aberto (ex.: painel "Aa" com A−/A+ e tipos de letra). Sem
+  // descontar essa altura, topVisibleVerse() pegaria um verso escondido atrás
+  // do painel aberto como se fosse o topo visível — daí o "voltar" a cada toque.
+  const stickyBarRef = useRef<HTMLDivElement | null>(null);
   const [verseFontSize, setVerseFontSize] = useState(initialVerseFontSize);
+  const [verseFontFamily, setVerseFontFamily] = useState(initialVerseFontFamily);
   const [openVerse, setOpenVerse] = useState<number | null>(initialVerse ?? null);
   const [chapterOverviewOpen, setChapterOverviewOpen] = useState(false);
-  const [picker, setPicker] = useState<"book" | "chapter" | null>(null);
+  const [picker, setPicker] = useState<"book" | "chapter" | "version" | "settings" | null>(null);
   const pickerPanelRef = useRef<HTMLDivElement | null>(null);
   const [expandedParticipantId, setExpandedParticipantId] = useState<string | null>(null);
   const [commentDraft, setCommentDraft] = useState("");
@@ -128,6 +151,31 @@ export function ReaderView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Reaproveitado tanto pelo cookie de "último lido" (efeito logo abaixo) quanto
+  // pra fixar a posição de leitura ao abrir "Versão"/"Aa" (ver pinnedVerseRef
+  // mais abaixo) — o verso cuja parte de baixo ainda não passou do topo da tela
+  // é o que a pessoa está "olhando agora".
+  function topVisibleVerse(): number {
+    // A barra fixa pode estar mais alta que 0 (seletor aberto) — um verso com
+    // bottom>0 mas ainda escondido atrás dela não conta como "visível".
+    const topBoundary = stickyBarRef.current?.getBoundingClientRect().bottom ?? 0;
+    const elements = Array.from(document.querySelectorAll<HTMLElement>('[id^="verse-"]'));
+    const visible = elements.find((element) => element.getBoundingClientRect().bottom > topBoundary);
+    return visible ? Number(visible.id.slice("verse-".length)) : 1;
+  }
+
+  // Rola até o verso ficar logo abaixo da barra fixa — não em y=0, que pode estar
+  // debaixo dela (compacta ou com um seletor aberto, tanto faz). Usado tanto pra
+  // "voltar pro mesmo verso" depois de trocar versão quanto durante os ajustes de
+  // tamanho/tipo de letra no painel "Aa" (ver useLayoutEffect abaixo).
+  function scrollVerseJustBelowBar(verseNumber: number) {
+    const verseEl = document.getElementById(`verse-${verseNumber}`);
+    if (!verseEl) return;
+    const barHeight = stickyBarRef.current?.getBoundingClientRect().height ?? 0;
+    const targetY = window.scrollY + verseEl.getBoundingClientRect().top - barHeight;
+    window.scrollTo({ top: Math.max(0, targetY) });
+  }
+
   // Lembra o último capítulo E verso — o BottomNav usa isso pra "Bíblia" voltar
   // pra cá (em vez de reiniciar na lista de livros) e retomar de onde parou, se
   // o usuário navegar pra outra aba e voltar. Atualiza a cada scroll (rAF-throttled)
@@ -135,12 +183,6 @@ export function ReaderView({
   // o capítulo foi aberto.
   useEffect(() => {
     let rafId: number | null = null;
-
-    function topVisibleVerse(): number {
-      const elements = Array.from(document.querySelectorAll<HTMLElement>('[id^="verse-"]'));
-      const visible = elements.find((element) => element.getBoundingClientRect().bottom > 0);
-      return visible ? Number(visible.id.slice("verse-".length)) : 1;
-    }
 
     function writeCookie() {
       const path = `/read/${book}/${chapter}?version=${version}&v=${topVisibleVerse()}`;
@@ -192,17 +234,57 @@ export function ReaderView({
     router.push(`/read/${targetBook}/${targetChapter}?${params.toString()}`);
   }
 
-  // Ao abrir o seletor, rola até o livro/capítulo atual dentro do painel — evita
-  // que a pessoa precise caçar manualmente entre 66 livros ou dezenas de capítulos.
+  // Ao abrir o seletor, rola até o livro/capítulo/versão atual dentro do painel —
+  // evita que a pessoa precise caçar manualmente entre 66 livros ou dezenas de
+  // capítulos. Calcula o scrollTop na mão em vez de current.scrollIntoView():
+  // scrollIntoView cascateia pros ancestrais scrolláveis, e a janela é um deles
+  // — arrastava a página inteira (e os versos por baixo) toda vez que abria.
+  // useLayoutEffect pra já nascer na posição certa, sem flash da rolagem padrão.
+  useLayoutEffect(() => {
+    if (!picker) return;
+    const panel = pickerPanelRef.current;
+    const current = panel?.querySelector<HTMLElement>('[data-current="true"]');
+    if (!panel || !current) return;
+    const target = current.offsetTop - panel.clientHeight / 2 + current.clientHeight / 2;
+    panel.scrollTo({ top: Math.max(0, target) });
+  }, [picker]);
+
+  // Clicar fora da barra/painel fecha o seletor aberto — mesmo gatilho de "fechar"
+  // que tocar de novo no botão, então o efeito abaixo (que devolve a rolagem pro
+  // verso fixado) dispara igual nos dois casos.
   useEffect(() => {
     if (!picker) return;
-    const current = pickerPanelRef.current?.querySelector('[data-current="true"]');
-    current?.scrollIntoView({ block: "center" });
+    function handlePointerDown(event: PointerEvent) {
+      if (!stickyBarRef.current?.contains(event.target as Node)) setPicker(null);
+    }
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [picker]);
+
+  // "Versão"/"Aa" fechando (clique fora ou no próprio botão) encolhe a barra de
+  // volta ao tamanho compacto — o que por si só já desloca os versos, então
+  // corrige rolando de volta pro verso fixado na abertura (pinnedVerseRef).
+  // `pending`: se fechou porque uma versão foi escolhida, uma navegação está em
+  // andamento — quem cuida da rolagem final é o efeito de `data` mais abaixo
+  // (só ele sabe quando o capítulo novo realmente chegou); agir aqui também
+  // consumiria pinnedVerseRef cedo demais, antes desse efeito ter a chance.
+  // useLayoutEffect (não useEffect) pra corrigir antes do navegador pintar o
+  // frame de painel fechado — senão dava pra ver o verso subir e descer num piscar.
+  useLayoutEffect(() => {
+    if (picker !== null || pending || pinnedVerseRef.current === null) return;
+    scrollVerseJustBelowBar(pinnedVerseRef.current);
+    pinnedVerseRef.current = null;
+  }, [picker, pending]);
 
   function handleVersionChange(next: string) {
     const url = new URL(window.location.href);
     url.searchParams.set("version", next);
+
+    // Não captura pinnedVerseRef aqui — já foi capturada uma vez, ao abrir o
+    // botão "Versão" (ver botão mais abaixo). O efeito de `data` logo adiante
+    // usa esse mesmo valor assim que o capítulo na nova versão chegar, em vez
+    // de deixar a navegação (que troca só o texto, não o capítulo) jogar a
+    // tela pro topo.
 
     // Trocar a versão no leitor vira o novo padrão do usuário até ele trocar de
     // novo (mesma ação que o seletor de versão em /profile já persiste). A
@@ -215,12 +297,31 @@ export function ReaderView({
       if (nextVersion) {
         await updatePreferences(next, nextVersion.language);
       }
-      router.push(`${url.pathname}${url.search}`);
+      // scroll: false — o efeito de `data` abaixo é quem decide pra onde rolar
+      // (o verso guardado em pinnedVerseRef), não o comportamento padrão do
+      // router de subir a página pro topo a cada navegação.
+      router.push(`${url.pathname}${url.search}`, { scroll: false });
     });
   }
 
+  // Assim que o capítulo na nova versão chega (data muda de fato — não dispara
+  // à toa em re-renders normais, já que `data` só muda com uma navegação real),
+  // rola de volta pro verso fixado ao abrir "Versão". Ignora o primeiro render
+  // (pinnedVerseRef começa null) e qualquer outra causa de re-render que não
+  // tenha passado por lá.
+  useEffect(() => {
+    if (pinnedVerseRef.current === null) return;
+    scrollVerseJustBelowBar(pinnedVerseRef.current);
+    pinnedVerseRef.current = null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
   // Preferência de dispositivo — grava direto num cookie (sem ida ao
   // servidor) pra não pesar cada clique, e persiste entre capítulos/sessões.
+  // Não mexe em pinnedVerseRef: a âncora é capturada uma única vez, ao abrir o
+  // painel "Aa" (ver botão mais abaixo) — recapturar a cada A−/A+ seria pegar
+  // uma posição que já tinha acabado de ser corrigida pelo ajuste anterior, e
+  // qualquer imprecisão nessa correção ia se acumulando a cada toque.
   function applyVerseFontSize(next: number) {
     const clamped = clampVerseFontSize(next);
     setVerseFontSize(clamped);
@@ -233,6 +334,32 @@ export function ReaderView({
 
   function handleIncreaseFont() {
     applyVerseFontSize(verseFontSize + VERSE_FONT_STEP);
+  }
+
+  function applyVerseFontFamily(next: VerseFontFamily) {
+    setVerseFontFamily(next);
+    document.cookie = `${VERSE_FONT_FAMILY_COOKIE}=${next}; path=/; max-age=${60 * 60 * 24 * 365}`;
+  }
+
+  // Tamanho/tipo de letra reflow o texto todo na hora (mesma página, sem navegação)
+  // — sem isso, a posição em pixels ficaria igual mas o verso ali embaixo teria
+  // mudado (texto anterior cresceu/encolheu). useLayoutEffect pra corrigir antes
+  // do navegador pintar o frame, sem o pulo visual de um scroll depois do fato.
+  // Não zera pinnedVerseRef aqui — o painel "Aa" pode ficar aberto pra vários
+  // ajustes seguidos, todos voltando pro mesmo verso fixado na abertura; só zera
+  // quando o painel fecha (ver efeito de [picker, pending] mais acima).
+  useLayoutEffect(() => {
+    if (pinnedVerseRef.current === null) return;
+    scrollVerseJustBelowBar(pinnedVerseRef.current);
+  }, [verseFontSize, verseFontFamily]);
+
+  const verseFontStack = VERSE_FONT_FAMILY_OPTIONS.find((option) => option.key === verseFontFamily)?.stack;
+
+  const versionsByLanguage = new Map<BibleVersion["language"], BibleVersion[]>();
+  for (const item of versions) {
+    const list = versionsByLanguage.get(item.language) ?? [];
+    list.push(item);
+    versionsByLanguage.set(item.language, list);
   }
 
   // Navegação por gesto: arrasta pra direita volta um capítulo, pra
@@ -522,22 +649,11 @@ export function ReaderView({
             ←
           </Link>
           <div>
-            {/* Livro e capítulo viram dois links separados — toque no livro pra trocar de
-                livro (lista completa em /bible), toque no capítulo pra trocar só de capítulo
-                dentro deste livro (grade em /bible/[book]) — em vez de texto estático. */}
+            {/* Livro/capítulo/versão/fonte viraram um seletor único, consolidado na barra
+                logo abaixo (mesma que fica fixa ao rolar) — aqui em cima fica só o texto,
+                sem duplicar a mesma navegação em dois lugares com comportamentos diferentes. */}
             <div className="flex items-center gap-1.5">
-              <Link
-                href={`/bible?version=${version}`}
-                className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary active:opacity-60"
-              >
-                {bookName}
-              </Link>
-              <Link
-                href={`/bible/${book}?version=${version}`}
-                className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary active:opacity-60"
-              >
-                {chapter}
-              </Link>
+              <span className="text-[calc(17px*var(--font-scale))] font-semibold text-text-primary">{data.reference}</span>
               <button
                 type="button"
                 onClick={isReadOptimistic ? handleUnmarkAsRead : handleMarkAsRead}
@@ -556,19 +672,6 @@ export function ReaderView({
               </div>
             )}
           </div>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <select
-            value={version}
-            onChange={(event) => handleVersionChange(event.target.value)}
-            className="rounded-full border border-[#d4c5ac] bg-transparent px-3 py-1.5 text-[calc(11px*var(--font-scale))] font-semibold text-ink"
-          >
-            {versions.map((item) => (
-              <option key={item.abbreviation} value={item.abbreviation}>
-                {item.abbreviation}
-              </option>
-            ))}
-          </select>
         </div>
       </header>
 
@@ -591,26 +694,6 @@ export function ReaderView({
         >
           Próximo →
         </Link>
-      </div>
-
-      <div className="flex items-center gap-2.5">
-        <button
-          onClick={handleDecreaseFont}
-          disabled={verseFontSize <= VERSE_FONT_MIN}
-          aria-label="Diminuir letra"
-          className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(11px*var(--font-scale))] font-semibold text-text-muted transition-transform active:scale-90 disabled:opacity-40"
-        >
-          A−
-        </button>
-        <span className="text-[calc(11px*var(--font-scale))] text-text-muted">{verseFontSize}px</span>
-        <button
-          onClick={handleIncreaseFont}
-          disabled={verseFontSize >= VERSE_FONT_MAX}
-          aria-label="Aumentar letra"
-          className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(15px*var(--font-scale))] font-semibold text-text-muted transition-transform active:scale-90 disabled:opacity-40"
-        >
-          A+
-        </button>
       </div>
 
       <div className="h-px bg-border" />
@@ -746,34 +829,94 @@ export function ReaderView({
         </div>
       )}
 
-      {/* Fixo no topo da tela ao rolar pelos versos — além de lembrete de qual livro/
-          capítulo está aberto, livro e capítulo são botões: cada um abre um seletor
-          rápido (lista de livros / grade de capítulos deste livro) sem sair da leitura. */}
-      <div className="sticky top-0 z-20 -mx-[18px] bg-background px-[18px] py-2">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setPicker((current) => (current === "book" ? null : "book"))}
-            aria-expanded={picker === "book"}
-            className="inline-flex items-center gap-1 rounded-full border border-[#d4c5ac] bg-surface px-3 py-1.5 text-[calc(14px*var(--font-scale))] font-semibold text-ink transition-transform active:scale-95"
-          >
-            {bookName}
-            <ChevronIcon open={picker === "book"} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setPicker((current) => (current === "chapter" ? null : "chapter"))}
-            aria-expanded={picker === "chapter"}
-            className="inline-flex items-center gap-1 rounded-full border border-[#d4c5ac] bg-surface px-3 py-1.5 text-[calc(14px*var(--font-scale))] font-semibold text-ink transition-transform active:scale-95"
-          >
-            {chapter}
-            <ChevronIcon open={picker === "chapter"} />
-          </button>
+      {/* Fixo no topo da tela ao rolar pelos versos — livro, capítulo, versão e
+          tipografia viram botões, cada um abrindo um seletor rápido sem sair da
+          leitura (lista de livros / grade de capítulos / versões por idioma /
+          tamanho+tipo de letra com prévia). */}
+      <div ref={stickyBarRef} className="sticky top-0 z-20 -mx-[18px] bg-background px-[18px] py-2">
+        <div className="flex items-center justify-between gap-2">
+          {/* Livro/capítulo: par de navegação principal — junto, estilo cheio (pílula
+              preenchida) pra pesar mais que versão/tipografia, que são ajustes secundários. */}
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setPicker((current) => (current === "book" ? null : "book"))}
+              aria-expanded={picker === "book"}
+              className="inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-[calc(14px*var(--font-scale))] font-semibold text-background transition-transform active:scale-95"
+            >
+              {bookName}
+              <ChevronIcon open={picker === "book"} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setPicker((current) => (current === "chapter" ? null : "chapter"))}
+              aria-expanded={picker === "chapter"}
+              className="inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1.5 text-[calc(14px*var(--font-scale))] font-semibold text-background transition-transform active:scale-95"
+            >
+              {chapter}
+              <ChevronIcon open={picker === "chapter"} />
+            </button>
+          </div>
+
+          {/* Versão/tipografia: ajustes secundários — estilo discreto (sem preenchimento). */}
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                setPicker((current) => {
+                  // Fecha (clique no próprio botão de novo) — mesmo caminho de saída
+                  // que clicar fora: o efeito de [picker, pending] acima devolve a
+                  // rolagem pro verso fixado abaixo.
+                  if (current === "version") return null;
+                  // Abre: fixa o verso do topo AGORA, antes do painel nascer — é
+                  // esse que continua no topo até fechar, mesmo que a pessoa troque
+                  // de versão dentro do painel (ver handleVersionChange).
+                  pinnedVerseRef.current = topVisibleVerse();
+                  return "version";
+                });
+              }}
+              aria-expanded={picker === "version"}
+              className="inline-flex items-center gap-1 rounded-full border border-[#d4c5ac] px-2.5 py-1.5 text-[calc(12px*var(--font-scale))] font-semibold text-text-secondary transition-transform active:scale-95"
+            >
+              {version}
+              <ChevronIcon open={picker === "version"} />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPicker((current) => {
+                  // Fecha (clique no próprio botão de novo) — mesmo caminho de saída
+                  // que clicar fora: o efeito de [picker, pending] devolve a rolagem
+                  // pro verso fixado abaixo (a barra ainda vai encolher de volta ao
+                  // tamanho compacto, o que também empurra os versos pra cima).
+                  if (current === "settings") return null;
+                  // Abre: fixa o verso do topo ANTES do painel nascer — é esse que
+                  // continua no topo depois, não importa quantos ajustes de
+                  // tamanho/tipo de letra acontecerem enquanto o painel ficar
+                  // aberto (ver useLayoutEffect de [verseFontSize, verseFontFamily]).
+                  pinnedVerseRef.current = topVisibleVerse();
+                  return "settings";
+                });
+              }}
+              aria-expanded={picker === "settings"}
+              aria-label="Tamanho e tipo de letra"
+              className="inline-flex items-center gap-1 rounded-full border border-[#d4c5ac] px-2.5 py-1.5 text-[calc(12px*var(--font-scale))] font-semibold text-text-secondary transition-transform active:scale-95"
+            >
+              Aa
+              <ChevronIcon open={picker === "settings"} />
+            </button>
+          </div>
         </div>
 
         {picker && (
-          <div ref={pickerPanelRef} className="mt-1.5 max-h-[60vh] overflow-y-auto rounded-[14px] border border-border bg-surface p-3 shadow-sm">
-            {picker === "book" ? (
+          // absolute (não em fluxo normal): flutua por cima dos versos em vez de
+          // empurrá-los pra baixo ao abrir — a barra fixa continua com a mesma
+          // altura compacta, aberto ou fechado.
+          <div
+            ref={pickerPanelRef}
+            className="absolute left-[18px] right-[18px] top-full z-30 mt-1.5 max-h-[60vh] overflow-y-auto rounded-[14px] border border-border bg-surface p-3 shadow-sm"
+          >
+            {picker === "book" && (
               <div className="flex flex-col gap-3">
                 {[...OLD_TESTAMENT_SECTIONS, ...NEW_TESTAMENT_SECTIONS].map((section) => (
                   <div key={section.label}>
@@ -803,7 +946,9 @@ export function ReaderView({
                   </div>
                 ))}
               </div>
-            ) : (
+            )}
+
+            {picker === "chapter" && (
               <div className="grid grid-cols-5 gap-2">
                 {Array.from({ length: bookChapterCount }, (_, index) => index + 1).map((chapterOption) => (
                   <button
@@ -818,6 +963,93 @@ export function ReaderView({
                     {chapterOption}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {picker === "version" && (
+              <div className="flex flex-col gap-3">
+                {Array.from(versionsByLanguage.entries()).map(([language, items]) => (
+                  <div key={language}>
+                    <div className="mb-1 px-2.5 text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
+                      {LANGUAGE_LABELS[language]}
+                    </div>
+                    <div className="flex flex-col">
+                      {items.map((item) => {
+                        const isCurrent = item.abbreviation === version;
+                        return (
+                          <button
+                            key={item.abbreviation}
+                            type="button"
+                            data-current={isCurrent || undefined}
+                            onClick={() => {
+                              setPicker(null);
+                              handleVersionChange(item.abbreviation);
+                            }}
+                            className={`rounded-[10px] px-2.5 py-2 text-left text-[calc(14px*var(--font-scale))] transition-transform active:scale-[0.98] ${
+                              isCurrent ? "bg-canvas text-ink" : "text-text-secondary"
+                            }`}
+                          >
+                            <span className="font-semibold">{item.abbreviation}</span>
+                            {" — "}
+                            {item.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {picker === "settings" && (
+              <div className="flex flex-col gap-4">
+                <div>
+                  <div className="mb-1.5 px-0.5 text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
+                    Tamanho da letra
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={handleDecreaseFont}
+                      disabled={verseFontSize <= VERSE_FONT_MIN}
+                      aria-label="Diminuir letra"
+                      className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(13px*var(--font-scale))] font-semibold text-text-muted transition-transform active:scale-90 disabled:opacity-40"
+                    >
+                      A−
+                    </button>
+                    <span className="text-[calc(12px*var(--font-scale))] text-text-muted">{verseFontSize}px</span>
+                    <button
+                      type="button"
+                      onClick={handleIncreaseFont}
+                      disabled={verseFontSize >= VERSE_FONT_MAX}
+                      aria-label="Aumentar letra"
+                      className="rounded-lg border border-input-border px-[9px] py-1 text-[calc(17px*var(--font-scale))] font-semibold text-text-muted transition-transform active:scale-90 disabled:opacity-40"
+                    >
+                      A+
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-1.5 px-0.5 text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
+                    Tipo da letra
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {VERSE_FONT_FAMILY_OPTIONS.map((option) => (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => applyVerseFontFamily(option.key)}
+                        style={{ fontFamily: option.stack }}
+                        className={`rounded-[10px] border px-3 py-2 text-[calc(13px*var(--font-scale))] transition-transform active:scale-[0.97] ${
+                          option.key === verseFontFamily ? "border-ink bg-canvas font-semibold text-ink" : "border-border text-text-secondary"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -843,12 +1075,13 @@ export function ReaderView({
                 tabIndex={0}
                 style={{
                   fontSize: `${verseFontSize}px`,
+                  fontFamily: verseFontStack,
                   backgroundColor: style?.bg,
                   color: style?.text ?? "#52442f",
                   borderRadius: style ? "10px" : undefined,
                   padding: style ? "11px 14px" : "7px 2px",
                 }}
-                className="cursor-pointer font-serif leading-[1.8]"
+                className="cursor-pointer leading-[1.8]"
               >
                 <sup className="mr-[5px] font-sans text-[calc(10px*var(--font-scale))] font-semibold" style={{ color: style?.verseNum ?? "#a3927d" }}>
                   {verse.number}

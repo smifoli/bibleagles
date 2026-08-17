@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Spectral } from "next/font/google";
+import { Lora, Space_Grotesk, Spectral } from "next/font/google";
 import { cookies } from "next/headers";
 import { FONT_SIZE_COOKIE, FONT_SIZE_MULTIPLIER, isFontSizePreference } from "@/lib/font-size";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
@@ -17,6 +17,18 @@ const spectral = Spectral({
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
   variable: "--font-spectral",
+  display: "swap",
+});
+
+// Segunda opção de fonte pro texto bíblico (ver VERSE_FONT_FAMILY_OPTIONS em
+// lib/font-size.ts) — serifa com um caráter mais moderno que a Spectral, pra
+// quem prefere. A terceira opção (sem serifa) reaproveita a Space Grotesk
+// acima, sem custo extra de fonte.
+const lora = Lora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-lora",
   display: "swap",
 });
 
@@ -67,7 +79,7 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${spaceGrotesk.variable} ${spectral.variable}`}
+      className={`${spaceGrotesk.variable} ${spectral.variable} ${lora.variable}`}
       // A maioria do texto do app usa tamanhos fixos em px (text-[calc(13px*var(--font-scale))] etc,
       // não rem), então cada um desses foi reescrito pra
       // text-[calc(Npx*var(--font-scale))] — essa variável é o único lugar
