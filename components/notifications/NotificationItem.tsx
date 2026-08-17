@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import { formatRelativeTime } from "@/lib/format";
 import { markNotificationRead } from "@/lib/notifications-actions";
 import type { NotificationItem as NotificationItemData } from "@/lib/notifications-data";
@@ -40,9 +41,10 @@ export function NotificationItem({ item }: { item: NotificationItemData }) {
       onClick={() => {
         if (!item.read) markNotificationRead(item.id);
       }}
-      className={`flex items-start gap-3 rounded-[14px] border border-border px-3.5 py-3 ${item.read ? "bg-surface" : "bg-canvas"}`}
+      className={`flex items-start rounded-[14px] border border-border px-3.5 py-3 ${item.read ? "bg-surface" : "bg-canvas"}`}
     >
-      <span className={`mt-1.5 h-[7px] w-[7px] shrink-0 rounded-full ${item.read ? "bg-transparent" : "bg-ink"}`} />
+      <span className={`mt-1.5 mr-2 h-[7px] w-[7px] shrink-0 rounded-full ${item.read ? "bg-transparent" : "bg-ink"}`} />
+      <Avatar name={item.actorName} avatarUrl={item.actorAvatarUrl} colorIndex={item.actorColorIndex} size="sm" className="mr-2" />
       <div className="min-w-0 flex-1">
         <div className={`text-[calc(13px*var(--font-scale))] leading-[1.5] ${item.read ? "text-text-secondary" : "text-text-primary"}`}>
           <span className="font-medium">{item.actorName}</span> {VERB_BY_TYPE[item.type]}{" "}

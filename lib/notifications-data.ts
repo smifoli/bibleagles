@@ -8,6 +8,9 @@ export interface NotificationItem {
   id: string;
   type: NotificationType;
   actorName: string;
+  actorAvatarUrl: string | null;
+  /** Índice estável do autor na família (ordem de criação) — cor de identidade do avatar, igual ao resto do app. */
+  actorColorIndex: number;
   read: boolean;
   createdAt: string;
   book: string;
@@ -44,19 +47,22 @@ export async function getNotificationsData(supabase: SupabaseServerClient, userI
 
   // types/database.ts não modela Relationships (mesma decisão de reader-data.ts) —
   // busca à parte de autores e comentários em vez de embed, e junta em memória.
-  const actorIds = Array.from(new Set(notifications.map((row) => row.actor_id)));
+  // Família inteira (não só os actorIds) pra manter o mesmo colorIndex por ordem
+  // de criação usado em bookmarks/reader — ver colorIndexFor em lib/bookmarks-data.ts.
   const commentIds = Array.from(new Set(notifications.flatMap((row) => (row.comment_id ? [row.comment_id] : []))));
 
-  const [{ data: actors }, { data: comments }] = await Promise.all([
-    supabase.from("users").select("id, name, is_deleted").in("id", actorIds),
+  const [{ data: familyMembers }, { data: comments }] = await Promise.all([
+    supabase.from("users").select("id, name, is_deleted, avatar_url").order("created_at", { ascending: true }),
     commentIds.length > 0
       ? supabase.from("comments").select("id, book, chapter, verse, bible_version, content").in("id", commentIds)
       : Promise.resolve({ data: [] as { id: string; book: string; chapter: number; verse: number; bible_version: string; content: string }[] }),
   ]);
 
+  const memberOrder = new Map((familyMembers ?? []).map((member, index) => [member.id, index]));
   const actorNames = new Map(
-    (actors ?? []).map((actor) => [actor.id, actor.is_deleted ? `${actor.name} (deletado)` : actor.name])
+    (familyMembers ?? []).map((member) => [member.id, member.is_deleted ? `${member.name} (deletado)` : member.name])
   );
+  const actorAvatars = new Map((familyMembers ?? []).map((member) => [member.id, member.avatar_url]));
   const commentById = new Map((comments ?? []).map((comment) => [comment.id, comment]));
 
   return notifications.flatMap((row): NotificationItem[] => {
@@ -64,6 +70,8 @@ export async function getNotificationsData(supabase: SupabaseServerClient, userI
       id: row.id,
       type: row.type as NotificationType,
       actorName: actorNames.get(row.actor_id) ?? "Alguém",
+      actorAvatarUrl: actorAvatars.get(row.actor_id) ?? null,
+      actorColorIndex: memberOrder.get(row.actor_id) ?? 0,
       read: row.read_at !== null,
       createdAt: row.created_at,
     };
