@@ -22,7 +22,8 @@ type NotificationType =
   | "comment_like"
   | "comment_on_read_chapter"
   | "comment_on_any_chapter"
-  | "chapter_read";
+  | "chapter_read"
+  | "announcement";
 
 // O iOS corta o título de push com ~30 e poucos caracteres ("Kevin Schmidt
 // comentou em At…"), então o título carrega só o essencial — primeiro nome e
@@ -35,6 +36,9 @@ const ACTION_BY_TYPE: Record<NotificationType, string> = {
   comment_on_read_chapter: "Comentou num capítulo que você leu",
   comment_on_any_chapter: "Comentou",
   chapter_read: "Leu este capítulo",
+  // Não usado de fato — announcement tem título/corpo próprios (ver abaixo),
+  // sem "ação" de ninguém pra descrever. Só aqui pro Record ficar completo.
+  announcement: "",
 };
 
 interface WebhookPayload {
@@ -42,10 +46,12 @@ interface WebhookPayload {
   recipient_id: string;
   actor_id: string;
   type: NotificationType;
-  // Tipos de comentário carregam comment_id; chapter_read carrega book+chapter.
+  // Tipos de comentário carregam comment_id; chapter_read carrega book+chapter;
+  // announcement carrega message (texto livre, sem referência bíblica).
   comment_id: string | null;
   book: string | null;
   chapter: number | null;
+  message: string | null;
 }
 
 Deno.serve(async (req) => {
@@ -92,9 +98,11 @@ Deno.serve(async (req) => {
     url = `/read/${comment.book}/${comment.chapter}?verse=${comment.verse}&from=${encodeURIComponent("/notifications")}`;
   }
 
-  const title = reference ? `${firstName} · ${reference}` : firstName;
+  // Aviso livre do admin pra família toda — sem ator/versículo, título fixo
+  // do app e o texto digitado direto no corpo (ver notifications.message).
+  const title = type === "announcement" ? "BiblEagles" : reference ? `${firstName} · ${reference}` : firstName;
   const action = ACTION_BY_TYPE[type] ?? ACTION_BY_TYPE.comment_on_thread;
-  const body = content ? `${action}: “${content}”` : action;
+  const body = type === "announcement" ? payload.message ?? "" : content ? `${action}: “${content}”` : action;
 
   const message = JSON.stringify({ title, body, url });
 

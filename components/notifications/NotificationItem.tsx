@@ -13,6 +13,9 @@ const VERB_BY_TYPE: Record<NotificationItemData["type"], string> = {
   comment_on_read_chapter: "comentou em",
   comment_on_any_chapter: "comentou em",
   chapter_read: "leu",
+  // Não usado — announcement tem seu próprio layout abaixo (sem referência
+  // bíblica pra "verbar"). Só aqui pro Record ficar completo.
+  announcement: "",
 };
 
 // Só o tipo "leu o capítulo" precisa desse lembrete — os outros já deixam a
@@ -23,6 +26,30 @@ const SUFFIX_BY_TYPE: Partial<Record<NotificationItemData["type"], string>> = {
 };
 
 export function NotificationItem({ item }: { item: NotificationItemData }) {
+  // announcement não referencia livro/capítulo nenhum — não navega pra lugar
+  // nenhum, só marca como lido ao tocar. Layout próprio, sem o verbo+referência
+  // que todo outro tipo usa.
+  if (item.type === "announcement") {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          if (!item.read) markNotificationRead(item.id);
+        }}
+        className={`flex items-start rounded-[14px] border border-border px-3.5 py-3 text-left ${item.read ? "bg-surface" : "bg-canvas"}`}
+      >
+        <span className={`mt-1.5 mr-2 h-[7px] w-[7px] shrink-0 rounded-full ${item.read ? "bg-transparent" : "bg-ink"}`} />
+        <Avatar name="BiblEagles" avatarUrl={null} fallbackColor={{ bg: "#2c2218", text: "#f5efe4" }} size="sm" className="mr-2" />
+        <div className="min-w-0 flex-1">
+          <div className={`text-[calc(13px*var(--font-scale))] leading-[1.5] ${item.read ? "text-text-secondary" : "text-text-primary"}`}>
+            {item.message}
+          </div>
+          <div className="mt-px text-[calc(11px*var(--font-scale))] text-[#a3927d]">{formatRelativeTime(new Date(item.createdAt))}</div>
+        </div>
+      </button>
+    );
+  }
+
   // chapter_read (verse null) referencia o capítulo inteiro ("Atos 11") e abre
   // o leitor sem fixar versículo nem versão — vale a preferida de quem clica.
   const reference = item.verse !== null ? `${item.bookName} ${item.chapter}:${item.verse}` : `${item.bookName} ${item.chapter}`;

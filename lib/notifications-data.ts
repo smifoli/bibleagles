@@ -13,13 +13,16 @@ export interface NotificationItem {
   actorColorIndex: number;
   read: boolean;
   createdAt: string;
-  book: string;
-  bookName: string;
-  chapter: number;
-  /** null em chapter_read — a referência é o capítulo inteiro, sem versículo/versão/conteúdo. */
+  /** null só em announcement — aviso livre, sem referência bíblica nenhuma. */
+  book: string | null;
+  bookName: string | null;
+  chapter: number | null;
+  /** null em chapter_read/announcement — a referência é o capítulo inteiro (ou não existe). */
   verse: number | null;
   version: string | null;
   commentContent: string | null;
+  /** Só em announcement — o texto livre do aviso. */
+  message: string | null;
 }
 
 /** Só a contagem — usada no badge do sino, presente em toda página (ver AppLayout). */
@@ -38,7 +41,7 @@ const NOTIFICATIONS_LIMIT = 100;
 export async function getNotificationsData(supabase: SupabaseServerClient, userId: string): Promise<NotificationItem[]> {
   const { data: notifications } = await supabase
     .from("notifications")
-    .select("id, type, actor_id, comment_id, book, chapter, read_at, created_at")
+    .select("id, type, actor_id, comment_id, book, chapter, message, read_at, created_at")
     .eq("recipient_id", userId)
     .order("created_at", { ascending: false })
     .limit(NOTIFICATIONS_LIMIT);
@@ -89,6 +92,24 @@ export async function getNotificationsData(supabase: SupabaseServerClient, userI
           verse: null,
           version: null,
           commentContent: null,
+          message: null,
+        },
+      ];
+    }
+
+    // announcement não referencia livro/capítulo nenhum — só o texto livre.
+    if (row.type === "announcement") {
+      if (!row.message) return [];
+      return [
+        {
+          ...base,
+          book: null,
+          bookName: null,
+          chapter: null,
+          verse: null,
+          version: null,
+          commentContent: null,
+          message: row.message,
         },
       ];
     }
@@ -108,6 +129,7 @@ export async function getNotificationsData(supabase: SupabaseServerClient, userI
         verse: comment.verse,
         version: comment.bible_version,
         commentContent: comment.content,
+        message: null,
       },
     ];
   });

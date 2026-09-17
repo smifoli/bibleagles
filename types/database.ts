@@ -9,7 +9,8 @@ export type NotificationType =
   | "comment_like"
   | "comment_on_read_chapter"
   | "comment_on_any_chapter"
-  | "chapter_read";
+  | "chapter_read"
+  | "announcement";
 /** Alcance das notificações de comentários novos: só em capítulos já lidos (padrão) ou em toda a Bíblia. */
 export type CommentNotificationScope = "read_chapters" | "all";
 
@@ -140,15 +141,24 @@ export interface Database {
           actor_id: string;
           type: NotificationType;
           // Tipos de comentário carregam comment_id; chapter_read carrega
-          // book+chapter (ver notifications_payload_check na migration).
+          // book+chapter; announcement carrega message (ver
+          // notifications_payload_check na migration).
           comment_id: string | null;
           book: string | null;
           chapter: number | null;
+          message: string | null;
           read_at: string | null;
           created_at: string;
         };
-        // Só nasce via trigger (security definer) — não há policy de insert pro usuário.
-        Insert: never;
+        // Todo tipo além de 'announcement' só nasce via trigger (security
+        // definer) — sem policy de insert pro usuário. 'announcement' é a
+        // exceção: admin insere direto (notifications_admin_insert_announcement).
+        Insert: {
+          recipient_id: string;
+          actor_id: string;
+          type: "announcement";
+          message: string;
+        };
         Update: { read_at: string | null };
         Relationships: [];
       };
