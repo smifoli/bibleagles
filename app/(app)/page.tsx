@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { ActivePackageCard } from "@/components/home/ActivePackageCard";
 import { ActivityFeed } from "@/components/home/ActivityFeed";
+import { FamilyPlansCard } from "@/components/home/FamilyPlansCard";
 import { NoReadingToday } from "@/components/home/NoReadingToday";
-import { SecondaryPackageCard } from "@/components/home/SecondaryPackageCard";
+import { TodayReadingCard } from "@/components/home/TodayReadingCard";
 import { formatGreetingDate, getGreeting } from "@/lib/format";
 import { getHomeData } from "@/lib/home-data";
 import { computeOverallReadPercent, getReadChaptersByBook } from "@/lib/bible-nav-data";
@@ -25,7 +25,7 @@ export default async function HomePage() {
     (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??
     getDefaultVersion(profile?.preferred_language ?? "pt");
 
-  const [{ userName, isAdmin, featured, secondary, activity }, readByBook] = await Promise.all([
+  const [{ userName, isAdmin, tasks, planFamily, activity }, readByBook] = await Promise.all([
     homeDataPromise,
     readByBookPromise,
   ]);
@@ -62,15 +62,10 @@ export default async function HomePage() {
       </Link>
 
       <div className="flex flex-col gap-4">
-        <div className="text-[calc(10px*var(--font-scale))] font-semibold uppercase tracking-[2px] text-text-muted">
-          Pacotes ativos
-        </div>
-        {featured ? (
+        {tasks.length > 0 ? (
           <>
-            <ActivePackageCard card={featured} />
-            {secondary.map((card) => (
-              <SecondaryPackageCard key={card.packageId} card={card} />
-            ))}
+            <TodayReadingCard tasks={tasks} />
+            <FamilyPlansCard plans={planFamily} />
           </>
         ) : (
           <NoReadingToday />

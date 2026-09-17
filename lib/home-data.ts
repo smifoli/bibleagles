@@ -1,5 +1,4 @@
 import type { createClient } from "@/lib/supabase/server";
-import { formatShortDate, parseDateOnly } from "@/lib/format";
 import { getActivePackagesWithToday } from "@/lib/reading-plan";
 import type { Passage } from "@/types/database";
 
@@ -20,21 +19,31 @@ export interface FamilyMemberStatus {
   percent: number;
 }
 
-export interface PackageCardData {
+/** Um pacote ativo com leitura pra hoje — uma linha na checklist "Sua leitura de
+ * hoje". `pendingCount` inclui dias vencidos anteriores, não só o de hoje (mesmo
+ * critério de antes) — por isso `done` (pendingCount === 0) é o sinal confiável de
+ * "está em dia neste plano", não só "já leu hoje". */
+export interface TodayTask {
   packageId: string;
   planDayId: string;
-  eyebrow: string;
-  title: string;
+  packageTitle: string;
   dayNumber: number;
   totalDays: number;
   chapterTitle: string;
-  dateLabel: string;
   pendingCount: number;
-  percent: number;
+  done: boolean;
   firstPassage: Passage | null;
 }
 
-export interface FeaturedPackageCardData extends PackageCardData {
+/** Progresso da família num pacote ativo — usado no bloco "A família nos planos",
+ * que mostra todo pacote ativo (não só o que tem leitura pra hoje). */
+export interface PlanFamilyStatus {
+  packageId: string;
+  packageTitle: string;
+  dayNumber: number;
+  totalDays: number;
+  /** % de hoje na linha do tempo do plano (dia atual / total de dias). */
+  percent: number;
   members: FamilyMemberStatus[];
 }
 
@@ -54,8 +63,8 @@ export interface ActivityItem {
 export interface HomeData {
   userName: string;
   isAdmin: boolean;
-  featured: FeaturedPackageCardData | null;
-  secondary: PackageCardData[];
+  tasks: TodayTask[];
+  planFamily: PlanFamilyStatus[];
   activity: ActivityItem[];
 }
 
@@ -86,70 +95,73 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
   );
   const activeFamilyMembers = (familyMembers ?? []).filter((member) => !member.is_deleted);
 
-  const cards: PackageCardData[] = todayPackages.map((pkg) => ({
+  const tasks: TodayTask[] = todayPackages.map((pkg) => ({
     packageId: pkg.packageId,
     planDayId: pkg.planDayId,
-    eyebrow: pkg.packageDescription ?? "Leitura em família",
-    title: pkg.packageTitle,
+    packageTitle: pkg.packageTitle,
     dayNumber: pkg.dayNumber,
     totalDays: pkg.totalDays,
     chapterTitle: pkg.chapterTitle,
-    dateLabel: formatShortDate(parseDateOnly(pkg.date)),
     pendingCount: 0,
-    percent: Math.round((pkg.dayNumber / pkg.totalDays) * 100),
+    done: false,
     firstPassage: pkg.passages[0] ?? null,
   }));
 
-  const [featuredCard, ...secondary] = cards;
-  const featuredPackage = todayPackages[0];
-
-  // Segunda onda: depende dos pacotes de hoje (dueDayIds / planDayId), mas as
-  // duas queries entre si são independentes — disparam juntas.
+  // Segunda onda: depende dos pacotes de hoje (dueDayIds / allDayIds), mas as
+  // duas queries entre si são independentes — disparam juntas. A segunda cobre
+  // TODOS os pacotes ativos (não só um "featured") — cada plano ganha seu próprio
+  // bloco de progresso da família na home agora.
   const allDueDayIds = todayPackages.flatMap((pkg) => pkg.dueDayIds);
-  const [{ data: myProgress }, { data: featuredProgress }] = await Promise.all([
+  const allActiveDayIds = todayPackages.flatMap((pkg) => pkg.allDayIds);
+  const [{ data: myProgress }, { data: allProgress }] = await Promise.all([
     allDueDayIds.length > 0
       ? supabase.from("reading_progress").select("plan_day_id").eq("user_id", userId).in("plan_day_id", allDueDayIds)
       : Promise.resolve({ data: [] as { plan_day_id: string }[] }),
-    // Todos os dias do pacote (não só hoje) — precisamos do quanto cada pessoa já
-    // avançou no plano inteiro pra posicionar o avatar dela na linha do tempo.
-    featuredPackage
-      ? supabase.from("reading_progress").select("user_id, plan_day_id").in("plan_day_id", featuredPackage.allDayIds)
+    allActiveDayIds.length > 0
+      ? supabase.from("reading_progress").select("user_id, plan_day_id").in("plan_day_id", allActiveDayIds)
       : Promise.resolve({ data: [] as { user_id: string; plan_day_id: string }[] }),
   ]);
 
   const myCompletedDayIds = new Set((myProgress ?? []).map((row) => row.plan_day_id));
-  for (const card of cards) {
-    const pkg = todayPackages.find((item) => item.packageId === card.packageId);
-    card.pendingCount = pkg ? pkg.dueDayIds.filter((id) => !myCompletedDayIds.has(id)).length : 0;
+  for (const task of tasks) {
+    const pkg = todayPackages.find((item) => item.packageId === task.packageId);
+    task.pendingCount = pkg ? pkg.dueDayIds.filter((id) => !myCompletedDayIds.has(id)).length : 0;
+    task.done = task.pendingCount === 0;
   }
 
-  let featured: FeaturedPackageCardData | null = null;
-  if (featuredCard) {
-    const readDayIdsByMember = new Map<string, Set<string>>();
-    for (const row of featuredProgress ?? []) {
-      if (!row.plan_day_id) continue;
-      let readDayIds = readDayIdsByMember.get(row.user_id);
-      if (!readDayIds) readDayIdsByMember.set(row.user_id, (readDayIds = new Set()));
-      readDayIds.add(row.plan_day_id);
-    }
+  const readDayIdsByMember = new Map<string, Set<string>>();
+  for (const row of allProgress ?? []) {
+    if (!row.plan_day_id) continue;
+    let readDayIds = readDayIdsByMember.get(row.user_id);
+    if (!readDayIds) readDayIdsByMember.set(row.user_id, (readDayIds = new Set()));
+    readDayIds.add(row.plan_day_id);
+  }
+
+  const planFamily: PlanFamilyStatus[] = todayPackages.map((pkg) => {
+    const packageDayIds = new Set(pkg.allDayIds);
     // Dias já vencidos (antes de hoje) — quem deve algum deles está atrasado. O dia
     // de hoje fica de fora: enquanto ainda é hoje, não ler ainda não é atraso.
-    const pastDueDayIds = featuredPackage!.dueDayIds.filter((id) => id !== featuredPackage!.planDayId);
-    featured = {
-      ...featuredCard,
+    const pastDueDayIds = pkg.dueDayIds.filter((id) => id !== pkg.planDayId);
+    return {
+      packageId: pkg.packageId,
+      packageTitle: pkg.packageTitle,
+      dayNumber: pkg.dayNumber,
+      totalDays: pkg.totalDays,
+      percent: Math.round((pkg.dayNumber / pkg.totalDays) * 100),
       members: activeFamilyMembers.map((member) => {
         const readDayIds = readDayIdsByMember.get(member.id) ?? new Set<string>();
+        const readInThisPackageCount = Array.from(readDayIds).filter((id) => packageDayIds.has(id)).length;
         return {
           id: member.id,
           name: member.name,
           avatarUrl: member.avatar_url,
-          completed: readDayIds.has(featuredPackage!.planDayId),
+          completed: readDayIds.has(pkg.planDayId),
           late: pastDueDayIds.some((id) => !readDayIds.has(id)),
-          percent: featuredCard.totalDays > 0 ? Math.round((readDayIds.size / featuredCard.totalDays) * 100) : 0,
+          percent: pkg.totalDays > 0 ? Math.round((readInThisPackageCount / pkg.totalDays) * 100) : 0,
         };
       }),
     };
-  }
+  });
 
   const activity: ActivityItem[] = [
     ...(comments ?? []).map((comment) => ({
@@ -182,8 +194,8 @@ export async function getHomeData(supabase: SupabaseServerClient, userId: string
   return {
     userName: currentUser?.name ?? "",
     isAdmin: currentUser?.role === "admin",
-    featured,
-    secondary,
+    tasks,
+    planFamily,
     activity,
   };
 }
