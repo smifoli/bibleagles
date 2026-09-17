@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { AnnouncementForm } from "@/components/admin/AnnouncementForm";
 import { MembersList } from "@/components/admin/MembersList";
 import { PackagesOverview } from "@/components/admin/PackagesOverview";
 import type { AdminMember } from "@/lib/admin-data";
 import type { AdminPackagesOverview } from "@/lib/admin-packages-data";
 
-type Tab = "pacotes" | "membros";
+type Tab = "pacotes" | "membros" | "avisos";
 
 export function AdminView({
   members,
@@ -55,13 +56,22 @@ export function AdminView({
         >
           Membros
         </button>
+        <button
+          type="button"
+          onClick={() => setTab("avisos")}
+          className={
+            tab === "avisos"
+              ? "rounded-full bg-ink px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-background"
+              : "rounded-full border border-input-border px-5 py-2 text-[calc(12px*var(--font-scale))] font-semibold text-text-muted"
+          }
+        >
+          Avisos
+        </button>
       </div>
 
-      {tab === "pacotes" ? (
-        <PackagesOverview overview={packages} />
-      ) : (
-        <MembersList members={members} currentUserId={currentUserId} />
-      )}
+      {tab === "pacotes" && <PackagesOverview overview={packages} />}
+      {tab === "membros" && <MembersList members={members} currentUserId={currentUserId} />}
+      {tab === "avisos" && <AnnouncementForm members={members} currentUserId={currentUserId} />}
     </div>
   );
 }
