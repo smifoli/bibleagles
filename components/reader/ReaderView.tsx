@@ -665,12 +665,10 @@ export function ReaderView({
                 ✓
               </button>
             </div>
-            {data.planContext && (
-              <div className="text-[calc(11px*var(--font-scale))] text-text-muted">
-                Dia {data.planContext.dayNumber} de {data.planContext.packageTitle} ·{" "}
-                {data.verses.length} {data.verses.length === 1 ? "versículo" : "versículos"}
-              </div>
-            )}
+            <div className="text-[calc(11px*var(--font-scale))] text-text-muted">
+              {data.planContext && `Dia ${data.planContext.dayNumber} de ${data.planContext.packageTitle} · `}
+              {data.verses.length} {data.verses.length === 1 ? "versículo" : "versículos"}
+            </div>
           </div>
         </div>
       </header>
