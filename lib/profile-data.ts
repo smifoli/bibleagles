@@ -91,36 +91,31 @@ async function getReadingCalendar(supabase: SupabaseServerClient, userId: string
   // processo (servidor, em produção, normalmente UTC), que perto do fim da
   // tarde/noite já tinha virado o dia lá: o calendário marcava o dia errado
   // como "hoje".
-  const [year, monthOneIndexed, today] = todayDateString(await getUserTimeZone()).split("-").map(Number);
+  const timeZone = await getUserTimeZone();
+  const [year, monthOneIndexed, today] = todayDateString(timeZone).split("-").map(Number);
   const month = monthOneIndexed - 1; // 0-indexed, pro resto da função
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const monthStart = toDateOnlyString(new Date(year, month, 1));
-  const monthEnd = toDateOnlyString(new Date(year, month, daysInMonth));
-
-  // O progresso do usuário não depende dos dias do mês — dispara junto em vez de
-  // esperar os dias pra só então filtrar por plan_day_id (mesmo ajuste feito em
-  // getActivePlanContextForChapter, lib/reader-data.ts): busca todo o progresso
-  // ligado a plano do usuário e cruza com os dias do mês em JS.
-  const [{ data: monthDays }, { data: progress }] = await Promise.all([
-    supabase.from("reading_plan_days").select("id, date").gte("date", monthStart).lte("date", monthEnd),
-    supabase.from("reading_progress").select("plan_day_id").eq("user_id", userId).not("plan_day_id", "is", null),
-  ]);
-
-  const dateByPlanDayId = new Map((monthDays ?? []).map((row) => [row.id, row.date]));
+  // Marca o dia em que a leitura foi de fato registrada (completed_at), não o dia em
+  // que o plano previa que ela acontecesse (reading_plan_days.date) — um capítulo
+  // atrasado lido hoje deve acender hoje no calendário, não o dia em que venceu.
+  // completed_at é timestamptz; sem filtro de intervalo na query (busca todo o
+  // progresso do usuário, igual o resto do código faz) porque um range em UTC
+  // calculado a partir de ano/mês do fuso do usuário cortaria errado perto da
+  // virada do mês pra quem não está em UTC — mais simples cruzar tudo em JS.
+  const { data: progress } = await supabase.from("reading_progress").select("completed_at").eq("user_id", userId);
 
   const readDates = new Set(
-    (progress ?? [])
-      // dateByPlanDayId só tem os dias deste mês — progresso de outros meses/pacotes
-      // cai em undefined aqui e é descartado pelo filter abaixo.
-      .map((row) => dateByPlanDayId.get(row.plan_day_id!))
-      .filter((date): date is string => Boolean(date))
+    (progress ?? []).map((row) => toDateOnlyString(new Date(row.completed_at), timeZone))
   );
 
+  let readCountThisMonth = 0;
   const days: CalendarDay[] = Array.from({ length: daysInMonth }, (_, index) => {
     const day = index + 1;
     const dateString = toDateOnlyString(new Date(year, month, day));
-    const status: CalendarDayStatus = day === today ? "today" : readDates.has(dateString) ? "read" : "default";
+    const read = readDates.has(dateString);
+    if (read) readCountThisMonth += 1;
+    const status: CalendarDayStatus = day === today ? "today" : read ? "read" : "default";
     return { day, status };
   });
 
@@ -140,6 +135,6 @@ async function getReadingCalendar(supabase: SupabaseServerClient, userId: string
     weekdayLabels: WEEKDAY_LABELS,
     leadingBlanks,
     days,
-    readCount: readDates.size,
+    readCount: readCountThisMonth,
   };
 }

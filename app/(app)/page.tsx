@@ -25,7 +25,7 @@ export default async function HomePage() {
     (profile?.preferred_version ? getVersionByAbbreviation(profile.preferred_version) : undefined) ??
     getDefaultVersion(profile?.preferred_language ?? "pt");
 
-  const [{ userName, isAdmin, tasks, planFamily, activity }, readByBook] = await Promise.all([
+  const [{ userName, isAdmin, pendingItems, planFamily, activity }, readByBook] = await Promise.all([
     homeDataPromise,
     readByBookPromise,
   ]);
@@ -62,9 +62,9 @@ export default async function HomePage() {
       </Link>
 
       <div className="flex flex-col gap-4">
-        {tasks.length > 0 ? (
+        {planFamily.length > 0 ? (
           <>
-            <TodayReadingCard tasks={tasks} />
+            <TodayReadingCard items={pendingItems} />
             <FamilyPlansCard plans={planFamily} />
           </>
         ) : (

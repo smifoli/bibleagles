@@ -52,8 +52,8 @@ export function formatRelativeTime(date: Date, now: Date = new Date()): string {
 // nesses casos o Date já nasceu com componentes locais, e forçar um fuso
 // diferente na hora de formatar quebraria a simetria e devolveria o dia
 // errado. Pra "que dia é hoje" de quem está lendo, use todayDateString() abaixo.
-export function toDateOnlyString(date: Date = new Date()): string {
-  return date.toLocaleDateString("en-CA");
+export function toDateOnlyString(date: Date = new Date(), timeZone?: string): string {
+  return date.toLocaleDateString("en-CA", timeZone ? { timeZone } : undefined);
 }
 
 /**
@@ -72,8 +72,11 @@ export function parseDateOnly(dateOnly: string): Date {
   return new Date(`${dateOnly}T00:00:00`);
 }
 
-/** Data curta estilo "4 jun" (dia + mês abreviado, sem ano, sem ponto). */
-export function formatShortDate(date: Date): string {
-  const formatted = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short" }).format(date);
+/** Data curta estilo "4 jun" (dia + mês abreviado, sem ano, sem ponto). `timeZone` só
+ * importa pra formatar um instante de verdade (timestamptz, ex.: reading_progress.completed_at)
+ * no fuso de quem está vendo — pra uma data já construída a partir de ano/mês/dia
+ * locais (ex.: parseDateOnly), formatar sem fuso explícito reproduz o mesmo dia. */
+export function formatShortDate(date: Date, timeZone?: string): string {
+  const formatted = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", timeZone }).format(date);
   return formatted.replace(".", "");
 }

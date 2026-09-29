@@ -16,7 +16,7 @@ function readCookie(name: string): string | null {
  * renderiza nada — só mantém um cookie ("tz") sincronizado com
  * Intl.DateTimeFormat().resolvedOptions().timeZone, que lib/timezone.ts lê
  * em todo Server Component/Action que precisa de "hoje" ou "que horas são"
- * (getGreeting, todayDateString em getActivePackagesWithToday etc.).
+ * (getGreeting, todayDateString em getActivePlans etc.).
  *
  * Montado uma vez em app/(app)/layout.tsx. Se o cookie já bate, não faz
  * nada; se mudou (primeira visita desse navegador, ou viagem pra outro

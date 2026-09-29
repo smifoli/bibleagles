@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { activatePackage, archivePackage } from "@/lib/package-admin-actions";
+import { activatePackage, archivePackage, deletePackage } from "@/lib/package-admin-actions";
 import type { AdminPackageSummary } from "@/lib/admin-packages-data";
 
 const STATUS_BADGE: Record<AdminPackageSummary["status"], { label: string; className: string }> = {
@@ -29,6 +29,15 @@ export function PackageCard({ summary }: { summary: AdminPackageSummary }) {
     setError(undefined);
     startTransition(async () => {
       const result = await activatePackage(summary.id);
+      if (result.error) setError(result.error);
+    });
+  }
+
+  function handleDelete() {
+    if (!window.confirm(`Excluir "${summary.title}" de vez? Isso apaga os dias do pacote e o progresso de leitura junto — não dá pra desfazer.`)) return;
+    setError(undefined);
+    startTransition(async () => {
+      const result = await deletePackage(summary.id);
       if (result.error) setError(result.error);
     });
   }
@@ -69,7 +78,7 @@ export function PackageCard({ summary }: { summary: AdminPackageSummary }) {
             type="button"
             onClick={handleArchive}
             disabled={pending}
-            className="rounded-full border border-[#e6c4be] px-3.5 py-1.5 text-[calc(11px*var(--font-scale))] font-semibold text-error disabled:opacity-60"
+            className="rounded-full border border-input-border px-3.5 py-1.5 text-[calc(11px*var(--font-scale))] font-semibold text-text-secondary disabled:opacity-60"
           >
             Arquivar
           </button>
@@ -84,6 +93,24 @@ export function PackageCard({ summary }: { summary: AdminPackageSummary }) {
             Ativar
           </button>
         )}
+        {summary.status === "archived" && (
+          <button
+            type="button"
+            onClick={handleActivate}
+            disabled={pending}
+            className="rounded-full bg-ink px-3.5 py-1.5 text-[calc(11px*var(--font-scale))] font-semibold text-background disabled:opacity-60"
+          >
+            Reabrir
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={pending}
+          className="rounded-full border border-[#e6c4be] px-3.5 py-1.5 text-[calc(11px*var(--font-scale))] font-semibold text-error disabled:opacity-60"
+        >
+          Excluir
+        </button>
       </div>
     </div>
   );

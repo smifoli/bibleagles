@@ -113,7 +113,7 @@ export async function updatePackage(packageId: string, input: PackageInput): Pro
   redirect(`/package/${packageId}`);
 }
 
-async function setPackageStatus(packageId: string, status: "active" | "archived"): Promise<{ error?: string }> {
+async function setPackageStatus(packageId: string, status: PackageStatus): Promise<{ error?: string }> {
   const admin = await requireAdmin();
   if ("error" in admin && admin.error) return { error: admin.error };
   const { supabase } = admin as { supabase: Awaited<ReturnType<typeof createClient>>; user: { id: string } };
@@ -125,12 +125,29 @@ async function setPackageStatus(packageId: string, status: "active" | "archived"
   return {};
 }
 
-// Ativação e arquivamento são sempre manuais (issue #15) — sem cron/trigger
-// automático baseado em datas.
+// Toda transição de status é manual (issue #15) — sem cron/trigger automático
+// baseado em datas. activatePackage também serve pra "reabrir" um pacote
+// arquivado de volta pra 'active'. Não existe um status "finalizado" setado pelo
+// admin — se um plano foi lido por completo é calculado por usuário na home
+// (lib/home-data.ts), não é um estado do pacote em si.
 export async function activatePackage(packageId: string): Promise<{ error?: string }> {
   return setPackageStatus(packageId, "active");
 }
 
 export async function archivePackage(packageId: string): Promise<{ error?: string }> {
   return setPackageStatus(packageId, "archived");
+}
+
+// Exclusão de verdade (não só arquivar) — cascade no schema remove os dias do
+// pacote e o progresso de leitura ligado a eles junto.
+export async function deletePackage(packageId: string): Promise<{ error?: string }> {
+  const admin = await requireAdmin();
+  if ("error" in admin && admin.error) return { error: admin.error };
+  const { supabase } = admin as { supabase: Awaited<ReturnType<typeof createClient>>; user: { id: string } };
+
+  const { error } = await supabase.from("reading_packages").delete().eq("id", packageId);
+  if (error) return { error: "Não foi possível excluir o pacote." };
+
+  revalidatePath("/admin");
+  return {};
 }

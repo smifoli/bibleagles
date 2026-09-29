@@ -5,20 +5,33 @@ import type { Passage } from "@/types/database";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-export interface TodayPlanDay {
+export interface ActivePlanDay {
+  id: string;
+  date: string;
+  dayNumber: number;
+  title: string;
+  passages: Passage[];
+}
+
+/** Um pacote com status 'active' e TODOS os seus dias — não só o de hoje, pra
+ * dar pra listar pendências atrasadas mesmo num plano sem dia configurado pra
+ * hoje exatamente (plano com furos entre datas, ou já com todos os dias no
+ * passado). */
+export interface ActivePlan {
   packageId: string;
   packageTitle: string;
   packageDescription: string | null;
-  planDayId: string;
-  date: string;
-  dayNumber: number;
   totalDays: number;
-  chapterTitle: string;
-  passages: Passage[];
-  /** IDs de todos os dias do pacote com data <= hoje — pra calcular pendências por usuário. */
+  /** Dia "atual" do plano — quantidade de dias já vencidos (clamp 1..totalDays),
+   * mesmo critério de lib/package-stats-data.ts e lib/admin-packages-data.ts,
+   * usado mesmo quando não existe um dia com date=hoje exato. */
+  currentDayNumber: number;
+  days: ActivePlanDay[];
+  /** IDs de dias com data <= hoje — usados pra achar pendências por usuário. */
   dueDayIds: string[];
-  /** IDs de TODOS os dias do pacote (passados, hoje e futuros) — pra calcular o quanto
-   * cada pessoa da família já avançou no plano inteiro (não só o que já venceu). */
+  /** IDs de dias com data < hoje (estritamente atrasados, exclui hoje). */
+  pastDueDayIds: string[];
+  /** IDs de TODOS os dias do pacote (passados, hoje e futuros). */
   allDayIds: string[];
 }
 
@@ -29,11 +42,12 @@ interface PackageWithDaysRow {
   reading_plan_days: { id: string; date: string; title: string; passages: Passage[] }[];
 }
 
-/** Pacotes ativos que têm um dia configurado para hoje, na ordem de start_date.
- * Uma query só (dias embutidos via relação package_id) em vez de uma por pacote.
- * `types/database.ts` é escrito à mão e não modela Relationships, então o client
- * tipado não infere o formato do embed — o shape real é o de PackageWithDaysRow. */
-export async function getActivePackagesWithToday(supabase: SupabaseServerClient): Promise<TodayPlanDay[]> {
+/** Todos os pacotes ativos que têm pelo menos um dia configurado, na ordem de
+ * start_date. Uma query só (dias embutidos via relação package_id) em vez de
+ * uma por pacote. `types/database.ts` é escrito à mão e não modela
+ * Relationships, então o client tipado não infere o formato do embed — o
+ * shape real é o de PackageWithDaysRow. */
+export async function getActivePlans(supabase: SupabaseServerClient): Promise<ActivePlan[]> {
   const today = todayDateString(await getUserTimeZone());
 
   const { data } = await supabase
@@ -43,27 +57,31 @@ export async function getActivePackagesWithToday(supabase: SupabaseServerClient)
     .order("start_date", { ascending: true });
   const packages = (data ?? []) as unknown as PackageWithDaysRow[];
 
-  const results: TodayPlanDay[] = [];
+  const results: ActivePlan[] = [];
 
   for (const pkg of packages) {
-    const days = [...pkg.reading_plan_days].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
-    if (days.length === 0) continue;
+    const sortedDays = [...pkg.reading_plan_days].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    if (sortedDays.length === 0) continue;
 
-    const todayIndex = days.findIndex((day) => day.date === today);
-    if (todayIndex === -1) continue;
+    const days: ActivePlanDay[] = sortedDays.map((day, index) => ({
+      id: day.id,
+      date: day.date,
+      dayNumber: index + 1,
+      title: day.title,
+      passages: day.passages,
+    }));
+    const totalDays = days.length;
+    const currentDayNumber = Math.min(Math.max(days.filter((day) => day.date <= today).length, 1), totalDays);
 
-    const todayDay = days[todayIndex];
     results.push({
       packageId: pkg.id,
       packageTitle: pkg.title,
       packageDescription: pkg.description,
-      planDayId: todayDay.id,
-      date: todayDay.date,
-      dayNumber: todayIndex + 1,
-      totalDays: days.length,
-      chapterTitle: todayDay.title,
-      passages: todayDay.passages,
+      totalDays,
+      currentDayNumber,
+      days,
       dueDayIds: days.filter((day) => day.date <= today).map((day) => day.id),
+      pastDueDayIds: days.filter((day) => day.date < today).map((day) => day.id),
       allDayIds: days.map((day) => day.id),
     });
   }

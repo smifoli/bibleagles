@@ -1,86 +1,80 @@
 import Link from "next/link";
-import type { TodayTask } from "@/lib/home-data";
+import type { PendingReadingItem } from "@/lib/home-data";
 
 interface TodayReadingCardProps {
-  tasks: TodayTask[];
+  items: PendingReadingItem[];
 }
 
-function readHref(task: TodayTask): string {
-  if (!task.firstPassage) return `/package/${task.packageId}`;
-  return `/read/${task.firstPassage.book}/${task.firstPassage.chapter_start}?planDay=${task.planDayId}&from=${encodeURIComponent("/")}`;
+function readHref(item: PendingReadingItem): string {
+  if (!item.firstPassage) return `/package/${item.packageId}`;
+  return `/read/${item.firstPassage.book}/${item.firstPassage.chapter_start}?planDay=${item.planDayId}&from=${encodeURIComponent("/")}`;
 }
 
-// Unidade da checklist é o capítulo pendente, não o plano — "X de Y lidos" responde
-// de cara "já terminei hoje?" mesmo com vários pacotes ativos ao mesmo tempo. Quem
-// já leu colapsa numa linha riscada (tick verde) em vez de ocupar o espaço de um
-// card inteiro, que é o que fazia o segundo plano de sempre parecer secundário.
-export function TodayReadingCard({ tasks }: TodayReadingCardProps) {
-  const doneCount = tasks.filter((task) => task.done).length;
-  const pendingTasks = tasks.filter((task) => !task.done);
-  const sortedTasks = [...pendingTasks, ...tasks.filter((task) => task.done)];
-  const nextTask = pendingTasks[0];
+// Unidade da checklist é o capítulo pendente, não o plano — mesmo com vários pacotes
+// ativos ao mesmo tempo. Capítulos atrasados de QUALQUER plano ativo aparecem aqui um
+// a um (não só como contador), na ordem em que deveriam ter sido lidos — mais atrasado
+// primeiro, hoje por último — cada um com a data em que devia ter sido lido. Sem
+// contador "X de Y lidos" no cabeçalho: Y cresceria sem parar num plano longo (soma
+// TODOS os dias já vencidos desde o início, não só os de hoje) e vira um número sem
+// sentido pra quem só quer saber "estou em dia ou não".
+export function TodayReadingCard({ items }: TodayReadingCardProps) {
+  const nextItem = items[0];
 
   return (
     <div className="flex flex-col gap-4 rounded-[20px] bg-card-dark p-[18px]">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="mb-1 text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1.5px] text-[#a08e78]">
-            Sua leitura de hoje
-          </div>
-          <div className="text-[calc(17px*var(--font-scale))] font-semibold text-[#f7f1e6]">
-            {doneCount} de {tasks.length} {tasks.length === 1 ? "capítulo lido" : "capítulos lidos"}
-          </div>
+      <div>
+        <div className="mb-1 text-[calc(9px*var(--font-scale))] font-semibold uppercase tracking-[1.5px] text-[#a08e78]">
+          Sua leitura de hoje
         </div>
-        {pendingTasks.length > 0 && (
-          <span className="shrink-0 whitespace-nowrap rounded-full border border-[#4a3d2c] px-2.5 py-1 text-[calc(10px*var(--font-scale))] tracking-wide text-[#cdbb9e]">
-            {pendingTasks.length} {pendingTasks.length === 1 ? "pendente" : "pendentes"}
-          </span>
-        )}
+        <div className="text-[calc(17px*var(--font-scale))] font-semibold text-[#f7f1e6]">
+          {items.length === 0
+            ? "Você está em dia"
+            : `${items.length} ${items.length === 1 ? "capítulo pendente" : "capítulos pendentes"}`}
+        </div>
       </div>
 
-      <div className="flex flex-col">
-        {sortedTasks.map((task, index) => (
-          <Link
-            key={task.packageId}
-            href={readHref(task)}
-            className={`flex items-center gap-3 py-2.5 transition-transform active:scale-[0.98] ${index > 0 ? "border-t border-[#43382a]" : ""}`}
-          >
-            <span
-              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-                task.done ? "bg-[#8fa876] text-[#23301c]" : "border-[1.5px] border-[#6a5a45]"
-              }`}
+      {items.length > 0 && (
+        <div className="flex flex-col">
+          {items.map((item, index) => (
+            <Link
+              key={item.planDayId}
+              href={readHref(item)}
+              className={`flex items-center gap-3 py-2.5 transition-transform active:scale-[0.98] ${index > 0 ? "border-t border-[#43382a]" : ""}`}
             >
-              {task.done && "✓"}
-            </span>
-            <span className="min-w-0 flex-1">
-              <span
-                className={`block truncate text-[calc(14px*var(--font-scale))] font-semibold ${
-                  task.done ? "text-[#a08e78] line-through decoration-[#5c4c38]" : "text-[#f7f1e6]"
-                }`}
-              >
-                {task.chapterTitle}
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-[1.5px] border-[#6a5a45]" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[calc(14px*var(--font-scale))] font-semibold text-[#f7f1e6]">
+                  {item.chapterTitle}
+                </span>
+                <span className="mt-0.5 block truncate text-[calc(11px*var(--font-scale))] text-[#a08e78]">
+                  {item.packageTitle} · dia {item.dayNumber} de {item.totalDays}
+                  {!item.isToday && (
+                    <span className="text-[#dc9552]"> · atrasado desde {item.dateLabel}</span>
+                  )}
+                </span>
               </span>
-              <span className="mt-0.5 block truncate text-[calc(11px*var(--font-scale))] text-[#a08e78]">
-                {task.packageTitle} · dia {task.dayNumber} de {task.totalDays}
-                {!task.done && task.pendingCount > 1 && ` · +${task.pendingCount - 1} atrasado${task.pendingCount - 1 === 1 ? "" : "s"}`}
+              <span aria-hidden className="shrink-0 text-[13px] text-[#a08e78]">
+                ›
               </span>
-            </span>
-            <span aria-hidden className="shrink-0 text-[13px] text-[#a08e78]">
-              ›
-            </span>
-          </Link>
-        ))}
-      </div>
+            </Link>
+          ))}
+        </div>
+      )}
 
-      {nextTask ? (
+      {nextItem ? (
         <Link
-          href={readHref(nextTask)}
+          href={readHref(nextItem)}
           className="self-end rounded-full bg-[#f3ebdc] px-[18px] py-2.5 text-[calc(12px*var(--font-scale))] font-semibold text-card-dark transition-transform active:scale-[0.96]"
         >
-          Continuar em {nextTask.chapterTitle}
+          Continuar em {nextItem.chapterTitle}
         </Link>
       ) : (
-        <div className="text-[calc(11px*var(--font-scale))] font-semibold text-[#9fb389]">Você está em dia com todos os planos</div>
+        <Link
+          href="/history"
+          className="self-end rounded-full bg-[#f3ebdc] px-[18px] py-2.5 text-[calc(12px*var(--font-scale))] font-semibold text-card-dark transition-transform active:scale-[0.96]"
+        >
+          Veja tudo que você já leu
+        </Link>
       )}
     </div>
   );
