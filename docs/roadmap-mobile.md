@@ -28,7 +28,7 @@
 - Projeto Supabase novo, na UE (D-MIG-04).
 - **Entrega:** um app "olá" abrindo no seu iPhone.
 
-## Etapa 1 — Bíblia offline
+## Etapa 1 — Bíblia offline ✅ (2026-10-10)
 
 - Texto bíblico embutido no app (reaproveitando `data/bibles`).
 - Navegação Testamento → Livro → Capítulo, busca por referência.
