@@ -8,7 +8,7 @@
 - **Cada etapa entrega algo que funciona** no iPhone, mesmo que pequeno.
 - **O mais arriscado primeiro:** a sincronização offline é provada cedo (etapa 3).
 - **Do simples ao complexo:** destaques antes de comentários; grupos antes de visibilidade.
-- **Aprender digitando:** cada etapa é quebrada em passos pequenos no início dela.
+- **Passos revisáveis:** Claude escreve o código em passos pequenos; Lucas revisa cada um antes do próximo.
 
 ## Decisões
 
