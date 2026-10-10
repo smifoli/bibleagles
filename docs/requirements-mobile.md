@@ -386,6 +386,25 @@ Tela de detalhes de um plano, visível para os membros do grupo:
   curtidas, leituras), incluindo o que o usuário já viu na home.
   (Substitui a tela "Família" do PWA.)
 
+### 3.20 Assinatura
+
+- **RF-ASS-01** O uso do app exige **assinatura ativa**, com um **período de teste** grátis.
+- **RF-ASS-02** Dois tipos de assinatura:
+  - **Individual:** cobre só quem assinou.
+  - **De grupo:** paga pelo dono do grupo, cobre todos os membros daquele grupo.
+- **RF-ASS-03** Um usuário tem acesso se tiver assinatura individual **ou** for membro de algum
+  grupo com assinatura de grupo ativa.
+- **RF-ASS-04** Os usuários atuais do PWA (a família) são **isentos para sempre**.
+- **RF-ASS-05** Compra pelas lojas (In-App Purchase da Apple / Google Play Billing).
+- **RF-ASS-06** A verificação de acesso é feita **no servidor**, nunca só no app (RNF-SEG-01).
+- **RF-ASS-07** Preço de referência: **€5/mês** individual *(a validar; considerar plano anual com desconto)*.
+- **RF-ASS-08** A assinatura de grupo custa mais que a individual e tem **limite de membros**,
+  em faixas (ex.: até 10, até 25, até 50). Para mais membros, o dono passa para uma faixa maior.
+- **RF-ASS-09** Grupo no limite: novos membros não conseguem entrar até o dono mudar de faixa
+  (o pedido fica pendente, com aviso ao dono).
+- **RF-ASS-10** Assinatura vencida = **somente leitura**: o usuário lê a Bíblia e vê o conteúdo
+  existente, mas não comenta, não destaca, não curte, não marca leitura e não entra em grupos.
+
 ---
 
 ## 4. Requisitos não funcionais
@@ -465,6 +484,14 @@ Tela de detalhes de um plano, visível para os membros do grupo:
 - **RNF-MIG-02** A família atual vira o primeiro grupo, **fechado**; os admins atuais viram
   admins do grupo, e o criador vira dono.
 - **RNF-MIG-03** Comentários e destaques existentes ficam visíveis nesse grupo.
+
+### Experiência nativa
+
+- **RNF-UX-01** O app deve parecer e se comportar como um app nativo do iPhone, não como um site:
+  navegação com gesto de voltar, vibração sutil nas ações, ícones do sistema, animações fluidas,
+  menus e painéis nativos.
+- **RNF-UX-02** Segue as *Human Interface Guidelines* da Apple (tamanhos de toque, tipografia,
+  modo escuro, Dynamic Type).
 
 ### Monitoramento
 
