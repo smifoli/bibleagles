@@ -21,7 +21,7 @@
 
 ---
 
-## Etapa 0 — Preparação
+## Etapa 0 — Preparação ✅ (2026-10-10)
 
 - Repositório novo para o app.
 - Projeto Expo (React Native + TypeScript) rodando no iPhone.

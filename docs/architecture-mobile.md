@@ -211,6 +211,17 @@ Mudar o que alguém pode ver também é uma mudança, mesmo que os dados não te
 - **D-TEC-02** Para a sensação nativa (RNF-UX-01): navegação nativa (Expo Router, native stack),
   `expo-haptics`, SF Symbols (`expo-symbols`), Reanimated + Gesture Handler, menus e *sheets* nativos.
 
+### Texto bíblico
+
+- **D-TEC-10** O texto bíblico vai empacotado no app como um **banco SQLite só de leitura**
+  (`bible.db`, ~38 MB, ~16 MB compactado), gerado a partir dos JSONs do PWA por um script.
+  Inclui índice **FTS5** sem acentos para a busca por palavra (RF-NAV-07).
+  - **Por quê:** abrir capítulo é uma consulta pequena (RNF-DES-01); importar 24 MB de JSON
+    no código deixaria o app lento e pesado em memória.
+  - Banco **separado** do banco sincronizado (PowerSync): um nunca muda, o outro sincroniza.
+  - Trocar o texto = gerar novo arquivo com outro nome (`bible-N.db`), senão o aparelho
+    continua com a cópia antiga.
+
 ### Servidor e sincronização
 
 - **D-TEC-03** Servidor: **Supabase** (Postgres, autenticação com e-mail/Apple/Google, arquivos,
