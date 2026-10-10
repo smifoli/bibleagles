@@ -343,6 +343,7 @@ Tela de detalhes de um plano, visível para os membros do grupo:
 - **RF-CON-02** Login com **e-mail e senha**, **Apple** ou **Google**; sessão persistente.
 - **RF-CON-03** Recuperação de senha por e-mail.
 - **RF-CON-04** Sair (logout).
+- **RF-CON-06** O app exige login ao abrir: sem conta, nenhuma tela é acessível (nem a Bíblia).
 - **RF-CON-05** **Excluir a conta** de dentro do app (exigência da Apple). O usuário escolhe:
   - **apagar tudo**; ou
   - **manter os comentários sem identificação** (autor aparece como "Usuário removido").
