@@ -92,6 +92,9 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
   Ao escrever a resposta, fica explícito onde ela vai aparecer e que isso não pode ser mudado.
   Se o autor do comentário original mudar a visibilidade, as respostas acompanham.
 - **RF-COM-08** Conteúdo de usuários bloqueados não aparece para quem bloqueou.
+- **RF-COM-09** Sempre que um comentário com respostas é apagado (pelo autor, por um admin,
+  ao sair do grupo ou ao excluir a conta), ele vira **"comentário removido"** e as respostas
+  continuam visíveis. Sem respostas, ele é apagado de vez.
 
 ### 3.3 Comentários — filtro de exibição ("olho")
 
