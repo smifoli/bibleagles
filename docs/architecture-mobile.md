@@ -1,6 +1,6 @@
 # Arquitetura — BiblEagles Mobile
 
-**Status:** Em desenho
+**Status:** Arquitetura da v1 fechada (2026-10-10)
 **Base:** `docs/requirements-mobile.md` (os códigos RF-*/RNF-* citados aqui vêm de lá)
 
 > Este documento descreve **como** o app é construído. Cada decisão aponta para o requisito
@@ -58,8 +58,6 @@
 ---
 
 ## 2. Modelo de dados
-
-*(em andamento)*
 
 ### Entidades e relacionamentos
 
@@ -135,8 +133,6 @@ Toda tabela sincronizada tem:
 
 ## 3. Sincronização
 
-*(em andamento)*
-
 ### O que cada aparelho baixa
 
 - **D-SYN-01** Comentários e destaques: os **visíveis em algum grupo do usuário**, mais **todos
@@ -202,8 +198,8 @@ Mudar o que alguém pode ver também é uma mudança, mesmo que os dados não te
 | [1] Telas | **React Native + Expo** (TypeScript) |
 | [2]+[4] Banco local + sincronizador | **PowerSync** (SQLite no aparelho) |
 | [5]–[9] Servidor | **Supabase** (Postgres, Auth, Storage, Edge Functions) |
-| [10] Push | *(a decidir)* |
-| [11] Monitoramento | *(a decidir)* |
+| [10] Push | **Expo Push** (repassa para APNs/FCM) |
+| [11] Monitoramento | **Sentry** (erros) + **PostHog UE** (uso) |
 
 ### App
 
@@ -252,3 +248,58 @@ Mudar o que alguém pode ver também é uma mudança, mesmo que os dados não te
   cobram "por pessoa" nativamente; mudar de faixa = upgrade/downgrade).
 - **D-ASS-05** Unificação das compras iOS/Android e aviso ao servidor (renovou, cancelou, venceu):
   **RevenueCat** *(a confirmar; verificar preço atual)*.
+
+### Push e monitoramento
+
+- **D-TEC-07** Push via **Expo Push**: o app registra o token na tabela Aparelho; a Edge Function
+  envia ao Expo, que repassa à Apple/Google. A lógica de quem recebe o quê (triggers atuais do
+  PWA) é reaproveitada; só muda o transporte (Web Push → Expo Push).
+- **D-TEC-08** Erros e travamentos: **Sentry** (RNF-MON-01).
+- **D-TEC-09** Estatísticas de uso: **PostHog**, hospedado na UE (RNF-MON-02, RNF-PRI-04).
+  Só eventos e erros — **nunca** o conteúdo de comentários.
+
+---
+
+## 5. Migração do PWA
+
+### Mapeamento
+
+| Hoje (PWA) | No modelo novo |
+|---|---|
+| `users` | Usuário (mesmo ID, mesma senha) |
+| — | Grupo **"Família"**, fechado, criado na migração |
+| `users.role` | Membro do grupo Família com o papel; Lucas como **dono** |
+| `users.is_deleted` | Usuário mantido; membro com `apagado_em` (ex-membro) |
+| `reading_packages` + `reading_plan_days` | Plano (`grupo_id` = Família) + Dia + Passagem |
+| `comments` + `comment_likes` | Comentário + Curtida + Visibilidade (Família) |
+| `bookmarks` | Destaque + Visibilidade (Família) |
+| `reading_progress` (dia de plano) | Progresso **por capítulo** (cada capítulo do dia, mesma data) |
+| `reading_progress` (capítulo avulso) | Leitura pessoal |
+| `notifications` | **Não migra** — caixa de entrada começa vazia |
+| `push_subscriptions` | **Não migra** — o app registra tokens novos |
+
+### Decisões
+
+- **D-MIG-01** Destaques do mesmo usuário no mesmo versículo em versões diferentes viram
+  **um só**: fica o mais recente (RF-VER-04).
+- **D-MIG-02** Capítulos lidos por plano também são copiados para a **leitura pessoal**,
+  para o percentual da Bíblia e o histórico não "zerarem".
+- **D-MIG-03** Os usuários atuais ficam marcados como **isentos de assinatura** (RF-ASS-04).
+- **D-MIG-04** O app usa um **projeto Supabase novo** (UE), com o schema novo. O projeto do PWA
+  continua no ar até o dia da migração, quando os dados são copiados (inclusive as senhas).
+- **D-MIG-05** **Dia da migração** pode ser depois de o app estar na App Store:
+  1. App publicado, já usado por novos usuários.
+  2. Família continua no PWA até o dia combinado (e não cria conta no app antes).
+  3. No dia: PWA em modo somente leitura → script de migração → família entra no app com o
+     mesmo e-mail e senha → PWA passa a mostrar só "baixe o app".
+- **D-MIG-06** O script de migração é testado antes numa cópia dos dados, e conferido por
+  contagem (ex.: número de comentários antes = depois).
+- **D-MIG-08** Toda a família usa iPhone: a migração não depende do app Android.
+
+### Região
+
+- **D-MIG-07** Servidor numa **única região, na UE**, atendendo Brasil, Europa e EUA.
+  - **Por quê funciona:** com offline-first, as telas leem do aparelho; a distância até o
+    servidor só afeta a sincronização em segundo plano (~100–200 ms a mais), imperceptível.
+  - Verificar antes do lançamento: política de privacidade informando que os dados ficam na UE
+    (transferência internacional — LGPD).
