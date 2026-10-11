@@ -94,8 +94,10 @@
 - **Status (2026-10-11):** partes 1 a 3 feitas e testadas no iPhone: destaques visíveis nos
   grupos (na cor de quem destacou), comentários (responder, editar, apagar/removido, curtir,
   trechos de versículos), filtro do olho por grupo e "meus comentários", resumo do capítulo.
-  Faltam: telas de destaques/comentários do grupo e "Meus destaques" (RF-DST-10 a 14); padrão de
-  visibilidade (RF-COM-03), admin remove comentário (RF-LEI-40) e aviso de recusa (D-SYN-08).
+  Parte 4 feita: "Destaques e comentários" na página do grupo e "Meus destaques" na aba Você
+  (RF-DST-10 a 14), um item por versículo com o texto, filtros por livro (e grupo/cor nos meus).
+  Faltam: padrão de visibilidade (RF-COM-03), admin remove comentário (RF-LEI-40) e aviso de
+  recusa (D-SYN-08).
 
 ## Etapa 7 — Planos
 
