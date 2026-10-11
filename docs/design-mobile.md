@@ -25,8 +25,8 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   Linhas de lista e campos num tom de superfície; texto em tons de tinta. Continuam do sistema
   só o vermelho de erro e o efeito de "pressionado".
 - **D-VIS-02** **Margens menores que as do PWA** (que usa 18 px nas laterais e 14 px dentro do
-  versículo destacado). Ponto de partida: 16 pt nas laterais, 10 pt dentro do destaque; ajustar
-  no iPhone.
+  versículo destacado). Ajustado no iPhone: texto a 18 pt das laterais (8 de margem + 10 de
+  respiro dentro do bloco).
 
 ## 2. Navegação
 
@@ -54,7 +54,7 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   - **Por quê:** toque e destaque precisos, e é o que a família conhece. Texto corrido é mais
     bonito, mas um versículo destacado no meio do parágrafo fica difícil de ver e de tocar.
 - **D-VIS-07** **Número do versículo** pequeno, semibold, cor areia (`#a3927d`), no início do bloco.
-- **D-VIS-08** **Destaque:** o bloco inteiro na cor, cantos de 8 pt, 10 pt de respiro
+- **D-VIS-08** **Destaque:** o bloco inteiro na cor, cantos de 12 pt, 10 pt de respiro
   (D-VIS-02). Meu destaque na minha cor; destacado só por outros em areia neutra (RF-LEI-22).
   No escuro, versões mais fechadas das 4 cores.
 - **Contexto do plano** (RF-LEI-13) numa linha abaixo do título, só quando a leitura vem de um
@@ -109,7 +109,7 @@ Tipografia e espaço:
 
 - Interface: fonte do sistema (SF), tamanhos do Dynamic Type.
 - Texto bíblico: Spectral 20 (14–32), entrelinha 1,55; número 13 semibold.
-- Margem lateral 16 pt; 6 pt entre versículos; destaque com 10 pt de respiro e cantos de 8 pt.
+- Texto a 18 pt das laterais; destaque com 10 pt de respiro e cantos de 12 pt.
 
 ## 6. Como validar
 
