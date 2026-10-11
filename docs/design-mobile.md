@@ -96,10 +96,10 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   de 2 colunas** cujo fundo se enche de verde na proporção do lido, com ✓ quando termina,
   "N capítulos" e "N destaques". Na grade de capítulos, ✓ verde pequeno no canto do lido. Na
   busca, os livros voltam a ser linhas de lista. O mesmo número na aba Você, junto do histórico.
-- **D-VIS-13** **Engrenagem no topo do leitor** (pedido do Lucas, 2026-10-11): um botão só, que
-  abre a folha "Ajustes de leitura" com tamanho e tipo de letra, versão e de quais grupos ver
-  comentários e destaques (o antigo olho). Substitui olho, "Aa" e a sigla da versão. O aviso
-  "grupos escondidos" no topo do capítulo abre a mesma folha.
+- **D-VIS-13** **Olho e engrenagem no topo do leitor** (pedido do Lucas, 2026-10-11): a
+  engrenagem abre "Ajustes de leitura" (tamanho e tipo de letra, versão) e substitui "Aa" e a
+  sigla da versão. O olho fica ao lado, à vista, porque muda o que aparece no capítulo (riscado
+  quando esconde algo); abre só o filtro de grupos, assim como o aviso "grupos escondidos".
 
 ## 5. Tokens
 
