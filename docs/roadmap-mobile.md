@@ -37,14 +37,15 @@
 - **Entrega:** ler a Bíblia inteira sem internet. Sem login, sem servidor.
 - Requisitos: RF-VER, RF-NAV, RF-LEI-01 a 08, RNF-OFF-01.
 
-## Etapa 2 — Login
+## Etapa 2 — Login ✅ (2026-10-10)
 
 - Supabase Auth com e-mail e senha.
 - Perfil básico (nome, foto, idioma, versão preferida).
 - **Entrega:** criar conta, entrar, sair.
 - Requisitos: RF-CON-01 a 04, RF-PER.
+- Pendente: confirmação de e-mail e "esqueci a senha" (exigem SMTP próprio).
 
-## Etapa 3 — Fundação da sincronização ⚠️ maior risco
+## Etapa 3 — Fundação da sincronização ✅ (2026-10-11)
 
 - PowerSync + SQLite no aparelho.
 - Schema mínimo no servidor: Usuário, Grupo, Membro do grupo, com colunas de sincronização.
@@ -52,6 +53,7 @@
 - Testar: criar offline, sincronizar, ver em outro aparelho.
 - **Entrega:** um dado criado offline num iPhone aparece no outro.
 - Decisões: D-DAD-01 a 08, D-SYN-01, D-SYN-02, D-TEC-04.
+- Testado: grupo criado no iPhone em modo avião apareceu no simulador após reconectar.
 
 ## Etapa 4 — Destaques e leitura pessoal
 
