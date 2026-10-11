@@ -74,6 +74,13 @@
 - Mudanças de acesso sincronizando (entrar baixa tudo; sair limpa).
 - **Entrega:** a família vira um grupo de teste.
 - Requisitos: RF-GRP, seção 2. Decisões: D-SYN-03 a 06.
+- **Status (2026-10-11):** tudo feito e testado no iPhone e no simulador: criar, editar
+  (nome, tipo, descrição), apagar, busca com detalhes, pedir/aprovar, papéis, transferir, sair,
+  convites por código, link e QR code (a tela do convite fecha sozinha quando alguém o usa).
+  O PowerSync passou a usar WebSocket (o streaming HTTP caía no iOS). Falta a entrega: a família
+  entrar, que depende do SMTP próprio (confirmação de e-mail e "esqueci a senha").
+- Ficou para as etapas 6 e 7: RF-GRP-12 (manter ou apagar o conteúdo ao sair) e limpar
+  comentários, destaques e planos ao apagar um grupo.
 
 ## Etapa 6 — Comentários e visibilidade
 

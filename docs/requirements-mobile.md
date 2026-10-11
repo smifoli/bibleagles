@@ -58,10 +58,11 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
 - **RF-GRP-06** Grupo aberto aparece na busca; o usuário entra direto.
 - **RF-GRP-07** Grupo fechado também aparece na busca, com o botão "pedir para entrar".
   O pedido fica pendente até um admin aprovar ou recusar.
-- **RF-GRP-08** Qualquer grupo pode ser acessado por convite (link ou código).
+- **RF-GRP-08** Qualquer grupo pode ser acessado por convite (link, código ou QR code).
 - **RF-GRP-09** Em grupo fechado, entrar por convite também passa por aprovação de um admin.
-- **RF-GRP-10** Exceção: ao gerar um **link** de convite, o admin pode marcar que quem entrar
-  por ele é aprovado automaticamente.
+- **RF-GRP-10** ~~Exceção: ao gerar um link de convite, o admin pode marcar que quem entrar por
+  ele é aprovado automaticamente.~~ Retirado (2026-10-11, decisão do Lucas): grupo fechado
+  sempre pede aprovação, inclusive por convite.
 - **RF-GRP-11** Todo grupo aparece na busca. Grupos escondidos ficam fora desta versão.
 
 - **RF-GRP-12** Ao sair de um grupo, o app pergunta se o usuário quer **manter** ou **apagar**
