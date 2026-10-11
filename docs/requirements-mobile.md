@@ -106,7 +106,9 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
 - **RF-COM-11** Um botão (ícone de olho) mostra também comentários de outros grupos do usuário.
   Eles aparecem **esmaecidos**, para indicar que são de outro contexto.
 - **RF-COM-12** No olho, o usuário escolhe: todos os outros grupos, ou só alguns.
-- **RF-COM-13** Lendo **livremente**: o usuário pode ver os comentários de todos os grupos, ou nenhum.
+- **RF-COM-13** Lendo **livremente**: o usuário escolhe no olho de quais grupos ver comentários e
+  destaques (todos, nenhum ou só alguns). Os próprios aparecem sempre. (Antes: só todos ou nenhum;
+  mudado em 2026-10-11, decisão do Lucas.)
 - **RF-COM-14** Ao entrar num grupo novo, ele já vem ativado no filtro do olho.
 
 ### 3.4 Destaques (cores) — visibilidade
