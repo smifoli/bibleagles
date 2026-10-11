@@ -71,6 +71,9 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
   - Comentário apagado que tem respostas de outros vira **"comentário removido"**,
     e as respostas continuam visíveis.
   - **Manter**: o conteúdo continua, e o autor aparece como **ex-membro**.
+- **RF-GRP-13** O **dono** pode apagar o grupo, com confirmação. O grupo deixa de existir para
+  todos os membros (some da lista e da busca). Se o dono é o único membro, sair do grupo também
+  o apaga.
 
 ### 3.2 Comentários — visibilidade
 
