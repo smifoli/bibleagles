@@ -99,6 +99,15 @@ Usuário ──1:N── Notificação
     (editar, responder, curtir, definir visibilidade). Um ID provisório exigiria trocar
     todas as referências depois da sincronização — frágil.
 - **D-DAD-03** Os UUIDs existentes no PWA são mantidos na migração (RNF-MIG-01).
+  Exceção: destaques e leitura pessoal (D-DAD-09).
+- **D-DAD-09** Destaque e Leitura pessoal têm **ID derivado da referência**: uuid v5 de
+  (usuário, `highlight:GEN.1.1` / `chapter_read:GEN.1`), calculado igual no aparelho e
+  conferido pelo servidor. Uma pessoa tem no máximo uma linha por versículo/capítulo, para
+  sempre: apagar é soft delete e recriar reativa a mesma linha.
+  - **Por quê:** o mesmo versículo destacado offline em dois aparelhos chegaria com dois IDs
+    aleatórios; o segundo seria recusado como duplicata e a cor se perderia sem aviso. Com o
+    mesmo ID, a segunda mudança é uma atualização comum (D-DAD-08).
+  - Na migração, os IDs dessas duas tabelas são recalculados (nada no PWA aponta para elas).
 
 ### Dono do plano
 
@@ -294,7 +303,8 @@ Mudar o que alguém pode ver também é uma mudança, mesmo que os dados não te
 - **D-MIG-01** Destaques do mesmo usuário no mesmo versículo em versões diferentes viram
   **um só**: fica o mais recente (RF-VER-04).
 - **D-MIG-02** Capítulos lidos por plano também são copiados para a **leitura pessoal**,
-  para o percentual da Bíblia e o histórico não "zerarem".
+  para o percentual da Bíblia e o histórico não "zerarem". Capítulo lido mais de uma vez:
+  fica a primeira data (RF-HIS-02).
 - **D-MIG-03** Os usuários atuais ficam marcados como **isentos de assinatura** (RF-ASS-04).
 - **D-MIG-04** O app usa um **projeto Supabase novo** (UE), com o schema novo. O projeto do PWA
   continua no ar até o dia da migração, quando os dados são copiados (inclusive as senhas).
