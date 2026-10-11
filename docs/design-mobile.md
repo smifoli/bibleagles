@@ -55,23 +55,27 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
     bonito, mas um versículo destacado no meio do parágrafo fica difícil de ver e de tocar.
 - **D-VIS-07** **Número do versículo** pequeno, semibold, cor areia (`#a3927d`), no início do bloco.
 - **D-VIS-08** **Destaque:** o bloco inteiro na cor, **encostado na borda esquerda** (sem raio
-  desse lado) e com raio de 12 pt à direita, a 8 pt da borda direita. Destaques seguidos formam
+  desse lado) e com raio de 20 pt à direita, a 8 pt da borda direita. Destaques seguidos formam
   um bloco só: sem fresta e sem raio onde se encontram, mesmo com cores diferentes. Meu destaque
   na minha cor; destacado só por outros em areia neutra (RF-LEI-22). No escuro, versões mais
   fechadas das 4 cores.
   - Escolhido no iPhone, comparando 4 estilos (arredondado com margem, ponta a ponta, encostado
-    à esquerda, ponta a ponta com faixa).
+    à esquerda, ponta a ponta com faixa). Raio: 20 pt; com 24, versículos de uma linha ficariam
+    com a ponta em pílula (o raio passa da metade da altura do bloco).
 - **Contexto do plano** (RF-LEI-13) numa linha abaixo do título, só quando a leitura vem de um
   plano: "Lendo Mateus · Dia 12 de 28".
 
 ## 4. Interações
 
-- **D-VIS-09** **Painel do versículo** (RF-LEI-20/21): tocar no versículo abre uma **sheet nativa
-  pequena** (altura só do conteúdo); o versículo ganha um contorno sutil enquanto ela está
-  aberta. Em cima, as 4 cores (tocar na já escolhida remove); escolher dá vibração leve e fecha
-  a sheet. Comentar e "quem destacou" entram nas próximas etapas, abaixo das cores.
-  - **Por quê não o toque longo:** muita gente não descobre o toque longo, e o painel vai
-    crescer (comentários, respostas).
+- **D-VIS-09** **Seleção de versículos** (RF-LEI-20/21): tocar num versículo o **seleciona**
+  (contorno sutil) e uma **barra pequena** sobe embaixo, acima das abas, com "N versículos", as
+  4 cores e ✕. Tocar em outros versículos soma à seleção; tocar de novo tira. Escolher uma cor
+  destaca todos de uma vez, com vibração leve, e fecha a barra. A cor marcada (✓) é a que todos
+  os selecionados já têm; tocar nela remove o destaque deles. Trocar de capítulo cancela.
+  - **Por quê:** destacar uma passagem inteira de uma vez, sem um painel cobrindo o texto a
+    cada versículo. Substitui a sheet de um versículo só (decidido no iPhone).
+  - **Comentar** continua sendo de um versículo (RF-VER-04): entra na barra quando a seleção
+    tiver um só (etapa 6), assim como "quem destacou".
 - **D-VIS-10** **Marcar como lido** (RF-LEI-10/12): botão grande **no fim do capítulo**, acima de
   anterior/próximo. "✓ Marcar como lido" → depois "Lido em 11 de out." (tocar desmarca).
   Vibração de sucesso. Com plano ativo contendo o capítulo (etapa 7), abre uma sheet de "onde
@@ -113,7 +117,7 @@ Tipografia e espaço:
 
 - Interface: fonte do sistema (SF), tamanhos do Dynamic Type.
 - Texto bíblico: Spectral 20 (14–32), entrelinha 1,55; número 13 semibold.
-- Texto a 18 pt da borda esquerda; destaque encostado à esquerda, raio de 12 pt à direita.
+- Texto a 18 pt da borda esquerda; destaque encostado à esquerda, raio de 20 pt à direita.
 
 ## 6. Como validar
 
