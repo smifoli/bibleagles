@@ -202,7 +202,8 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
   ver comentários e respostas, ver quem destacou e com qual cor.
 - **RF-LEI-21** Cores: amarelo, verde, rosa, azul. Tocar na cor já escolhida remove o destaque.
 - **RF-LEI-22** Versículo destacado pelo próprio usuário aparece na cor dele; destacado só por
-  outros aparece num tom neutro.
+  outros aparece na cor de quem destacou, igual, e o selo do versículo mostra quem foi. (Antes:
+  tom neutro; mudado em 2026-10-11, decisão do Lucas.)
 - **RF-LEI-23** Cada versículo mostra os avatares de quem interagiu (destacou ou comentou),
   uma vez por pessoa, e a quantidade de comentários.
 - **RF-LEI-24** Comentários: criar, editar (marca "editado"), apagar, responder (1 nível),

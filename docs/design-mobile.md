@@ -58,7 +58,9 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   desse lado) e com raio de 20 pt à direita, a 8 pt da borda direita. Destaques seguidos **da
   mesma cor** formam um bloco só (sem fresta e sem raio onde se encontram); de cores
   diferentes ficam separados, cada um com os seus cantos e 3 pt de fresta. Meu destaque
-  na minha cor; destacado só por outros em areia neutra (RF-LEI-22). No escuro, versões mais
+  na minha cor; destacado só por outros na cor de quem destacou, com as iniciais no selo do
+  versículo (RF-LEI-22; antes era areia neutra, mudado a pedido do Lucas em 2026-10-11).
+  Blocos só se juntam com a mesma cor e a mesma pessoa. No escuro, versões mais
   fechadas das 4 cores.
   - Escolhido no iPhone, comparando 4 estilos (arredondado com margem, ponta a ponta, encostado
     à esquerda, ponta a ponta com faixa). Raio: 20 pt; com 24, versículos de uma linha ficariam
