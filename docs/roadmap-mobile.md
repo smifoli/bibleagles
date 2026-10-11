@@ -91,6 +91,11 @@
 - **Entrega:** o coração do app funcionando.
 - Telas de destaques e comentários: por versículo, na página do grupo e "Meus destaques".
 - Requisitos: RF-COM, RF-DST-01 a 03, RF-DST-10 a 14, RF-LEI-23/24/30 a 32/40. Decisões: D-SYN-07 a 09.
+- **Status (2026-10-11):** partes 1 a 3 feitas e testadas no iPhone: destaques visíveis nos
+  grupos (na cor de quem destacou), comentários (responder, editar, apagar/removido, curtir,
+  trechos de versículos), filtro do olho por grupo e "meus comentários", resumo do capítulo.
+  Faltam: telas de destaques/comentários do grupo e "Meus destaques" (RF-DST-10 a 14); padrão de
+  visibilidade (RF-COM-03), admin remove comentário (RF-LEI-40) e aviso de recusa (D-SYN-08).
 
 ## Etapa 7 — Planos
 
