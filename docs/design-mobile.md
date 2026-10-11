@@ -55,8 +55,9 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
     bonito, mas um versículo destacado no meio do parágrafo fica difícil de ver e de tocar.
 - **D-VIS-07** **Número do versículo** pequeno, semibold, cor areia (`#a3927d`), no início do bloco.
 - **D-VIS-08** **Destaque:** o bloco inteiro na cor, **encostado na borda esquerda** (sem raio
-  desse lado) e com raio de 20 pt à direita, a 8 pt da borda direita. Destaques seguidos formam
-  um bloco só: sem fresta e sem raio onde se encontram, mesmo com cores diferentes. Meu destaque
+  desse lado) e com raio de 20 pt à direita, a 8 pt da borda direita. Destaques seguidos **da
+  mesma cor** formam um bloco só (sem fresta e sem raio onde se encontram); de cores
+  diferentes ficam separados, cada um com os seus cantos e 3 pt de fresta. Meu destaque
   na minha cor; destacado só por outros em areia neutra (RF-LEI-22). No escuro, versões mais
   fechadas das 4 cores.
   - Escolhido no iPhone, comparando 4 estilos (arredondado com margem, ponta a ponta, encostado
