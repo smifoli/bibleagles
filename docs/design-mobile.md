@@ -105,6 +105,12 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   hora em 14. Onde aparece: uma linha "Visível em: …" acima do campo, que abre ali mesmo a lista
   de grupos com ✓ e "Privado (só você)"; numa resposta, a linha só informa. Segurar o dedo num
   versículo abre direto para comentar (o toque continua selecionando).
+- **D-VIS-15** **Troca de capítulo pelo dedo** (pedido do Lucas, 2026-10-11): o leitor é uma
+  faixa com três capítulos completos lado a lado (anterior, atual e próximo). A página segue o
+  dedo; ao soltar (30% da largura ou um gesto rápido), continua na velocidade do dedo e
+  desacelera até parar; senão, volta com um leve quique. Nas pontas da Bíblia, resistência
+  elástica. A página que fica para trás continua montada: se o swipe foi sem querer, voltar
+  leva exatamente onde se estava. Nada é recriado na troca (sem piscar).
 
 ## 5. Tokens
 
