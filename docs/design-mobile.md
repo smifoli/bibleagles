@@ -88,14 +88,18 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   anterior/próximo. "✓ Marcar como lido" → depois "Lido em 11 de out." (tocar desmarca).
   Vibração de sucesso. Com plano ativo contendo o capítulo (etapa 7), abre uma sheet de "onde
   marcar", tudo pré-selecionado; sem plano, marca direto.
-  - **Por quê só no fim:** quem leu chega ao fim; a barra do topo já tem voltar, título, versão
-    e "Aa".
+  - **Por quê só no fim:** quem leu chega ao fim; a barra do topo já tem voltar, título e a
+    engrenagem.
 - **D-VIS-11** **Percentual lido e aba Bíblia** (RF-NAV-03/04), no visual do PWA (pedido do
   Lucas): no topo, "Você leu X% da Bíblia" com barras verdes de AT e NT; livros **agrupados nas
   seções do PWA** (Pentateuco, Históricos, Poéticos, Profetas, Evangelhos, Cartas…), em **cards
   de 2 colunas** cujo fundo se enche de verde na proporção do lido, com ✓ quando termina,
   "N capítulos" e "N destaques". Na grade de capítulos, ✓ verde pequeno no canto do lido. Na
   busca, os livros voltam a ser linhas de lista. O mesmo número na aba Você, junto do histórico.
+- **D-VIS-13** **Engrenagem no topo do leitor** (pedido do Lucas, 2026-10-11): um botão só, que
+  abre a folha "Ajustes de leitura" com tamanho e tipo de letra, versão e de quais grupos ver
+  comentários e destaques (o antigo olho). Substitui olho, "Aa" e a sigla da versão. O aviso
+  "grupos escondidos" no topo do capítulo abre a mesma folha.
 
 ## 5. Tokens
 
