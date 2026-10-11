@@ -68,8 +68,8 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
 ## 4. Interações
 
 - **D-VIS-09** **Seleção de versículos** (RF-LEI-20/21): tocar num versículo o **seleciona**
-  (contorno sutil) e uma **barra pequena** sobe embaixo, acima das abas, com "N versículos", as
-  4 cores e ✕. Tocar em outros versículos soma à seleção; tocar de novo tira. Escolher uma cor
+  (contorno sutil; selecionados seguidos formam um contorno só) e uma **barra pequena** aparece
+  logo abaixo do título, por cima do texto, com "N versículos", as 4 cores e ✕. Tocar em outros versículos soma à seleção; tocar de novo tira. Escolher uma cor
   destaca todos de uma vez, com vibração leve, e fecha a barra. A cor marcada (✓) é a que todos
   os selecionados já têm; tocar nela remove o destaque deles. Trocar de capítulo cancela.
   - **Por quê:** destacar uma passagem inteira de uma vez, sem um painel cobrindo o texto a
