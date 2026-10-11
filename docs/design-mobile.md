@@ -71,7 +71,10 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   (contorno sutil; selecionados seguidos formam um contorno só) e uma **barra pequena** aparece
   logo abaixo do título, por cima do texto, com "N versículos", as 4 cores e ✕. Tocar em outros versículos soma à seleção; tocar de novo tira. Escolher uma cor
   destaca todos de uma vez, com vibração leve, e fecha a barra. A cor marcada (✓) é a que todos
-  os selecionados já têm; tocar nela remove o destaque deles. Trocar de capítulo cancela.
+  os selecionados já têm; tocar nela remove o destaque deles. Quando algum selecionado tem cor,
+  aparece também um botão **remover** (borracha), mais claro para quem não conhece o atalho.
+  Durante a seleção, o contorno é sempre arredondado nas pontas do grupo selecionado, mesmo
+  encostando num destaque de fora. Trocar de capítulo cancela.
   - **Por quê:** destacar uma passagem inteira de uma vez, sem um painel cobrindo o texto a
     cada versículo. Substitui a sheet de um versículo só (decidido no iPhone).
   - **Comentar** continua sendo de um versículo (RF-VER-04): entra na barra quando a seleção
