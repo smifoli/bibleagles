@@ -116,15 +116,18 @@ Ponto de partida, a ajustar no iPhone. Valem para o app inteiro (D-VIS-12); no c
 | `read` (✓ e barras de "lido") | `#5c8a52` | `#86ad7b` |
 | `readFill` (fundo verde dos livros) | `rgba(92,138,82,.22)` | `rgba(134,173,123,.22)` |
 
-Destaques (fundo / texto / número):
+Destaques (fundo / texto / número; no escuro, também a bolinha das listas):
 
 | Cor | Claro | Escuro |
 |---|---|---|
-| Amarelo | `#f1e6a0` / `#3a2f17` / `#9a883e` | `#4d4320` / `#f3e9b8` / `#b8a660` |
-| Verde | `#bcd0b3` / `#2f3a26` / `#5e7350` | `#33402c` / `#dbe6d4` / `#8fa682` |
-| Rosa | `#e6b3a6` / `#4a2820` / `#8a5a4d` | `#4f2e26` / `#f0d3ca` / `#b88576` |
-| Azul | `#b3c4d6` / `#1f2c38` / `#4f6478` | `#2a3746` / `#d3deea` / `#8199b2` |
+| Amarelo | `#f1e6a0` / `#3a2f17` / `#9a883e` | `#6a5a1c` / `#f6edc0` / `#d4c070` / `#d9c25a` |
+| Verde | `#bcd0b3` / `#2f3a26` / `#5e7350` | `#3d5a32` / `#e0ecd8` / `#a8c49a` / `#8fb57f` |
+| Rosa | `#e6b3a6` / `#4a2820` / `#8a5a4d` | `#6d3a2d` / `#f5d8cf` / `#dba08f` / `#d48a74` |
+| Azul | `#b3c4d6` / `#1f2c38` / `#4f6478` | `#2f4d6b` / `#d8e4f0` / `#a0bad4` / `#7fa3c9` |
 | Areia (só de outros) | `#ece0cf` / `#4a3f2c` / `#a3927d` | `#3a3023` / `#e6dac6` / `#a3927d` |
+
+No escuro, os primeiros tons ficaram apagados no iPhone (2026-10-11): os fundos ficaram mais
+vivos, com o texto acima de 5,8:1, e a bolinha das listas ganhou um tom próprio, mais claro.
 
 Tipografia e espaço:
 
