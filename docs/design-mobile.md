@@ -86,9 +86,12 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   marcar", tudo pré-selecionado; sem plano, marca direto.
   - **Por quê só no fim:** quem leu chega ao fim; a barra do topo já tem voltar, título, versão
     e "Aa".
-- **D-VIS-11** **Percentual lido** (RF-NAV-03/04): no topo da aba Bíblia ("Você leu 23% da
-  Bíblia", com barras de AT e NT); percentual por livro na lista; capítulos lidos preenchidos
-  na grade; o mesmo número na aba Você, junto do histórico.
+- **D-VIS-11** **Percentual lido e aba Bíblia** (RF-NAV-03/04), no visual do PWA (pedido do
+  Lucas): no topo, "Você leu X% da Bíblia" com barras verdes de AT e NT; livros **agrupados nas
+  seções do PWA** (Pentateuco, Históricos, Poéticos, Profetas, Evangelhos, Cartas…), em **cards
+  de 2 colunas** cujo fundo se enche de verde na proporção do lido, com ✓ quando termina,
+  "N capítulos" e "N destaques". Na grade de capítulos, ✓ verde pequeno no canto do lido. Na
+  busca, os livros voltam a ser linhas de lista. O mesmo número na aba Você, junto do histórico.
 
 ## 5. Tokens
 
@@ -106,6 +109,8 @@ Ponto de partida, a ajustar no iPhone. Valem para o app inteiro (D-VIS-12); no c
 | `verseNumber` | `#a3927d` | `#a3927d` |
 | `accent` (botões, links, aba ativa) | `#52442f` | `#d9cbb5` |
 | `onAccent` (texto sobre `accent`) | `#fbf7ef` | `#1c150e` |
+| `read` (✓ e barras de "lido") | `#5c8a52` | `#86ad7b` |
+| `readFill` (fundo verde dos livros) | `rgba(92,138,82,.22)` | `rgba(134,173,123,.22)` |
 
 Destaques (fundo / texto / número):
 
