@@ -55,12 +55,17 @@
 - Decisões: D-DAD-01 a 08, D-SYN-01, D-SYN-02, D-TEC-04.
 - Testado: grupo criado no iPhone em modo avião apareceu no simulador após reconectar.
 
-## Etapa 4 — Destaques e leitura pessoal
+## Etapa 4 — Destaques e leitura pessoal ✅ (2026-10-11)
 
 - Destacar versículos (4 cores), marcar capítulo como lido, percentual lido.
 - Tudo offline, sincronizando.
 - **Entrega:** primeira funcionalidade "de verdade" sincronizada.
 - Requisitos: RF-LEI-10 a 14, RF-LEI-20 a 22, RF-DST, RF-HIS.
+- Feito: destaques com seleção de vários versículos (privados), marcar capítulo e livro
+  inteiro como lido (RF-NAV-05), percentual (Bíblia, testamento, livro, grade), histórico.
+  Design definido no caminho (`design-mobile.md`, D-VIS-01 a 12).
+- Movido: RF-LEI-12 a 14 (dependem de planos) → etapa 7. RF-DST-01 a 03 (visibilidade) e
+  RF-DST-10 a 14 (telas de destaques e comentários, inclusive "Meus destaques") → etapa 6.
 
 ## Etapa 5 — Grupos
 
@@ -77,7 +82,8 @@
 - Visibilidade também nos destaques.
 - Recusas e aceitação parcial com aviso claro.
 - **Entrega:** o coração do app funcionando.
-- Requisitos: RF-COM, RF-DST-01 a 03, RF-LEI-23/24/30 a 32/40. Decisões: D-SYN-07 a 09.
+- Telas de destaques e comentários: por versículo, na página do grupo e "Meus destaques".
+- Requisitos: RF-COM, RF-DST-01 a 03, RF-DST-10 a 14, RF-LEI-23/24/30 a 32/40. Decisões: D-SYN-07 a 09.
 
 ## Etapa 7 — Planos
 
@@ -85,7 +91,7 @@
 - Progresso por capítulo, diálogo "marcar como lido onde?", atrasos.
 - Home com leituras pendentes; estatísticas do plano; histórico.
 - **Entrega:** a família consegue seguir um plano juntos.
-- Requisitos: RF-PLN, RF-HOME-10 a 13, RF-EST, RF-HIS.
+- Requisitos: RF-PLN, RF-HOME-10 a 13, RF-EST, RF-HIS, RF-LEI-12 a 14.
 
 ## Etapa 8 — Notificações
 
