@@ -20,6 +20,10 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
     tempo — continua sendo "o BiblEagles". *Space Grotesk* sai da interface: ao lado dos
     componentes nativos, ela faria o app parecer um site. (Continua como opção de fonte do
     leitor, RF-LEI-05; *Spectral* é a padrão.)
+- **D-VIS-12** **O papel vale para o app inteiro** (decidido depois de ver no iPhone): fundos e
+  barras de título de todas as telas em creme / marrom escuro, não no branco / preto do iOS.
+  Linhas de lista e campos num tom de superfície; texto em tons de tinta. Continuam do sistema
+  só o vermelho de erro e o efeito de "pressionado".
 - **D-VIS-02** **Margens menores que as do PWA** (que usa 18 px nas laterais e 14 px dentro do
   versículo destacado). Ponto de partida: 16 pt nas laterais, 10 pt dentro do destaque; ajustar
   no iPhone.
@@ -76,15 +80,20 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
 
 ## 5. Tokens
 
-Ponto de partida, a ajustar no iPhone. Fora do leitor, a interface usa as cores do sistema
-(`PlatformColor`); estes tokens são o leitor e a cor de destaque.
+Ponto de partida, a ajustar no iPhone. Valem para o app inteiro (D-VIS-12); no código, em
+`src/theme/colors.ts`.
 
 | Token | Claro | Escuro |
 |---|---|---|
-| `paper` (fundo do leitor) | `#fbf7ef` | `#1c150e` |
-| `ink` (texto bíblico) | `#2c2218` | `#e6dac6` |
+| `paper` (fundo das telas e barras) | `#fbf7ef` | `#1c150e` |
+| `surface` (linhas de lista, campos) | `#f4ede1` | `#2a2118` |
+| `ink` (texto principal e bíblico) | `#2c2218` | `#e6dac6` |
+| `inkSecondary` | `#7d6c58` | `#a3927d` |
+| `inkTertiary` (apoio, placeholder) | `#a3927d` | `#7d6c58` |
+| `separator` | `#e6dac6` | `#3a3023` |
 | `verseNumber` | `#a3927d` | `#a3927d` |
 | `accent` (botões, links, aba ativa) | `#52442f` | `#d9cbb5` |
+| `onAccent` (texto sobre `accent`) | `#fbf7ef` | `#1c150e` |
 
 Destaques (fundo / texto / número):
 
