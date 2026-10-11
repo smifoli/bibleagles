@@ -96,8 +96,9 @@
   trechos de versículos), filtro do olho por grupo e "meus comentários", resumo do capítulo.
   Parte 4 feita: "Destaques e comentários" na página do grupo e "Meus destaques" na aba Você
   (RF-DST-10 a 14), um item por versículo com o texto, filtros por livro (e grupo/cor nos meus).
-  Faltam: padrão de visibilidade (RF-COM-03), admin remove comentário (RF-LEI-40) e aviso de
-  recusa (D-SYN-08).
+  Parte 5 feita: padrão de visibilidade na aba Você (RF-COM-03, vale também para destaques),
+  admin remove comentário só do grupo dele com as respostas ficando (RF-LEI-40), e aviso claro
+  de toda mudança recusada pelo servidor (D-SYN-08).
 
 ## Etapa 7 — Planos
 
