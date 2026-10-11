@@ -99,6 +99,9 @@
   Parte 5 feita: padrão de visibilidade na aba Você (RF-COM-03, vale também para destaques),
   admin remove comentário só do grupo dele com as respostas ficando (RF-LEI-40), e aviso claro
   de toda mudança recusada pelo servidor (D-SYN-08).
+  Depois, polimento pedido pelo Lucas (D-VIS-13 a 15): topo do leitor, folha de comentários,
+  segurar para comentar e troca de capítulo pelo dedo numa faixa de três páginas. Testado no
+  iPhone. Próxima: etapa 7.
 
 ## Etapa 7 — Planos
 
