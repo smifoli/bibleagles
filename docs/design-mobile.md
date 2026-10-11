@@ -100,6 +100,11 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   engrenagem abre "Ajustes de leitura" (tamanho e tipo de letra, versão) e substitui "Aa" e a
   sigla da versão. O olho fica ao lado, à vista, porque muda o que aparece no capítulo (riscado
   quando esconde algo); abre só o filtro de grupos, assim como o aviso "grupos escondidos".
+- **D-VIS-14** **Folha de comentários** (pedido do Lucas, 2026-10-11): o texto do versículo (ou
+  trecho) logo abaixo do título, na fonte do leitor; comentários em 18 pt (respostas 17), nome e
+  hora em 14. Onde aparece: uma linha "Visível em: …" acima do campo, que abre ali mesmo a lista
+  de grupos com ✓ e "Privado (só você)"; numa resposta, a linha só informa. Segurar o dedo num
+  versículo abre direto para comentar (o toque continua selecionando).
 
 ## 5. Tokens
 
