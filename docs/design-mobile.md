@@ -43,6 +43,8 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   - **Sem aba de Planos:** cada plano aparece onde é usado — os do dia no Início, os de grupo
     no grupo, os pessoais em Você.
   - **Busca dentro da Bíblia**, na barra do topo, não como aba.
+  - **A barra de abas fica sempre à mostra**, sem encolher ao rolar (pedido do Lucas,
+    2026-10-11). A barra de seleção do leitor flutua logo acima dela.
 
 ## 3. Leitor
 
