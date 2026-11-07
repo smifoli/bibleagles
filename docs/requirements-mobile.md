@@ -115,7 +115,9 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
 
 - **RF-DST-01** Destaques seguem as mesmas regras de visibilidade dos comentários:
   grupos escolhidos ou privado, mesmo padrão de seleção, mesmo filtro do olho.
-- **RF-DST-02** Destacar é um toque só: o destaque usa a seleção padrão, sem perguntar.
+- **RF-DST-02** Destacar é um toque só: o destaque usa a seleção padrão, sem perguntar. A barra de
+  seleção mostra onde ele vai aparecer ("Visível em", como ao comentar); tocar ali muda os grupos
+  antes de escolher a cor.
 - **RF-DST-03** Depois de criado, o usuário pode tocar no destaque e mudar os grupos.
 
 ### 3.5 Home — atividade dos outros
