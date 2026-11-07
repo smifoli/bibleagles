@@ -107,8 +107,11 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
   Eles aparecem **esmaecidos**, para indicar que são de outro contexto.
 - **RF-COM-12** No olho, o usuário escolhe: todos os outros grupos, ou só alguns.
 - **RF-COM-13** Lendo **livremente**: o usuário escolhe no olho de quais grupos ver comentários e
-  destaques (todos, nenhum ou só alguns). Os próprios aparecem sempre. (Antes: só todos ou nenhum;
-  mudado em 2026-10-11, decisão do Lucas.)
+  destaques (todos, nenhum ou só alguns) e se vê os seus **privados**. O filtro é por onde as coisas
+  aparecem e vale também para os próprios: um comentário ou destaque meu num grupo some se o grupo
+  estiver escondido; os que não estão em nenhum grupo seguem a linha "Privado". (Antes: só todos ou
+  nenhum, mudado em 2026-10-11; os próprios sempre visíveis e "Meus comentários" no lugar de
+  "Privado", mudado em 2026-11-07. Decisões do Lucas.)
 - **RF-COM-14** Ao entrar num grupo novo, ele já vem ativado no filtro do olho.
 
 ### 3.4 Destaques (cores) — visibilidade
