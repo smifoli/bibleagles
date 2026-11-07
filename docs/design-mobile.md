@@ -96,8 +96,9 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   daquele Testamento; só as pontas arredondadas, sem animação; legenda com o percentual de cada
   Testamento (mudado em 2026-11-07: as duas barras finas eram difíceis de ver; um efeito "líquido" animado
   foi testado e descartado pelo Lucas); livros **agrupados nas
-  seções do PWA** (Pentateuco, Históricos, Poéticos, Profetas, Evangelhos, Cartas…), sob os
-  títulos "Antigo Testamento" e "Novo Testamento", em **cards
+  seções do PWA** (Pentateuco, Históricos, Poéticos, Profetas, Evangelhos, Cartas…), um
+  Testamento por vez, escolhido num seletor "Antigo Testamento | Novo Testamento" abaixo do
+  card de progresso, que fica fixo logo abaixo da busca ao rolar (pedidos do Lucas, 2026-11-07), em **cards
   de 2 colunas** cujo fundo se enche de verde na proporção do lido, com ✓ quando termina,
   "N capítulos" e "N destaques". Na grade de capítulos, ✓ verde pequeno no canto do lido. Na
   busca, os livros voltam a ser linhas de lista. O mesmo número na aba Você, junto do histórico.
