@@ -171,7 +171,9 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
 - **RF-NAV-04** Na grade de capítulos, cada capítulo mostra se foi lido e quantos comentários
   e destaques tem.
 - **RF-NAV-05** "Marcar tudo como lido" / "desmarcar tudo" num livro inteiro, com confirmação.
-- **RF-NAV-06** O app lembra o último capítulo e versículo lidos e volta para lá ao abrir a Bíblia.
+- **RF-NAV-06** O app lembra o último capítulo e versículo lidos e mostra "Continuar lendo" no
+  Início e na aba Bíblia, que leva de volta para lá. (Antes: pulava sozinho para o leitor ao abrir
+  a Bíblia; mudado em 2026-11-07, decisão do Lucas.)
 
 ### 3.9 Leitor
 
