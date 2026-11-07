@@ -117,8 +117,8 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
   grupos escolhidos ou privado, mesmo padrão de seleção, mesmo filtro do olho.
 - **RF-DST-02** Destacar é um toque só: o destaque usa a seleção padrão, sem perguntar. A barra de
   seleção mostra onde ele vai aparecer ("Visível em", como ao comentar); tocar ali muda os grupos
-  antes de escolher a cor. Comentar a partir da seleção usa os mesmos grupos, e o comentário enviado
-  leva os destaques do trecho para os grupos dele: destaque e comentário ficam com a mesma visibilidade.
+  antes de escolher a cor. Comentar a partir da seleção começa com os mesmos grupos. Destaques e
+  comentários já feitos nunca mudam de visibilidade por causa disso.
 - **RF-DST-03** Depois de criado, o usuário pode tocar no destaque e mudar os grupos.
 
 ### 3.5 Home — atividade dos outros
