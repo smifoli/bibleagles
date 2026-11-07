@@ -91,9 +91,10 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   - **Por quê só no fim:** quem leu chega ao fim; a barra do topo já tem voltar, título e a
     engrenagem.
 - **D-VIS-11** **Percentual lido e aba Bíblia** (RF-NAV-03/04), no visual do PWA (pedido do
-  Lucas): no topo, "Você leu X% da Bíblia" com **uma barra contínua, grossa (16 pt)**, AT (verde) e NT
-  (âmbar) em sequência na proporção real de capítulos, só as pontas arredondadas, sem animação, e legenda com os percentuais
-  (mudado em 2026-11-07: as duas barras finas eram difíceis de ver; um efeito "líquido" animado
+  Lucas): no topo, "Você leu X% da Bíblia" com **uma barra contínua, grossa (16 pt)** do total
+  lido: o verde do AT e, logo em seguida, o âmbar do NT, cada um na fração da Bíblia inteira lida
+  daquele Testamento; só as pontas arredondadas, sem animação; legenda com o percentual de cada
+  Testamento (mudado em 2026-11-07: as duas barras finas eram difíceis de ver; um efeito "líquido" animado
   foi testado e descartado pelo Lucas); livros **agrupados nas
   seções do PWA** (Pentateuco, Históricos, Poéticos, Profetas, Evangelhos, Cartas…), em **cards
   de 2 colunas** cujo fundo se enche de verde na proporção do lido, com ✓ quando termina,
