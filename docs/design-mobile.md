@@ -91,14 +91,16 @@ Decisões visuais do app. Cada uma tem um ID (D-VIS-*) para citar no código e n
   - **Por quê só no fim:** quem leu chega ao fim; a barra do topo já tem voltar, título e a
     engrenagem.
 - **D-VIS-11** **Percentual lido e aba Bíblia** (RF-NAV-03/04), no visual do PWA (pedido do
-  Lucas): no topo, "Você leu X% da Bíblia" com **uma barra contínua, grossa (16 pt)** do total
+  Lucas): no **Início**, "Você leu X% da Bíblia" com **uma barra contínua, grossa (16 pt)** do total
   lido: o verde do AT e, logo em seguida, o âmbar do NT, cada um na fração da Bíblia inteira lida
   daquele Testamento; só as pontas arredondadas, sem animação; legenda com o percentual de cada
-  Testamento (mudado em 2026-11-07: as duas barras finas eram difíceis de ver; um efeito "líquido" animado
+  Testamento. Na **aba Bíblia**, abaixo do seletor, a barra só do Testamento escolhido ("Você leu
+  X% do Antigo Testamento") (mudado em 2026-11-07: as duas barras finas eram difíceis de ver; um efeito "líquido" animado
   foi testado e descartado pelo Lucas); livros **agrupados nas
   seções do PWA** (Pentateuco, Históricos, Poéticos, Profetas, Evangelhos, Cartas…), um
-  Testamento por vez, escolhido num seletor "Antigo Testamento | Novo Testamento" abaixo do
-  card de progresso, que fica fixo logo abaixo da busca ao rolar (pedidos do Lucas, 2026-11-07), em **cards
+  Testamento por vez, escolhido num seletor "Antigo Testamento | Novo Testamento" em vidro (iOS 26),
+  logo abaixo da busca e fixo nela ao rolar, com o papel se desfazendo por trás (pedidos do Lucas,
+  2026-11-07), em **cards
   de 2 colunas** cujo fundo se enche de verde na proporção do lido, com ✓ quando termina,
   "N capítulos" e "N destaques". Na grade de capítulos, ✓ verde pequeno no canto do lido. Na
   busca, os livros voltam a ser linhas de lista. O mesmo número na aba Você, junto do histórico.
