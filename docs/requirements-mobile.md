@@ -173,7 +173,8 @@ Ele evolui o PWA atual: em vez de servir uma única família, serve **vários gr
 - **RF-NAV-05** "Marcar tudo como lido" / "desmarcar tudo" num livro inteiro, com confirmação.
 - **RF-NAV-06** O app lembra o último capítulo e versículo lidos e mostra "Continuar lendo" no
   Início e na aba Bíblia, que leva de volta para lá. Na aba Bíblia, cada Testamento lembra onde
-  parou (o card segue o seletor Antigo | Novo); no Início, a última leitura de todas. (Antes: pulava sozinho para o leitor ao abrir
+  parou (o card segue o seletor Antigo | Novo); no Início, a última leitura de todas. Se a leitura
+  era por um plano, o card mostra o plano e o dia e volta no contexto dele. (Antes: pulava sozinho para o leitor ao abrir
   a Bíblia; mudado em 2026-11-07, decisão do Lucas.)
 
 ### 3.9 Leitor
